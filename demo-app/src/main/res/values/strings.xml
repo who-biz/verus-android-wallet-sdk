@@ -42,8 +42,11 @@
     <string name="configure_seed">Please select your wallet secret phrase</string>
     <string name="person_alyssa">Alyssa P. Hacker</string>
     <string name="person_ben">Ben Bitdiddle</string>
-    <string name="seed_custom">Type in a secret phrase</string>
     <string name="seed_random">Generate a new random secret phrase</string>
+    <string name="seed_custom_title">Or use another seed:</string>
+    <string name="seed_custom">Secret phrase</string>
+    <string name="seed_custom_birthday_height">Birthday height</string>
+    <string name="seed_custom_restore">Restore</string>
 
     <string name="home_status">Status: <xliff:g id="status" example="Syncing">%1$s</xliff:g></string>
     <string name="home_progress">Progress: <xliff:g id="percentage" example="15%">%1$.2f</xliff:g>%%</string>
