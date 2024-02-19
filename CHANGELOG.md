@@ -19,6 +19,10 @@ and this library adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `WalletSnapshot.transparentBalance: WalletBalance` to `WalletSnapshot.transparentBalance: Zatoshi` 
 
 ### Added
+- APIs for creating proposals, and building transactions from them:
+  - `Synchronizer.proposeTransfer`
+  - `Synchronizer.proposeShielding`
+  - `Synchronizer.createProposedTransactions`
 - `WalletBalanceFixture` class with mock values that are supposed to be used only for testing purposes 
 
 ## [2.0.6] - 2024-01-30
