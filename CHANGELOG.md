@@ -16,7 +16,8 @@ and this library adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   still provided. See more in the class documentation 
   `sdk-lib/src/main/java/cash/z/ecc/android/sdk/model/WalletBalance.kt`
 - `Synchronizer.transparentBalances: WalletBalance` to `Synchronizer.transparentBalance: Zatoshi`
-- `WalletSnapshot.transparentBalance: WalletBalance` to `WalletSnapshot.transparentBalance: Zatoshi` 
+- `WalletSnapshot.transparentBalance: WalletBalance` to `WalletSnapshot.transparentBalance: Zatoshi`
+- `Synchronizer.sendToAddress` and `Synchronizer.shieldFunds` have been deprecated.
 
 ### Added
 - APIs for creating proposals, and building transactions from them:

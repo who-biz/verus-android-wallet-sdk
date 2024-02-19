@@ -595,6 +595,12 @@ class SdkSynchronizer private constructor(
         }
     }
 
+    @Deprecated(
+        message = "Upcoming SDK 2.1 will create multiple transactions at once for some recipients.",
+        replaceWith = ReplaceWith(
+            "createProposedTransactions(proposeTransfer(usk.account, toAddress, amount, memo), usk)"
+        )
+    )
     @Throws(TransactionEncoderException::class, TransactionSubmitException::class)
     override suspend fun sendToAddress(
         usk: UnifiedSpendingKey,
@@ -621,6 +627,12 @@ class SdkSynchronizer private constructor(
         }
     }
 
+    @Deprecated(
+        message = "Upcoming SDK 2.1 will create multiple transactions at once for some recipients.",
+        replaceWith = ReplaceWith(
+            "createProposedTransactions(proposeShielding(usk.account, memo), usk)"
+        )
+    )
     @Throws(TransactionEncoderException::class, TransactionSubmitException::class)
     override suspend fun shieldFunds(
         usk: UnifiedSpendingKey,
