@@ -27,16 +27,16 @@ data class ZcashNetwork(
             ZcashNetwork(
                 ID_TESTNET,
                 "testnet",
-                saplingActivationHeight = BlockHeight(280_000),
-                orchardActivationHeight = BlockHeight(1_842_420)
+                saplingActivationHeight = BlockHeight(1), // TODO: double check pbaas/vrsctest sapling height
+                orchardActivationHeight = BlockHeight(999_999_999)
             )
 
         val Mainnet =
             ZcashNetwork(
                 ID_MAINNET,
                 "mainnet",
-                saplingActivationHeight = BlockHeight(419_200),
-                orchardActivationHeight = BlockHeight(1_687_104)
+                saplingActivationHeight = BlockHeight(227_520), // taken from VerusCoin/src/chainparams.cpp
+                orchardActivationHeight = BlockHeight(999_999_999)
             )
 
         fun from(id: Int) =
