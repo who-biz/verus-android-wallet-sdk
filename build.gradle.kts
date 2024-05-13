@@ -16,6 +16,7 @@ plugins {
     id("zcash-sdk.detekt-conventions")
     id("zcash-sdk.ktlint-conventions")
     id("zcash-sdk.rosetta-conventions")
+    `maven-publish`
 }
 
 tasks {
@@ -131,4 +132,17 @@ fladle {
     directoriesToPull.set(listOf(
         "/sdcard/googletest/test_outputfiles"
     ))
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = "com.github.who-biz"
+                artifactId = "verus-android-wallet-sdk"
+                version = '0.0.1'
+            }
+        }
+    }
 }
