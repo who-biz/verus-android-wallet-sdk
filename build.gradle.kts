@@ -134,15 +134,15 @@ fladle {
     ))
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
-                groupId = "com.github.who-biz"
-                artifactId = "verus-android-wallet-sdk"
-                version = '0.0.1'
-            }
-        }
-    }
-}
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            release(MavenPublication) {
+//                from components.release
+//                groupId = "com.github.who-biz"
+//                artifactId = "verus-android-wallet-sdk"
+//                version = '0.0.1'
+//            }
+//        }
+//    }
+//}

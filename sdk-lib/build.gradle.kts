@@ -17,7 +17,7 @@ plugins {
 // Publishing information
 
 val myVersion = project.property("LIBRARY_VERSION").toString()
-val myArtifactId = "zcash-android-sdk"
+val myArtifactId = "verus-android-sdk"
 publishing {
     publications {
         publications.withType<MavenPublication>().all {
