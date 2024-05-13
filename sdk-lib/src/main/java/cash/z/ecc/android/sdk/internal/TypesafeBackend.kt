@@ -7,6 +7,7 @@ import cash.z.ecc.android.sdk.internal.model.ScanSummary
 import cash.z.ecc.android.sdk.internal.model.SubtreeRoot
 import cash.z.ecc.android.sdk.internal.model.TreeState
 import cash.z.ecc.android.sdk.internal.model.WalletSummary
+import cash.z.ecc.android.sdk.internal.model.ZcashProtocol
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.FirstClassByteArray
@@ -75,6 +76,7 @@ internal interface TypesafeBackend {
 
     suspend fun getMemoAsUtf8(
         txId: ByteArray,
+        protocol: ZcashProtocol,
         outputIndex: Int
     ): String?
 
@@ -85,9 +87,11 @@ internal interface TypesafeBackend {
      * @throws RuntimeException as a common indicator of the operation failure
      */
     @Throws(RuntimeException::class)
-    suspend fun putSaplingSubtreeRoots(
-        startIndex: UInt,
-        roots: List<SubtreeRoot>,
+    suspend fun putSubtreeRoots(
+        saplingStartIndex: UInt,
+        saplingRoots: List<SubtreeRoot>,
+        orchardStartIndex: UInt,
+        orchardRoots: List<SubtreeRoot>,
     )
 
     /**
@@ -125,6 +129,7 @@ internal interface TypesafeBackend {
     @Throws(RuntimeException::class)
     suspend fun scanBlocks(
         fromHeight: BlockHeight,
+        fromState: TreeState,
         limit: Long
     ): ScanSummary
 

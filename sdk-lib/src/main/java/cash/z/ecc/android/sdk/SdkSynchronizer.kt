@@ -65,11 +65,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -298,7 +300,7 @@ class SdkSynchronizer private constructor(
 
         val shutdownJob =
             coroutineScope.launch {
-                Twig.debug { "Stopping synchronizer $synchronizerKey…" }
+                Twig.info { "Stopping synchronizer $synchronizerKey…" }
                 processor.stop()
             }
 
@@ -312,6 +314,35 @@ class SdkSynchronizer private constructor(
             instances.remove(synchronizerKey)
         }
     }
+
+    /**
+     * A Flow-providing version of [close] function. This safely closes the Synchronizer together with the related
+     * components.
+     */
+    fun closeFlow(): Flow<Unit> =
+        callbackFlow {
+            val shutdownJob =
+                coroutineScope.launch {
+                    Twig.info { "Stopping synchronizer $synchronizerKey…" }
+                    processor.stop()
+                }
+
+            instances[synchronizerKey] = InstanceState.ShuttingDown(shutdownJob)
+
+            shutdownJob.invokeOnCompletion {
+                coroutineScope.cancel()
+                _status.value = STOPPED
+                Twig.info { "Synchronizer $synchronizerKey stopped" }
+
+                instances.remove(synchronizerKey)
+
+                trySend(Unit)
+            }
+
+            awaitClose {
+                // Nothing to close here
+            }
+        }
 
     override suspend fun getNearestRewindHeight(height: BlockHeight): BlockHeight =
         processor.getNearestRewindHeight(
@@ -327,17 +358,25 @@ class SdkSynchronizer private constructor(
     }
 
     override fun getMemos(transactionOverview: TransactionOverview): Flow<String> {
-        return storage.getSaplingOutputIndices(transactionOverview.rawId).map {
-            runCatching {
-                backend.getMemoAsUtf8(transactionOverview.rawId.byteArray, it)
-            }.onFailure {
-                Twig.error { "Failed to get memo with: $it" }
-            }.onSuccess {
-                Twig.debug { "Transaction memo queried: $it" }
-            }.fold(
-                onSuccess = { it ?: "" },
-                onFailure = { "" }
-            )
+        return storage.getOutputProperties(transactionOverview.rawId).map { properties ->
+            if (!properties.protocol.isShielded()) {
+                ""
+            } else {
+                runCatching {
+                    backend.getMemoAsUtf8(
+                        txId = transactionOverview.rawId.byteArray,
+                        protocol = properties.protocol,
+                        outputIndex = properties.index
+                    )
+                }.onFailure {
+                    Twig.error { "Failed to get memo with: $it" }
+                }.onSuccess {
+                    Twig.debug { "Transaction memo queried: $it" }
+                }.fold(
+                    onSuccess = { it ?: "" },
+                    onFailure = { "" }
+                )
+            }
         }
     }
 
@@ -365,14 +404,10 @@ class SdkSynchronizer private constructor(
 
     /**
      * Calculate the latest balance based on the blocks that have been scanned and transmit this information into the
-     * [transparentBalance] and [saplingBalances] flow. The [orchardBalances] flow is still not filled with proper data
-     * because of the current limited Orchard support.
+     * [transparentBalance], [saplingBalances], and [orchardBalances] flows.
      */
     suspend fun refreshAllBalances() {
         processor.refreshWalletSummary()
-        // TODO [#682]: refresh orchard balance
-        // TODO [#682]: https://github.com/zcash/zcash-android-wallet-sdk/issues/682
-        Twig.warn { "Warning: Orchard balance does not yet refresh. Only some of the plumbing is in place." }
     }
 
     suspend fun isValidAddress(address: String): Boolean {

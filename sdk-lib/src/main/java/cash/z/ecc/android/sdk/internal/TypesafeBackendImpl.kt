@@ -8,6 +8,7 @@ import cash.z.ecc.android.sdk.internal.model.ScanSummary
 import cash.z.ecc.android.sdk.internal.model.SubtreeRoot
 import cash.z.ecc.android.sdk.internal.model.TreeState
 import cash.z.ecc.android.sdk.internal.model.WalletSummary
+import cash.z.ecc.android.sdk.internal.model.ZcashProtocol
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.FirstClassByteArray
@@ -147,12 +148,19 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
 
     override suspend fun getMemoAsUtf8(
         txId: ByteArray,
+        protocol: ZcashProtocol,
         outputIndex: Int
-    ): String? = backend.getMemoAsUtf8(txId, outputIndex)
+    ): String? =
+        backend.getMemoAsUtf8(
+            txId = txId,
+            protocol = protocol.poolCode,
+            outputIndex = outputIndex
+        )
 
     override suspend fun initDataDb(seed: ByteArray?) {
         val ret = backend.initDataDb(seed)
         when (ret) {
+            2 -> throw InitializeException.SeedNotRelevant
             1 -> throw InitializeException.SeedRequired
             0 -> { /* Successful case - no action needed */ }
             -1 -> error("Rust backend only uses -1 as an error sentinel")
@@ -160,18 +168,28 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
         }
     }
 
-    override suspend fun putSaplingSubtreeRoots(
-        startIndex: UInt,
-        roots: List<SubtreeRoot>
-    ) = backend.putSaplingSubtreeRoots(
-        startIndex = startIndex.toLong(),
-        roots =
-            roots.map {
+    override suspend fun putSubtreeRoots(
+        saplingStartIndex: UInt,
+        saplingRoots: List<SubtreeRoot>,
+        orchardStartIndex: UInt,
+        orchardRoots: List<SubtreeRoot>
+    ) = backend.putSubtreeRoots(
+        saplingStartIndex = saplingStartIndex.toLong(),
+        saplingRoots =
+            saplingRoots.map {
                 JniSubtreeRoot.new(
                     rootHash = it.rootHash,
                     completingBlockHeight = it.completingBlockHeight.value
                 )
-            }
+            },
+        orchardStartIndex = orchardStartIndex.toLong(),
+        orchardRoots =
+            orchardRoots.map {
+                JniSubtreeRoot.new(
+                    rootHash = it.rootHash,
+                    completingBlockHeight = it.completingBlockHeight.value
+                )
+            },
     )
 
     override suspend fun updateChainTip(height: BlockHeight) = backend.updateChainTip(height.value)
@@ -196,8 +214,9 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
 
     override suspend fun scanBlocks(
         fromHeight: BlockHeight,
+        fromState: TreeState,
         limit: Long
-    ): ScanSummary = ScanSummary.new(backend.scanBlocks(fromHeight.value, limit), network)
+    ): ScanSummary = ScanSummary.new(backend.scanBlocks(fromHeight.value, fromState.encoded, limit), network)
 
     override suspend fun getWalletSummary(): WalletSummary? =
         backend.getWalletSummary()?.let { jniWalletSummary ->
