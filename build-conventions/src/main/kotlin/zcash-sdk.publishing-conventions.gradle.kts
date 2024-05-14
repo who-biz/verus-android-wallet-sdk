@@ -86,7 +86,7 @@ plugins.withId("org.gradle.maven-publish") {
         }
     }
 
-    plugins.withId("org.gradle.signing") {
+    /*plugins.withId("org.gradle.signing") {
         project.the<SigningExtension>().apply {
             // Maven Central requires signing for non-snapshots
             isRequired = !isSnapshot
@@ -107,5 +107,5 @@ plugins.withId("org.gradle.maven-publish") {
 
             sign(publishingExtension.publications)
         }
-    }
+    }*/
 }
