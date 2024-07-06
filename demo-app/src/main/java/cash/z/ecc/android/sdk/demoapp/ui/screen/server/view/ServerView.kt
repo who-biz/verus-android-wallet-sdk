@@ -154,24 +154,6 @@ fun ServerSwitch(
             // Then alternative servers
             if (buildInNetwork == ZcashNetwork.Mainnet) {
                 add(LightWalletEndpoint(NH_HOST_NA, NH_PORT, true))
-                add(LightWalletEndpoint(NH_HOST_SA, NH_PORT, true))
-                add(LightWalletEndpoint(NH_HOST_EU, NH_PORT, true))
-                add(LightWalletEndpoint(NH_HOST_AI, NH_PORT, true))
-
-                add(LightWalletEndpoint(YW_HOST_1, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_2, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_3, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_4, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_5, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_6, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_7, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_8, YW_PORT, true))
-
-                add(LightWalletEndpoint(ZR_HOST, ZR_PORT, true))
-                add(LightWalletEndpoint(ZR_HOST_NA, ZR_PORT, true))
-                add(LightWalletEndpoint(ZR_HOST_SA, ZR_PORT, true))
-                add(LightWalletEndpoint(ZR_HOST_EU, ZR_PORT, true))
-                add(LightWalletEndpoint(ZR_HOST_AP, ZR_PORT, true))
             }
 
             // Custom server
