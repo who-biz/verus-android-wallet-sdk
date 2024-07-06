@@ -34,7 +34,7 @@ data class ZcashNetwork(
         val Mainnet =
             ZcashNetwork(
                 ID_MAINNET,
-                "mainnet",
+                "VRSC",
                 saplingActivationHeight = BlockHeight(227_520), // taken from VerusCoin/src/chainparams.cpp
                 orchardActivationHeight = BlockHeight(999_999_999)
             )

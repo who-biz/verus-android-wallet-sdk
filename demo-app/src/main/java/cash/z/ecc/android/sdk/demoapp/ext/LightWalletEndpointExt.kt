@@ -24,7 +24,7 @@ internal val LightWalletEndpoint.Companion.Mainnet
         LightWalletEndpoint(
             "lightwallet.verus.services",
             DEFAULT_PORT,
-            isSecure = false
+            isSecure = true
         )
 
 internal val LightWalletEndpoint.Companion.Testnet
