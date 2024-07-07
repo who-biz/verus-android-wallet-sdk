@@ -29,7 +29,7 @@ data class LightWalletEndpointInfoUnsafe(
         fun String.toId() =
             lowercase(Locale.ROOT).run {
                 when {
-                    contains("main") -> "mainnet"
+                    contains("vrsc") -> "mainnet"
                     contains("test") -> "testnet"
                     else -> this
                 }
