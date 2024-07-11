@@ -22,7 +22,7 @@ private const val DEFAULT_PORT = 8120
 internal val LightWalletEndpoint.Companion.Mainnet
     get() =
         LightWalletEndpoint(
-            "lightwallet.verus.services",
+            "144.217.65.10",
             DEFAULT_PORT,
             isSecure = true
         )
