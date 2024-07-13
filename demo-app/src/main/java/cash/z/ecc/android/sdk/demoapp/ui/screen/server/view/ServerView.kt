@@ -61,13 +61,13 @@ private fun ComposablePreview() {
     }
 }
 
-private const val NH_HOST_NA = "lightwalletd.blur.cash" // NON-NLS
+private const val NH_HOST_NA = "lightwallet.verus.services" // NON-NLS
 //private const val NH_HOST_SA = "sa.lightwalletd.com" // NON-NLS
 //private const val NH_HOST_EU = "eu.lightwalletd.com" // NON-NLS
 //private const val NH_HOST_AI = "ai.lightwalletd.com" // NON-NLS
-private const val NH_PORT = 443
+private const val NH_PORT = 8120
 
-private const val YW_HOST_1 = "lightwallet.verus.services" // NON-NLS
+//private const val YW_HOST_1 = "lightwallet.verus.services" // NON-NLS
 //private const val YW_HOST_2 = "lwd2.zcash-infra.com" // NON-NLS
 //private const val YW_HOST_3 = "lwd3.zcash-infra.com" // NON-NLS
 //private const val YW_HOST_4 = "lwd4.zcash-infra.com" // NON-NLS
@@ -75,7 +75,7 @@ private const val YW_HOST_1 = "lightwallet.verus.services" // NON-NLS
 //private const val YW_HOST_6 = "lwd6.zcash-infra.com" // NON-NLS
 //private const val YW_HOST_7 = "lwd7.zcash-infra.com" // NON-NLS
 //private const val YW_HOST_8 = "lwd8.zcash-infra.com" // NON-NLS
-private const val YW_PORT = 8120
+//private const val YW_PORT = 8120
 
 //private const val ZR_HOST = "zec.rocks" // NON-NLS
 //private const val ZR_HOST_NA = "na.zec.rocks" // NON-NLS
