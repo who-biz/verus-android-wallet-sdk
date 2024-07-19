@@ -61,7 +61,7 @@ private fun ComposablePreview() {
     }
 }
 
-private const val NH_HOST_NA = "lwdlegacy.blur.cash" // NON-NLS
+private const val NH_HOST_NA = "lightwalletd.blur.cash" // NON-NLS
 //private const val NH_HOST_SA = "sa.lightwalletd.com" // NON-NLS
 //private const val NH_HOST_EU = "eu.lightwalletd.com" // NON-NLS
 //private const val NH_HOST_AI = "ai.lightwalletd.com" // NON-NLS
