@@ -42,7 +42,7 @@ sealed class WalletFixture {
                     BlockHeight.new(zcashNetwork, 2170000L)
                 }
                 ZcashNetwork.ID_MAINNET -> {
-                    BlockHeight.new(zcashNetwork, 1935000L)
+                    BlockHeight.new(zcashNetwork, 3000000L)
                 }
                 else -> error("Unknown network $zcashNetwork")
             }
