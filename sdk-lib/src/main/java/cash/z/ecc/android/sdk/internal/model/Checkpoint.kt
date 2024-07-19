@@ -23,7 +23,7 @@ internal data class Checkpoint(
         require(epochSeconds.isInUIntRange()) {
             "epochSeconds $epochSeconds is outside of allowed UInt range"
         }
-        return TreeState.fromParts(height.value, hash, epochSeconds.toInt(), saplingTree, orchardTree)
+        return TreeState.fromParts(height.value, hash, epochSeconds.toInt(), saplingTree/*, orchardTree*/)
     }
 
     internal companion object

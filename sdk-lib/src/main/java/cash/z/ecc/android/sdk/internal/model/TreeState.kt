@@ -18,9 +18,9 @@ class TreeState(
             hash: String,
             time: Int,
             saplingTree: String,
-            orchardTree: String
+//            orchardTree: String
         ): TreeState {
-            val unsafeTreeState = TreeStateUnsafe.fromParts(height, hash, time, saplingTree, orchardTree)
+            val unsafeTreeState = TreeStateUnsafe.fromParts(height, hash, time, saplingTree/*, orchardTree*/)
             return TreeState.new(unsafeTreeState)
         }
     }
