@@ -12,6 +12,8 @@ import cash.z.ecc.android.sdk.tool.DerivationTool
 sealed class WalletFixture {
     abstract val seedPhrase: String
 
+    abstract val wif: String?
+
     abstract fun getBirthday(zcashNetwork: ZcashNetwork): BlockHeight
 
     abstract fun getAddresses(zcashNetwork: ZcashNetwork): Addresses
@@ -28,6 +30,9 @@ sealed class WalletFixture {
 
     @Suppress("MaxLineLength")
     object Ben : WalletFixture() {
+
+        override val wif = null
+
         override val seedPhrase: String
             get() =
                 "kitchen renew wide common vague fold vacuum tilt amazing pear square gossip jewel month tree" +
@@ -74,6 +79,10 @@ sealed class WalletFixture {
 
     @Suppress("MaxLineLength")
     object Alice : WalletFixture() {
+
+	override val wif: String
+	    get() = "UxUY1K87of2ntgchEprKosZVt97DXPv4iZP6oGkcxXdVFNtbncMT"
+
         override val seedPhrase: String
             get() =
                 "wish puppy smile loan doll curve hole maze file ginger hair nose key relax knife witness cannon" +

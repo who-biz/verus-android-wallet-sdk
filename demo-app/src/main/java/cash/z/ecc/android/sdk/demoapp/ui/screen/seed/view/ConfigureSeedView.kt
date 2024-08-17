@@ -86,7 +86,8 @@ private fun ConfigureSeedMainContent(
                         endpoint = LightWalletEndpoint.defaultForNetwork(zcashNetwork),
                         birthday = WalletFixture.Alice.getBirthday(zcashNetwork),
                         seedPhrase = SeedPhrase.new(WalletFixture.Alice.seedPhrase),
-                        walletInitMode = WalletInitMode.RestoreWallet
+                        walletInitMode = WalletInitMode.RestoreWallet,
+                        wif = WalletFixture.Alice.Wif
                     )
                 onExistingWallet(newWallet)
             }

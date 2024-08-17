@@ -28,7 +28,8 @@ data class PersistableWallet(
     val endpoint: LightWalletEndpoint,
     val birthday: BlockHeight?,
     val seedPhrase: SeedPhrase,
-    val walletInitMode: WalletInitMode
+    val walletInitMode: WalletInitMode,
+    val wif: String?
 ) {
     init {
         walletInitModeHolder = walletInitMode
@@ -51,6 +52,9 @@ data class PersistableWallet(
                 put(KEY_BIRTHDAY, it.value)
             }
             put(KEY_SEED_PHRASE, seedPhrase.joinToString())
+            wif?.let {
+                put(KEY_WIF, wif)
+            }
         }
 
     // For security, intentionally override the toString method to reduce risk of accidentally logging secrets
@@ -77,6 +81,7 @@ data class PersistableWallet(
         internal const val KEY_ENDPOINT_IS_SECURE = "key_endpoint_is_secure"
         internal const val KEY_BIRTHDAY = "birthday"
         internal const val KEY_SEED_PHRASE = "seed_phrase"
+        internal const val KEY_WIF = "wif"
 
         // Note: [walletInitMode] is excluded from the serialization to avoid persisting the wallet initialization mode
         // with the persistable wallet.
@@ -89,6 +94,8 @@ data class PersistableWallet(
             val seedPhrase = getSeedPhrase(jsonObject)
             // From version 2
             val endpoint: LightWalletEndpoint
+
+            val wif = getWif(jsonObject)
 
             when (val version = getVersion(jsonObject)) {
                 VERSION_1 -> {
@@ -107,7 +114,8 @@ data class PersistableWallet(
                 endpoint = endpoint,
                 birthday = birthday,
                 seedPhrase = SeedPhrase.new(seedPhrase),
-                walletInitMode = walletInitModeHolder
+                walletInitMode = walletInitModeHolder,
+                wif = wif
             )
         }
 
@@ -117,6 +125,14 @@ data class PersistableWallet(
 
         internal fun getSeedPhrase(jsonObject: JSONObject): String {
             return jsonObject.getString(KEY_SEED_PHRASE)
+        }
+
+        internal fun getWif(jsonObject: JSONObject): String? {
+            return if (jsonObject.has(KEY_WIF)) {
+                jsonObject.getString(KEY_WIF)
+            } else {
+                null
+            }
         }
 
         internal fun getNetwork(jsonObject: JSONObject): ZcashNetwork {
@@ -166,12 +182,15 @@ data class PersistableWallet(
 
             val seedPhrase = newSeedPhrase()
 
+            val wif = null
+
             return PersistableWallet(
                 zcashNetwork,
                 endpoint,
                 birthday,
                 seedPhrase,
-                walletInitMode
+                walletInitMode,
+                wif
             )
         }
 
@@ -186,7 +205,8 @@ data class PersistableWallet(
             network: ZcashNetwork,
             endpoint: LightWalletEndpoint?,
             birthday: BlockHeight?,
-            seed: SeedPhrase
+            seed: SeedPhrase,
+            wif: String?
         ) = JSONObject().apply {
             put(KEY_VERSION, version)
             put(KEY_NETWORK_ID, network.id)
@@ -199,6 +219,9 @@ data class PersistableWallet(
                 put(KEY_BIRTHDAY, it.value)
             }
             put(KEY_SEED_PHRASE, seed.joinToString())
+            wif?.let {
+                put(KEY_WIF, wif)
+           }
         }
     }
 }

@@ -21,6 +21,7 @@ import cash.z.ecc.android.sdk.internal.Twig
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.PercentDecimal
+import cash.z.ecc.android.sdk.model.Base58
 import cash.z.ecc.android.sdk.model.PersistableWallet
 import cash.z.ecc.android.sdk.model.Proposal
 import cash.z.ecc.android.sdk.model.TransactionSubmitResult
@@ -99,15 +100,27 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             .filterIsInstance<SecretState.Ready>()
             .map { it.persistableWallet }
             .map {
-                val bip39Seed =
-                    withContext(Dispatchers.IO) {
-                        Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
-                    }
-                DerivationTool.getInstance().deriveUnifiedSpendingKey(
-                    seed = bip39Seed,
-                    network = it.network,
-                    account = Account.DEFAULT
-                )
+                it.wif? {
+                    Log.w("WifCheck", "WIF included for this Wallet! Using that instead of bip39!")
+                    Log.w("WifCheck", "WIF value: " + String(it.wif))
+                    Log.w("WifCheck", "Decoded WIF: " + String(wif.decodeBase58WithChecksum())
+                    val bip39Seed = wif.decodeBase58WithChecksum()
+                    DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                        seed = bip39Seed,
+                        network = it.network,
+                        account = Account.DEFAULT
+                    )
+                } else {
+                    val bip39Seed =
+                        withContext(Dispatchers.IO) {
+                            Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
+                        }
+                    DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                        seed = bip39Seed,
+                        network = it.network,
+                        account = Account.DEFAULT
+                    )
+                }
             }.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
