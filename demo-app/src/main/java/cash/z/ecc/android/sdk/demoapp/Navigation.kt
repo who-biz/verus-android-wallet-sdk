@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import cash.z.ecc.android.sdk.SdkSynchronizer
 import cash.z.ecc.android.sdk.demoapp.NavigationTargets.BALANCE
 import cash.z.ecc.android.sdk.demoapp.NavigationTargets.HOME
+import cash.z.ecc.android.sdk.demoapp.NavigationTargets.KEYS
 import cash.z.ecc.android.sdk.demoapp.NavigationTargets.SEND
 import cash.z.ecc.android.sdk.demoapp.NavigationTargets.SERVER
 import cash.z.ecc.android.sdk.demoapp.NavigationTargets.TRANSACTIONS
@@ -34,6 +35,8 @@ import cash.z.ecc.android.sdk.demoapp.ui.screen.balance.view.Balance
 import cash.z.ecc.android.sdk.demoapp.ui.screen.home.view.Home
 import cash.z.ecc.android.sdk.demoapp.ui.screen.home.viewmodel.SecretState
 import cash.z.ecc.android.sdk.demoapp.ui.screen.home.viewmodel.WalletViewModel
+import cash.z.ecc.android.sdk.demoapp.ui.screen.keys.view.Keys
+import cash.z.ecc.android.sdk.model.PersistableWallet
 import cash.z.ecc.android.sdk.demoapp.ui.screen.send.view.Send
 import cash.z.ecc.android.sdk.demoapp.ui.screen.server.view.Server
 import cash.z.ecc.android.sdk.demoapp.ui.screen.transactions.view.Transactions
@@ -75,6 +78,7 @@ internal fun ComposeActivity.Navigation() {
                     },
                     goTransactions = { navController.navigateJustOnce(TRANSACTIONS) },
                     goServer = { navController.navigateJustOnce(SERVER) },
+                    goKeys = { navController.navigateJustOnce(KEYS) },
                     resetSdk = { walletViewModel.resetSdk() },
                     rewind = { walletViewModel.rewind() }
                 )
@@ -152,6 +156,28 @@ internal fun ComposeActivity.Navigation() {
                         navController.popBackStackJustOnce(SEND)
                     },
                     sendTransactionProposal = sendTransactionProposal.value
+                )
+            }
+        }
+
+        composable(KEYS) {
+            //val synchronizer = walletViewModel.synchronizer.collectAsStateWithLifecycle().value
+            val secretState = walletViewModel.secretState.collectAsStateWithLifecycle().value
+            val spendingKey = walletViewModel.spendingKey.collectAsStateWithLifecycle().value
+
+            if (spendingKey == null || secretState !is SecretState.Ready) {
+                // Display loading indicator
+            } else {
+                val wallet = secretState.persistableWallet
+
+                Twig.info { "Current persisted wallet: ${wallet.toSafeString()}" }
+
+                Keys(
+                    persistableWallet = wallet,
+                    spendingKey = spendingKey,
+                    onBack = {
+                        navController.popBackStackJustOnce(KEYS)
+                    }
                 )
             }
         }
@@ -317,4 +343,6 @@ object NavigationTargets {
     const val SERVER = "server" // NON-NLS
 
     const val TRANSACTIONS = "transactions" // NON-NLS
+
+    const val KEYS = "keys"
 }

@@ -83,4 +83,8 @@
     <string name="server_save">Save</string>
 
     <string name="transactions_refresh">Refresh transactions</string>
+
+    <string name="spending_key">Private Spending Key</string>
+    <string name="wif">WIF Used</string>
+    <string name="seed">Seed, Not Used if WIF Present</string>
 </resources>
