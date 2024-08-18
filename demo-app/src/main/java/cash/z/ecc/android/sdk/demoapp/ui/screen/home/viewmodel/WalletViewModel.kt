@@ -96,6 +96,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                 SecretState.Loading
             )
 
+    @OptIn(ExperimentalStdlibApi::class)
     val spendingKey =
         secretState
             .filterIsInstance<SecretState.Ready>()
@@ -115,7 +116,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                     Log.w("WifCheck", "WIF included for this Wallet! Using that instead of bip39!")
                     Log.w("WifCheck", "WIF value: " + it.wif)
                     val decodedWif = it.wif!!.decodeBase58WithChecksum()
-                    Log.w("WifCheck", "Decoded WIF: " + decodedWif.toString(Charsets.UTF_8))
+                    Log.w("WifCheck", "Decoded WIF: " + decodedWif.toHexString())
                     DerivationTool.getInstance().deriveUnifiedSpendingKey(
                         seed = decodedWif,
                         network = it.network,

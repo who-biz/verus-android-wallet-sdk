@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import cash.z.ecc.android.sdk.demoapp.R
 import cash.z.ecc.android.sdk.model.PersistableWallet
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 
 @Preview(name = "Keys")
 @Composable
@@ -73,6 +74,7 @@ private fun KeysTopAppBar(onBack: () -> Unit) {
     )
 }
 
+@OptIn(ExperimentalStdlibApi::class)
 @Composable
 private fun KeysMainContent(
     paddingValues: PaddingValues,
@@ -89,10 +91,21 @@ private fun KeysMainContent(
 
         Spacer(Modifier.padding(8.dp))
 
-        Text(stringResource(id = R.string.wif))
+        Text(stringResource(id = R.string.base58_wif))
         persistableWallet.wif.also { wif ->
             if (wif != null) {
                 Text(wif)
+            } else {
+                Text("None Imported")
+            }
+        }
+
+        Spacer(Modifier.padding(8.dp))
+
+        Text(stringResource(id = R.string.decoded_wif))
+        persistableWallet.wif.also { wif ->
+            if (wif != null) {
+                Text(wif.decodeBase58WithChecksum().toHexString())
             } else {
                 Text("None Imported")
             }

@@ -85,6 +85,7 @@
     <string name="transactions_refresh">Refresh transactions</string>
 
     <string name="spending_key">Private Spending Key</string>
-    <string name="wif">WIF Used</string>
-    <string name="seed">Seed, Not Used if WIF Present</string>
+    <string name="base58_wif">WIF Used (Base58)</string>
+    <string name="decoded_wif">Decoded WIF (Hex)</string>
+    <string name="seed">Seed Phrase (Not Used if WIF Present)</string>
 </resources>
