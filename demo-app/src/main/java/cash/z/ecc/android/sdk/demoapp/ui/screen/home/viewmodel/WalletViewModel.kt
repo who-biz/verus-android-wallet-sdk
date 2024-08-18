@@ -1,6 +1,7 @@
 package cash.z.ecc.android.sdk.demoapp.ui.screen.home.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
@@ -21,7 +22,6 @@ import cash.z.ecc.android.sdk.internal.Twig
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.PercentDecimal
-import cash.z.ecc.android.sdk.model.Base58
 import cash.z.ecc.android.sdk.model.PersistableWallet
 import cash.z.ecc.android.sdk.model.Proposal
 import cash.z.ecc.android.sdk.model.TransactionSubmitResult
@@ -30,6 +30,7 @@ import cash.z.ecc.android.sdk.model.WalletBalance
 import cash.z.ecc.android.sdk.model.Zatoshi
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.model.ZecSend
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.model.proposeSend
 import cash.z.ecc.android.sdk.model.send
 import cash.z.ecc.android.sdk.tool.DerivationTool
@@ -100,17 +101,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             .filterIsInstance<SecretState.Ready>()
             .map { it.persistableWallet }
             .map {
-                it.wif? {
-                    Log.w("WifCheck", "WIF included for this Wallet! Using that instead of bip39!")
-                    Log.w("WifCheck", "WIF value: " + String(it.wif))
-                    Log.w("WifCheck", "Decoded WIF: " + String(wif.decodeBase58WithChecksum())
-                    val bip39Seed = wif.decodeBase58WithChecksum()
-                    DerivationTool.getInstance().deriveUnifiedSpendingKey(
-                        seed = bip39Seed,
-                        network = it.network,
-                        account = Account.DEFAULT
-                    )
-                } else {
+                if (null == it.wif) {
                     val bip39Seed =
                         withContext(Dispatchers.IO) {
                             Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
@@ -119,6 +110,16 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                         seed = bip39Seed,
                         network = it.network,
                         account = Account.DEFAULT
+                    )
+                } else {
+                    Log.w("WifCheck", "WIF included for this Wallet! Using that instead of bip39!")
+                    Log.w("WifCheck", "WIF value: " + it.wif)
+                    val decodedWif = it.wif!!.decodeBase58WithChecksum()
+                    Log.w("WifCheck", "Decoded WIF: " + decodedWif.toString(Charsets.UTF_8))
+                    DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                        seed = decodedWif,
+                        network = it.network,
+                        account = Account.DEFAULT,
                     )
                 }
             }.stateIn(
