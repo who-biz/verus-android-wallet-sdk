@@ -81,6 +81,7 @@ class WalletCoordinator(
                                 birthday = persistableWallet.birthday,
                                 seed = persistableWallet.seedPhrase.toByteArray(),
                                 walletInitMode = persistableWallet.walletInitMode,
+                                wif = persistableWallet.wif
                             )
 
                         trySend(InternalSynchronizerStatus.Available(closeableSynchronizer))

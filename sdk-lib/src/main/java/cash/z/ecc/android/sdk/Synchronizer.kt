@@ -33,6 +33,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import java.io.Closeable
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
+
 
 @Suppress("TooManyFunctions")
 interface Synchronizer {
@@ -565,7 +567,8 @@ interface Synchronizer {
             lightWalletEndpoint: LightWalletEndpoint,
             seed: ByteArray?,
             birthday: BlockHeight?,
-            walletInitMode: WalletInitMode
+            walletInitMode: WalletInitMode,
+            wif: String?
         ): CloseableSynchronizer {
             val applicationContext = context.applicationContext
 
@@ -620,6 +623,8 @@ interface Synchronizer {
                     }
                 }
 
+            val decodedWif = wif?.decodeBase58WithChecksum()
+
             val repository =
                 DefaultSynchronizerFactory.defaultDerivedDataRepository(
                     context = applicationContext,
@@ -627,7 +632,7 @@ interface Synchronizer {
                     databaseFile = coordinator.dataDbFile(zcashNetwork, alias),
                     zcashNetwork = zcashNetwork,
                     checkpoint = loadedCheckpoint,
-                    seed = seed,
+                    seed = if (wif == null) seed else decodedWif?.copyOfRange(1,decodedWif.lastIndex),
                     numberOfAccounts = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS,
                     recoverUntil = chainTip,
                 )
@@ -671,10 +676,11 @@ interface Synchronizer {
             lightWalletEndpoint: LightWalletEndpoint,
             seed: ByteArray?,
             birthday: BlockHeight?,
-            walletInitMode: WalletInitMode
+            walletInitMode: WalletInitMode,
+            wif: String?
         ): CloseableSynchronizer =
             runBlocking {
-                new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode)
+                new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode, wif)
             }
 
         /**

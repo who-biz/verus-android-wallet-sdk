@@ -116,9 +116,15 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                     Log.w("WifCheck", "WIF included for this Wallet! Using that instead of bip39!")
                     Log.w("WifCheck", "WIF value: " + it.wif)
                     val decodedWif = it.wif!!.decodeBase58WithChecksum()
-                    Log.w("WifCheck", "Decoded WIF: " + decodedWif.toHexString())
+                    val decodedTrimmedWif = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+                    Log.w("WifCheck", "Decoded WIF: " + decodedTrimmedWif.toHexString())
+                    val bip39Seed =
+                        withContext(Dispatchers.IO) {
+                            Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
+                        }
+                    Log.w("WifCheck", "bip39 calculated seed: " + bip39Seed.toHexString())
                     DerivationTool.getInstance().deriveUnifiedSpendingKey(
-                        seed = decodedWif,
+                        seed = decodedTrimmedWif,
                         network = it.network,
                         account = Account.DEFAULT,
                     )

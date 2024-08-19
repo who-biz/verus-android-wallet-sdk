@@ -87,7 +87,7 @@ private fun KeysMainContent(
             .padding(top = paddingValues.calculateTopPadding())
     ) {
         Text(stringResource(id = R.string.spending_key))
-        Text(spendingKey.toString()) // TODO: this will probably be overridden with placeholder
+        Text(spendingKey. copyBytes().toHexString()) // TODO: this will probably be overridden with placeholder
 
         Spacer(Modifier.padding(8.dp))
 
@@ -105,7 +105,7 @@ private fun KeysMainContent(
         Text(stringResource(id = R.string.decoded_wif))
         persistableWallet.wif.also { wif ->
             if (wif != null) {
-                Text(wif.decodeBase58WithChecksum().toHexString())
+                Text(wif.decodeBase58WithChecksum().toHexString(0,31))
             } else {
                 Text("None Imported")
             }

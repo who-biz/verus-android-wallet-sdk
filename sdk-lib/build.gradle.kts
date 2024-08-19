@@ -1,3 +1,11 @@
+buildscript {
+    repositories {
+        maven {
+            setUrl("https://jitpack.io")
+        }
+    }
+}
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
@@ -88,6 +96,8 @@ tasks.dokkaHtml.configure {
 }
 
 dependencies {
+    implementation("com.github.komputing.khash:sha256:1.1.1")
+
     api(projects.lightwalletClientLib)
     implementation(projects.backendLib)
 
