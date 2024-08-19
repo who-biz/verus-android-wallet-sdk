@@ -105,7 +105,7 @@ private fun KeysMainContent(
         Text(stringResource(id = R.string.decoded_wif))
         persistableWallet.wif.also { wif ->
             if (wif != null) {
-                Text(wif.decodeBase58WithChecksum().toHexString(0,31))
+                Text(wif.decodeBase58WithChecksum().toHexString(1,33))
             } else {
                 Text("None Imported")
             }
