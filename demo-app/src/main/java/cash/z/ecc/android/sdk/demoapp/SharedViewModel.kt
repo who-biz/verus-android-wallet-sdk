@@ -78,7 +78,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                     // have the seed stored
                     val seedBytes = Mnemonics.MnemonicCode(seedPhrase.value).toSeed()
 
-                    val wif = wifString.value.decodeBase58WithChecksum().copyOfRange(1, 33)
+                    val transparentKey = wifString.value.decodeBase58WithChecksum().copyOfRange(1, 33)
 
                     val network = ZcashNetwork.fromResources(application)
                     val synchronizer =
@@ -96,7 +96,7 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                             // We use restore mode as this is always initialization with an older seed
                             walletInitMode = WalletInitMode.RestoreWallet,
                             alias = OLD_UI_SYNCHRONIZER_ALIAS,
-                            wif = wif
+                            transparentKey = transparentKey
                         )
 
                     send(InternalSynchronizerStatus.Available(synchronizer))

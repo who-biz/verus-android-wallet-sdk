@@ -15,6 +15,7 @@ import cash.z.ecc.android.sdk.demoapp.ext.requireApplicationContext
 import cash.z.ecc.android.sdk.demoapp.util.fromResources
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.tool.DerivationTool
 import kotlinx.coroutines.launch
 
@@ -26,7 +27,8 @@ import kotlinx.coroutines.launch
 class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
     private lateinit var seedPhrase: String
     private lateinit var seed: ByteArray
-    private lateinit var wif: ByteArray
+    private lateinit var wif: String
+    private lateinit var transparentKey: ByteArray
 
     /**
      * Initialize the required values that would normally live outside the demo but are repeated
@@ -39,6 +41,11 @@ class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
         // Use a BIP-39 library to convert a seed phrase into a byte array. Most wallets already
         // have the seed stored
         seed = Mnemonics.MnemonicCode(seedPhrase).toSeed()
+
+        wif = sharedViewModel.wifString.value
+
+        val decodedWif = wif.decodeBase58WithChecksum()
+        transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
     }
 
     private fun displayKeys() {
@@ -49,7 +56,7 @@ class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
                 @Suppress("MagicNumber")
                 val spendingKey =
                     DerivationTool.getInstance().deriveUnifiedSpendingKey(
-                        wif,
+                        transparentKey,
                         seed,
                         ZcashNetwork.fromResources(requireApplicationContext()),
                         Account(5)

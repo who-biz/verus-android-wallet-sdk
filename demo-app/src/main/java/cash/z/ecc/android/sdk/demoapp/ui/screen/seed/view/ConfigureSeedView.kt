@@ -87,7 +87,7 @@ private fun ConfigureSeedMainContent(
                         birthday = WalletFixture.Alice.getBirthday(zcashNetwork),
                         seedPhrase = SeedPhrase.new(WalletFixture.Alice.seedPhrase),
                         walletInitMode = WalletInitMode.RestoreWallet,
-                        wif = WalletFixture.Alice.wif
+                        wif = WalletFixture.Alice.wifString
                     )
                 onExistingWallet(newWallet)
             }

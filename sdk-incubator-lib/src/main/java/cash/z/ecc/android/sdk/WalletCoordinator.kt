@@ -4,6 +4,7 @@ import android.content.Context
 import cash.z.ecc.android.sdk.ext.onFirst
 import cash.z.ecc.android.sdk.internal.Twig
 import cash.z.ecc.android.sdk.model.PersistableWallet
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -81,7 +82,7 @@ class WalletCoordinator(
                                 birthday = persistableWallet.birthday,
                                 seed = persistableWallet.seedPhrase.toByteArray(),
                                 walletInitMode = persistableWallet.walletInitMode,
-                                wif = persistableWallet.wif
+                                transparentKey = persistableWallet.wif?.decodeBase58WithChecksum()?.copyOfRange(1,33)
                             )
 
                         trySend(InternalSynchronizerStatus.Available(closeableSynchronizer))
