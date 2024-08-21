@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
     private lateinit var seedPhrase: String
     private lateinit var seed: ByteArray
+    private lateinit var wif: ByteArray
 
     /**
      * Initialize the required values that would normally live outside the demo but are repeated
@@ -48,6 +49,7 @@ class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
                 @Suppress("MagicNumber")
                 val spendingKey =
                     DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                        wif,
                         seed,
                         ZcashNetwork.fromResources(requireApplicationContext()),
                         Account(5)

@@ -13,6 +13,7 @@ import cash.z.ecc.android.sdk.ext.onFirst
 import cash.z.ecc.android.sdk.internal.Twig
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import co.electriccoin.lightwallet.client.ext.BenchmarkingExt
 import co.electriccoin.lightwallet.client.fixture.BenchmarkingBlockRangeFixture
 import co.electriccoin.lightwallet.client.model.LightWalletEndpoint
@@ -40,6 +41,8 @@ import kotlin.time.Duration.Companion.seconds
  * Shared mutable state for the demo
  */
 class SharedViewModel(application: Application) : AndroidViewModel(application) {
+    private val _wifString = MutableStateFlow(DemoConstants.INITIAL_WIFSTRING)
+
     private val _seedPhrase = MutableStateFlow(DemoConstants.INITIAL_SEED_WORDS)
 
     private val _birthdayHeight =
@@ -51,6 +54,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                 )
             }
         )
+
+    val wifString: StateFlow<String> get() = _wifString
 
     // publicly, this is read-only
     val seedPhrase: StateFlow<String> get() = _seedPhrase
@@ -73,6 +78,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                     // have the seed stored
                     val seedBytes = Mnemonics.MnemonicCode(seedPhrase.value).toSeed()
 
+                    val wif = wifString.value.decodeBase58WithChecksum().copyOfRange(1, 33)
+
                     val network = ZcashNetwork.fromResources(application)
                     val synchronizer =
                         Synchronizer.new(
@@ -88,7 +95,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                                 },
                             // We use restore mode as this is always initialization with an older seed
                             walletInitMode = WalletInitMode.RestoreWallet,
-                            alias = OLD_UI_SYNCHRONIZER_ALIAS
+                            alias = OLD_UI_SYNCHRONIZER_ALIAS,
+                            wif = wif
                         )
 
                     send(InternalSynchronizerStatus.Available(synchronizer))

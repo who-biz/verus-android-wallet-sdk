@@ -50,6 +50,7 @@ interface DerivationTool {
      * @return the unified spending key for the account.
      */
     suspend fun deriveUnifiedSpendingKey(
+        wif: ByteArray,
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account

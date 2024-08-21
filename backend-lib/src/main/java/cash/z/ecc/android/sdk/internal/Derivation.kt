@@ -15,6 +15,7 @@ interface Derivation {
     ): String
 
     fun deriveUnifiedSpendingKey(
+        transparentKey: ByteArray,
         seed: ByteArray,
         networkId: Int,
         accountIndex: Int

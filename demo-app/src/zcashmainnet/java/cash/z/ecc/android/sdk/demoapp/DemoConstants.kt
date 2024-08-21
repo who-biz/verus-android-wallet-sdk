@@ -3,6 +3,8 @@ package cash.z.ecc.android.sdk.demoapp
 object DemoConstants {
     const val SEND_AMOUNT: Double = 0.000018
 
+    const val  INITIAL_WIFSTRING: String = "UxUY1K87of2ntgchEprKosZVt97DXPv4iZP6oGkcxXdVFNtbncMT"
+
     // corresponds to address: zs15tzaulx5weua5c7l47l4pku2pw9fzwvvnsp4y80jdpul0y3nwn5zp7tmkcclqaca3mdjqjkl7hx
     const val INITIAL_SEED_WORDS: String =
         "wish puppy smile loan doll curve hole maze file ginger hair nose key relax knife witness cannon grab despair" +

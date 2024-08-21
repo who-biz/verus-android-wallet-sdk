@@ -908,7 +908,8 @@ internal object DefaultSynchronizerFactory {
         checkpoint: Checkpoint,
         seed: ByteArray?,
         numberOfAccounts: Int,
-        recoverUntil: BlockHeight?
+        recoverUntil: BlockHeight?,
+        transparentKey: ByteArray?
     ): DerivedDataRepository =
         DbDerivedDataRepository(
             DerivedDataDb.new(
@@ -917,6 +918,7 @@ internal object DefaultSynchronizerFactory {
                 databaseFile,
                 zcashNetwork,
                 checkpoint,
+                transparentKey,
                 seed,
                 numberOfAccounts,
                 recoverUntil

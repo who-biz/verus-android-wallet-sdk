@@ -16,10 +16,11 @@ class RustDerivationTool private constructor() : Derivation {
     ): String = deriveUnifiedFullViewingKey(usk.bytes, networkId = networkId)
 
     override fun deriveUnifiedSpendingKey(
+        transparentKey: ByteArray,
         seed: ByteArray,
         networkId: Int,
         accountIndex: Int
-    ): JniUnifiedSpendingKey = deriveSpendingKey(seed, accountIndex, networkId = networkId)
+    ): JniUnifiedSpendingKey = deriveSpendingKey(transparentKey, seed, accountIndex, networkId = networkId)
 
     override fun deriveUnifiedAddress(
         seed: ByteArray,
@@ -49,6 +50,7 @@ class RustDerivationTool private constructor() : Derivation {
 
         @JvmStatic
         private external fun deriveSpendingKey(
+            transparentKey: ByteArray,
             seed: ByteArray,
             account: Int,
             networkId: Int

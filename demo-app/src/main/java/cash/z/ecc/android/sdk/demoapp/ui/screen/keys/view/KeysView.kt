@@ -87,7 +87,9 @@ private fun KeysMainContent(
             .padding(top = paddingValues.calculateTopPadding())
     ) {
         Text(stringResource(id = R.string.spending_key))
-        Text(spendingKey. copyBytes().toHexString()) // TODO: this will probably be overridden with placeholder
+        //Text(spendingKey.toString())
+        // note: above value is overridden with placeholder, for security reasons
+        Text(spendingKey. copyBytes().toHexString())
 
         Spacer(Modifier.padding(8.dp))
 

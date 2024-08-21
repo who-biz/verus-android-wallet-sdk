@@ -108,6 +108,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                             Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
                         }
                     DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                        wif = bip39Seed,
                         seed = bip39Seed,
                         network = it.network,
                         account = Account.DEFAULT
@@ -124,7 +125,8 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                         }
                     Log.w("WifCheck", "bip39 calculated seed: " + bip39Seed.toHexString())
                     DerivationTool.getInstance().deriveUnifiedSpendingKey(
-                        seed = decodedTrimmedWif,
+                        wif = decodedTrimmedWif,
+                        seed = bip39Seed,
                         network = it.network,
                         account = Account.DEFAULT,
                     )

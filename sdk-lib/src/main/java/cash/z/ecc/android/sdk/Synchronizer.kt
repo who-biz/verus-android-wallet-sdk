@@ -1,6 +1,7 @@
 package cash.z.ecc.android.sdk
 
 import android.content.Context
+import android.util.Log
 import cash.z.ecc.android.sdk.WalletInitMode.ExistingWallet
 import cash.z.ecc.android.sdk.WalletInitMode.NewWallet
 import cash.z.ecc.android.sdk.WalletInitMode.RestoreWallet
@@ -568,7 +569,7 @@ interface Synchronizer {
             seed: ByteArray?,
             birthday: BlockHeight?,
             walletInitMode: WalletInitMode,
-            wif: String?
+            wif: ByteArray?
         ): CloseableSynchronizer {
             val applicationContext = context.applicationContext
 
@@ -623,8 +624,6 @@ interface Synchronizer {
                     }
                 }
 
-            val decodedWif = wif?.decodeBase58WithChecksum()
-
             val repository =
                 DefaultSynchronizerFactory.defaultDerivedDataRepository(
                     context = applicationContext,
@@ -632,9 +631,10 @@ interface Synchronizer {
                     databaseFile = coordinator.dataDbFile(zcashNetwork, alias),
                     zcashNetwork = zcashNetwork,
                     checkpoint = loadedCheckpoint,
-                    seed = if (wif == null) seed else decodedWif?.copyOfRange(1,decodedWif.lastIndex),
+                    transparentKey = wif,
+                    seed = seed,
                     numberOfAccounts = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS,
-                    recoverUntil = chainTip,
+                    recoverUntil = chainTip
                 )
 
             val encoder = DefaultSynchronizerFactory.defaultEncoder(backend, saplingParamTool, repository)
@@ -677,7 +677,7 @@ interface Synchronizer {
             seed: ByteArray?,
             birthday: BlockHeight?,
             walletInitMode: WalletInitMode,
-            wif: String?
+            wif: ByteArray?
         ): CloseableSynchronizer =
             runBlocking {
                 new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode, wif)

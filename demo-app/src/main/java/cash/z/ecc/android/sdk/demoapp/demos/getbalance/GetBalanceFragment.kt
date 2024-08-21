@@ -21,6 +21,7 @@ import cash.z.ecc.android.sdk.model.PercentDecimal
 import cash.z.ecc.android.sdk.model.WalletBalance
 import cash.z.ecc.android.sdk.model.Zatoshi
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.tool.DerivationTool
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterNotNull
@@ -55,6 +56,11 @@ class GetBalanceFragment : BaseDemoFragment<FragmentGetBalanceBinding>() {
 
         val seedPhrase = sharedViewModel.seedPhrase.value
         val seed = Mnemonics.MnemonicCode(seedPhrase).toSeed()
+
+        val wifString = sharedViewModel.wifString.value
+        val decodedWif = wifString.decodeBase58WithChecksum()
+        val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+
         val network = ZcashNetwork.fromResources(requireApplicationContext())
 
         binding.shield.apply {
@@ -62,6 +68,7 @@ class GetBalanceFragment : BaseDemoFragment<FragmentGetBalanceBinding>() {
                 lifecycleScope.launch {
                     val usk =
                         DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                            transparentKey,
                             seed,
                             network,
                             Account.DEFAULT

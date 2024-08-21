@@ -47,11 +47,12 @@ internal class DerivedDataDb private constructor(
             databaseFile: File,
             zcashNetwork: ZcashNetwork,
             checkpoint: Checkpoint,
+            transparentKey: ByteArray?,
             seed: ByteArray?,
             numberOfAccounts: Int,
             recoverUntil: BlockHeight?
         ): DerivedDataDb {
-            backend.initDataDb(seed)
+            backend.initDataDb(transparentKey, seed)
 
             val database =
                 ReadOnlySupportSqliteOpenHelper.openExistingDatabaseAsReadOnly(

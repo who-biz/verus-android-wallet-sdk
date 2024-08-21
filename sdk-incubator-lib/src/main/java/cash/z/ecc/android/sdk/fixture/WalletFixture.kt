@@ -3,6 +3,7 @@ package cash.z.ecc.android.sdk.fixture
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.tool.DerivationTool
 
@@ -12,17 +13,19 @@ import cash.z.ecc.android.sdk.tool.DerivationTool
 sealed class WalletFixture {
     abstract val seedPhrase: String
 
-    abstract val wif: String?
+    abstract val wifString: String
 
     abstract fun getBirthday(zcashNetwork: ZcashNetwork): BlockHeight
 
     abstract fun getAddresses(zcashNetwork: ZcashNetwork): Addresses
 
     suspend fun getUnifiedSpendingKey(
+        wif: ByteArray = wifString.decodeBase58WithChecksum().copyOfRange(1,33), //TODO: don't use hardcoded ints
         seed: String = seedPhrase,
         network: ZcashNetwork,
         account: Account = Account.DEFAULT
     ) = DerivationTool.getInstance().deriveUnifiedSpendingKey(
+        wif,
         Mnemonics.MnemonicCode(seed).toEntropy(),
         network,
         account
@@ -31,7 +34,7 @@ sealed class WalletFixture {
     @Suppress("MaxLineLength")
     object Ben : WalletFixture() {
 
-        override val wif = null
+        override val wifString = ""
 
         override val seedPhrase: String
             get() =
@@ -80,7 +83,7 @@ sealed class WalletFixture {
     @Suppress("MaxLineLength")
     object Alice : WalletFixture() {
 
-	override val wif: String
+	override val wifString: String
 	    get() = "UxUY1K87of2ntgchEprKosZVt97DXPv4iZP6oGkcxXdVFNtbncMT"
 
         override val seedPhrase: String
