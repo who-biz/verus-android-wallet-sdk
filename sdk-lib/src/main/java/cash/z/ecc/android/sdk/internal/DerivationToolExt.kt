@@ -18,11 +18,11 @@ fun Derivation.deriveUnifiedAddress(
 ): String = deriveUnifiedAddress(viewingKey, network.id)
 
 fun Derivation.deriveUnifiedSpendingKey(
-    wif: ByteArray,
+    transparentKey: ByteArray,
     seed: ByteArray,
     network: ZcashNetwork,
     account: Account
-): UnifiedSpendingKey = UnifiedSpendingKey(deriveUnifiedSpendingKey(wif, seed, network.id, account.value))
+): UnifiedSpendingKey = UnifiedSpendingKey(deriveUnifiedSpendingKey(transparentKey, seed, network.id, account.value))
 
 fun Derivation.deriveUnifiedFullViewingKey(
     usk: UnifiedSpendingKey,

@@ -66,10 +66,11 @@ class RustBackend private constructor(
             )
         }
 
-    override suspend fun initDataDb(seed: ByteArray?) =
+    override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?) =
         withContext(SdkDispatchers.DATABASE_IO) {
             initDataDb(
                 dataDbFile.absolutePath,
+                transparentKey,
                 seed,
                 networkId = networkId
             )
@@ -436,6 +437,7 @@ class RustBackend private constructor(
         @JvmStatic
         private external fun initDataDb(
             dbDataPath: String,
+            transparentKey: ByteArray?,
             seed: ByteArray?,
             networkId: Int
         ): Int

@@ -157,8 +157,8 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
             outputIndex = outputIndex
         )
 
-    override suspend fun initDataDb(seed: ByteArray?) {
-        val ret = backend.initDataDb(seed)
+    override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?) {
+        val ret = backend.initDataDb(transparentKey, seed)
         when (ret) {
             2 -> throw InitializeException.SeedNotRelevant
             1 -> throw InitializeException.SeedRequired
