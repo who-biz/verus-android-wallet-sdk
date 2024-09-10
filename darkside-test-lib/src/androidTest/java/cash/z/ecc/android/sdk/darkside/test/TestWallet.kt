@@ -12,6 +12,7 @@ import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.Zatoshi
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.tool.DerivationTool
 import co.electriccoin.lightwallet.client.model.LightWalletEndpoint
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeoutException
 @OptIn(DelicateCoroutinesApi::class)
 class TestWallet(
     val seedPhrase: String,
+    val wif: String = "",
     val alias: String = "TestWallet",
     val network: ZcashNetwork = ZcashNetwork.Testnet,
     val endpoint: LightWalletEndpoint = LightWalletEndpoint.Darkside,
@@ -42,6 +44,7 @@ class TestWallet(
         alias: String = "TestWallet"
     ) : this(
         backup.seedPhrase,
+        "",
         network = network,
         startHeight = if (network == ZcashNetwork.Mainnet) backup.mainnetBirthday else backup.testnetBirthday,
         alias = alias
@@ -58,8 +61,17 @@ class TestWallet(
     private val account = Account.DEFAULT
     private val context = InstrumentationRegistry.getInstrumentation().context
     private val seed: ByteArray = Mnemonics.MnemonicCode(seedPhrase).toSeed()
+    private val decodedWif = wif.decodeBase58WithChecksum()
+    private val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
     private val shieldedSpendingKey =
-        runBlocking { DerivationTool.getInstance().deriveUnifiedSpendingKey(seed, network = network, account) }
+        runBlocking {
+                DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                    transparentKey,
+                    seed,
+                    network = network,
+                    account
+            )
+        }
     val synchronizer: SdkSynchronizer =
         Synchronizer.newBlocking(
             context,
@@ -69,7 +81,8 @@ class TestWallet(
             seed,
             startHeight,
             // Using existing wallet init mode as simplification for the test
-            walletInitMode = WalletInitMode.ExistingWallet
+            walletInitMode = WalletInitMode.ExistingWallet,
+            transparentKey
         ) as SdkSynchronizer
 
     val available get() = synchronizer.saplingBalances.value?.available
@@ -107,7 +120,7 @@ class TestWallet(
     ): TestWallet {
         synchronizer.createProposedTransactions(
             synchronizer.proposeTransfer(
-                shieldedSpendingKey.account,
+                account,
                 address,
                 amount,
                 memo

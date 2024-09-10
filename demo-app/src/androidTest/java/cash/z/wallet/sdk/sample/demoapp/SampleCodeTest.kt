@@ -12,6 +12,7 @@ import cash.z.ecc.android.sdk.internal.Twig
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.tool.DerivationTool
 import co.electriccoin.lightwallet.client.LightWalletClient
 import co.electriccoin.lightwallet.client.model.BlockHeightUnsafe
@@ -185,6 +186,7 @@ class SampleCodeTest {
             val memo = "Test Transaction"
             val spendingKey =
                 DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                    transparentKey,
                     seed,
                     ZcashNetwork.Mainnet,
                     Account.DEFAULT
@@ -206,6 +208,8 @@ class SampleCodeTest {
 
     companion object {
         private val seed = "Insert seed for testing".toByteArray()
+        private val decodedWif = "Insert WIF for testing".decodeBase58WithChecksum()
+        private val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
         private val lightwalletdHost = LightWalletEndpoint.Mainnet
 
         private val context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -219,7 +223,8 @@ class SampleCodeTest {
                     seed = seed,
                     birthday = null,
                     // Using existing wallet init mode as simplification for the test
-                    walletInitMode = WalletInitMode.ExistingWallet
+                    walletInitMode = WalletInitMode.ExistingWallet,
+                    transparentKey = transparentKey
                 )
             }
 

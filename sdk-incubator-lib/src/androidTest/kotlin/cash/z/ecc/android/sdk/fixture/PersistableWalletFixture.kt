@@ -6,6 +6,7 @@ import cash.z.ecc.android.sdk.model.Mainnet
 import cash.z.ecc.android.sdk.model.PersistableWallet
 import cash.z.ecc.android.sdk.model.SeedPhrase
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import co.electriccoin.lightwallet.client.model.LightWalletEndpoint
 
 object PersistableWalletFixture {
@@ -17,6 +18,12 @@ object PersistableWalletFixture {
     @Suppress("MagicNumber")
     val BIRTHDAY = BlockHeight.new(ZcashNetwork.Mainnet, 1500000L)
 
+    val WIF = ""
+
+    val decodedWif = WIF.decodeBase58WithChecksum()
+
+    val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+
     val SEED_PHRASE = SeedPhraseFixture.new()
 
     val WALLET_INIT_MODE = WalletInitMode.ExistingWallet
@@ -26,8 +33,9 @@ object PersistableWalletFixture {
         endpoint: LightWalletEndpoint = ENDPOINT,
         birthday: BlockHeight = BIRTHDAY,
         seedPhrase: SeedPhrase = SEED_PHRASE,
-        walletInitMode: WalletInitMode = WALLET_INIT_MODE
-    ) = PersistableWallet(network, endpoint, birthday, seedPhrase, walletInitMode)
+        walletInitMode: WalletInitMode = WALLET_INIT_MODE,
+        wif: String? = WIF
+    ) = PersistableWallet(network, endpoint, birthday, seedPhrase, walletInitMode, wif)
 
     fun persistVersionOne() =
         PersistableWallet.toCustomJson(
@@ -35,6 +43,7 @@ object PersistableWalletFixture {
             network = NETWORK,
             endpoint = null,
             birthday = BIRTHDAY,
-            seed = SEED_PHRASE
+            seed = SEED_PHRASE,
+            wif = WIF
         )
 }

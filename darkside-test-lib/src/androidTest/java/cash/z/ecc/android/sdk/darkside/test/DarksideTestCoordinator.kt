@@ -23,10 +23,11 @@ class DarksideTestCoordinator(val wallet: TestWallet) {
     constructor(
         alias: String = "DarksideTestCoordinator",
         seedPhrase: String = DEFAULT_SEED_PHRASE,
+        wif: String = "", //TODO: default test WIF
         startHeight: BlockHeight = DEFAULT_START_HEIGHT,
         network: ZcashNetwork = ZcashNetwork.Mainnet,
         endpoint: LightWalletEndpoint = LightWalletEndpoint.Darkside
-    ) : this(TestWallet(seedPhrase, alias, network, endpoint, startHeight = startHeight))
+    ) : this(TestWallet(seedPhrase, wif, alias, network, endpoint, startHeight = startHeight))
 
     private val targetHeight = BlockHeight.new(wallet.network, 663250)
     private val context = InstrumentationRegistry.getInstrumentation().context

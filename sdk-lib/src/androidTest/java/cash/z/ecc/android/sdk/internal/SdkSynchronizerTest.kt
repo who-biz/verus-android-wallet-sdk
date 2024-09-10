@@ -34,7 +34,8 @@ class SdkSynchronizerTest {
                 Mnemonics.MnemonicCode(WalletFixture.SEED_PHRASE).toEntropy(),
                 birthday = null,
                 // Using existing wallet init mode as simplification for the test
-                walletInitMode = WalletInitMode.ExistingWallet
+                walletInitMode = WalletInitMode.ExistingWallet,
+                transparentKey = WalletFixture.decodedTrimmedWif
             ).use {
                 assertFailsWith<IllegalStateException> {
                     Synchronizer.new(
@@ -45,7 +46,8 @@ class SdkSynchronizerTest {
                         Mnemonics.MnemonicCode(WalletFixture.SEED_PHRASE).toEntropy(),
                         birthday = null,
                         // Using existing wallet init mode as simplification for the test
-                        walletInitMode = WalletInitMode.ExistingWallet
+                        walletInitMode = WalletInitMode.ExistingWallet,
+                        transparentKey = WalletFixture.decodedTrimmedWif
                     )
                 }
             }
@@ -70,7 +72,8 @@ class SdkSynchronizerTest {
                 Mnemonics.MnemonicCode(WalletFixture.SEED_PHRASE).toEntropy(),
                 birthday = null,
                 // Using existing wallet init mode as simplification for the test
-                walletInitMode = WalletInitMode.ExistingWallet
+                walletInitMode = WalletInitMode.ExistingWallet,
+                transparentKey = WalletFixture.decodedTrimmedWif
             ).use {}
 
             // Second instance should succeed because first one was closed
@@ -82,7 +85,8 @@ class SdkSynchronizerTest {
                 Mnemonics.MnemonicCode(WalletFixture.SEED_PHRASE).toEntropy(),
                 birthday = null,
                 // Using existing wallet init mode as simplification for the test
-                walletInitMode = WalletInitMode.ExistingWallet
+                walletInitMode = WalletInitMode.ExistingWallet,
+                transparentKey = WalletFixture.decodedTrimmedWif
             ).use {}
         }
 
@@ -105,7 +109,8 @@ class SdkSynchronizerTest {
                 Mnemonics.MnemonicCode(WalletFixture.SEED_PHRASE).toEntropy(),
                 birthday = null,
                 // Using existing wallet init mode as simplification for the test
-                walletInitMode = WalletInitMode.ExistingWallet
+                walletInitMode = WalletInitMode.ExistingWallet,
+                transparentKey = WalletFixture.decodedTrimmedWif
             ).use {
                 it.getSaplingAddress(Account.DEFAULT)
             }
@@ -121,7 +126,8 @@ class SdkSynchronizerTest {
                         Mnemonics.MnemonicCode(WalletFixture.ALICE_SEED_PHRASE).toEntropy(),
                         birthday = null,
                         // Using existing wallet init mode as simplification for the test
-                        walletInitMode = WalletInitMode.ExistingWallet
+                        walletInitMode = WalletInitMode.ExistingWallet,
+                        transparentKey = WalletFixture.decodedTrimmedWif
                     ).use {}
                 }
             assertEquals(InitializeException.SeedNotRelevant, error)

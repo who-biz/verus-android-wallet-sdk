@@ -5,8 +5,13 @@ import cash.z.ecc.android.sdk.internal.deriveUnifiedSpendingKey
 import cash.z.ecc.android.sdk.internal.jni.RustDerivationTool
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 
 object WalletFixture {
+    val WIF = ""
+    val decodedWif: ByteArray = WIF.decodeBase58WithChecksum()
+    val decodedTrimmedWif: ByteArray = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+
     val NETWORK = ZcashNetwork.Mainnet
 
     // This is the "Ben" wallet phrase from sdk-incubator-lib.
@@ -20,8 +25,10 @@ object WalletFixture {
             " cannon grab despair throw review deal slush frame"
 
     suspend fun getUnifiedSpendingKey(
+        transparentKey: ByteArray = decodedTrimmedWif,
         seed: String = SEED_PHRASE,
         network: ZcashNetwork = NETWORK,
         account: Account = Account.DEFAULT
-    ) = RustDerivationTool.new().deriveUnifiedSpendingKey(Mnemonics.MnemonicCode(seed).toEntropy(), network, account)
+    ) = RustDerivationTool.new().deriveUnifiedSpendingKey(transparentKey, Mnemonics.MnemonicCode(seed).toEntropy(),
+        network, account)
 }

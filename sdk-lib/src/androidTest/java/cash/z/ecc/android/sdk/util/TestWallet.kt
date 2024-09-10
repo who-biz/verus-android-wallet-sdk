@@ -59,8 +59,11 @@ class TestWallet(
     private val account = Account.DEFAULT
     private val context = InstrumentationRegistry.getInstrumentation().context
     private val seed: ByteArray = Mnemonics.MnemonicCode(seedPhrase).toSeed()
+    private val transparentKey = byteArrayOf()
+
     private val spendingKey =
-        runBlocking { RustDerivationTool.new().deriveUnifiedSpendingKey(seed, network = network, account) }
+        runBlocking { RustDerivationTool.new().deriveUnifiedSpendingKey(transparentKey, seed, network = network,
+            account) }
     val synchronizer: SdkSynchronizer =
         Synchronizer.newBlocking(
             context,
@@ -70,7 +73,8 @@ class TestWallet(
             seed = seed,
             startHeight,
             // Using existing wallet init mode as simplification for the test
-            walletInitMode = WalletInitMode.ExistingWallet
+            walletInitMode = WalletInitMode.ExistingWallet,
+            transparentKey
         ) as SdkSynchronizer
 
     val available get() = synchronizer.saplingBalances.value?.available

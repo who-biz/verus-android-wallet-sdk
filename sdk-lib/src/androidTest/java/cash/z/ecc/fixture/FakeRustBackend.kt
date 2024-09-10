@@ -107,7 +107,7 @@ internal class FakeRustBackend(
     override suspend fun decryptAndStoreTransaction(tx: ByteArray) =
         error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
-    override suspend fun initDataDb(seed: ByteArray?): Int =
+    override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?): Int =
         error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
     override suspend fun createAccount(
