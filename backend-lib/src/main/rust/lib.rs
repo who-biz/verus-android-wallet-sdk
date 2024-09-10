@@ -231,12 +231,16 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initDataD
 
         let seed = (!seed.is_null()).then(|| SecretVec::new(env.convert_byte_array(seed).unwrap()));
 
-        match init_wallet_db(&mut db_data, seed) {
+        let transparent_key = (!transparent_key.is_null()).then(|| SecretVec::new(env.convert_byte_array(transparent_key).unwrap()));
+
+        match init_wallet_db(&mut db_data, seed, transparent_key) {
             Ok(()) => Ok(0),
             Err(e)
                 if matches!(
                     e.source().and_then(|e| e.downcast_ref()),
                     Some(&WalletMigrationError::SeedRequired)
+                    //TODO: change these migration errors so that we can accept WIF, seed, HD seed, etc
+                    // so we still have meaningful error messages
                 ) =>
             {
                 Ok(1)
