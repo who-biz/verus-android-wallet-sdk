@@ -220,6 +220,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initDataD
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     db_data: JString<'local>,
+    transparent_key: JByteArray<'local>,
     seed: JByteArray<'local>,
     network_id: jint,
 ) -> jint {
