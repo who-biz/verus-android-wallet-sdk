@@ -233,7 +233,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initDataD
 
         let transparent_key = (!transparent_key.is_null()).then(|| SecretVec::new(env.convert_byte_array(transparent_key).unwrap()));
 
-        match init_wallet_db(&mut db_data, seed, transparent_key) {
+        match init_wallet_db(&mut db_data, transparent_key, seed) {
             Ok(()) => Ok(0),
             Err(e)
                 if matches!(
