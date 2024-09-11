@@ -311,6 +311,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     db_data: JString<'local>,
+    transparent_key: JByteArray<'local>,
     seed: JByteArray<'local>,
     treestate: JByteArray<'local>,
     recover_until: jlong,
@@ -321,6 +322,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
     let res = catch_unwind(&mut env, |env| {
         let network = parse_network(network_id as u32)?;
         let mut db_data = wallet_db(env, network, db_data)?;
+        let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap());
         let seed = SecretVec::new(env.convert_byte_array(seed).unwrap());
         let treestate = TreeState::decode(&env.convert_byte_array(treestate).unwrap()[..])
             .map_err(|e| anyhow!("Invalid TreeState: {}", e))?;
@@ -337,7 +339,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
             })?;
 
         let (account_id, usk) = db_data
-            .create_account(&seed, &birthday)
+            .create_account(&transparent_key, &seed, &birthday)
             .map_err(|e| anyhow!("Error while initializing accounts: {}", e))?;
 
         let account = db_data.get_account(account_id)?.expect("just created");
@@ -359,16 +361,18 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isSeedRel
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     db_data: JString<'local>,
+    transparent_key: JByteArray<'local>,
     seed: JByteArray<'local>,
     network_id: jint,
 ) -> jboolean {
     let res = catch_unwind(&mut env, |env| {
         let network = parse_network(network_id as u32)?;
         let db_data = wallet_db(env, network, db_data)?;
+        let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap());
         let seed = SecretVec::new(env.convert_byte_array(seed).unwrap());
 
         // Replicate the logic from `initWalletDb`.
-        Ok(match db_data.seed_relevance_to_derived_accounts(&seed)? {
+        Ok(match db_data.seed_relevance_to_derived_accounts(&transparent_key, &seed)? {
             SeedRelevance::Relevant { .. } | SeedRelevance::NoAccounts => JNI_TRUE,
             SeedRelevance::NotRelevant | SeedRelevance::NoDerivedAccounts => JNI_FALSE,
         })
@@ -387,6 +391,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
 >(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
+    transparent_key: JByteArray<'local>,
     seed: JByteArray<'local>,
     account: jint,
     network_id: jint,
@@ -394,10 +399,11 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
     let res = catch_unwind(&mut env, |env| {
         let _span = tracing::info_span!("RustDerivationTool.deriveSpendingKey").entered();
         let network = parse_network(network_id as u32)?;
+        let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap());
         let seed = SecretVec::new(env.convert_byte_array(seed).unwrap());
         let account = account_id_from_jint(account)?;
 
-        let usk = UnifiedSpendingKey::from_seed(&network, seed.expose_secret(), account)
+        let usk = UnifiedSpendingKey::from_seed(&network, transparent_key.expose_secret(), seed.expose_secret(), account)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))?;
 
         Ok(encode_usk(env, account, usk)?.into_raw())
@@ -411,6 +417,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
 >(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
+    transparent_key: JByteArray<'local>,
     seed: JByteArray<'local>,
     accounts: jint,
     network_id: jint,
@@ -419,6 +426,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let _span = tracing::info_span!("RustDerivationTool.deriveUnifiedFullViewingKeysFromSeed")
             .entered();
         let network = parse_network(network_id as u32)?;
+        let transparent_key = env.convert_byte_array(transparent_key).unwrap();
         let seed = env.convert_byte_array(seed).unwrap();
         let accounts = if accounts > 0 {
             accounts as u32
@@ -430,7 +438,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
             .map(|account| {
                 let account_id = zip32::AccountId::try_from(account)
                     .map_err(|_| anyhow!("Invalid account ID"))?;
-                UnifiedSpendingKey::from_seed(&network, &seed, account_id)
+                UnifiedSpendingKey::from_seed(&network, &transparent_key, &seed, account_id)
                     .map_err(|e| {
                         anyhow!("error generating unified spending key from seed: {:?}", e)
                     })
@@ -456,6 +464,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
 >(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
+    transparent_key: JByteArray<'local>,
     seed: JByteArray<'local>,
     account_index: jint,
     network_id: jint,
@@ -464,10 +473,11 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let _span =
             tracing::info_span!("RustDerivationTool.deriveUnifiedAddressFromSeed").entered();
         let network = parse_network(network_id as u32)?;
+        let transparent_key = env.convert_byte_array(transparent_key).unwrap();
         let seed = env.convert_byte_array(seed).unwrap();
         let account_id = account_id_from_jint(account_index)?;
 
-        let ufvk = UnifiedSpendingKey::from_seed(&network, &seed, account_id)
+        let ufvk = UnifiedSpendingKey::from_seed(&network, &transparent_key, &seed, account_id)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))
             .map(|usk| usk.to_unified_full_viewing_key())?;
 
@@ -1086,8 +1096,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
     db_data: JString<'local>,
     sapling_start_index: jlong,
     sapling_roots: JObjectArray<'local>,
-    orchard_start_index: jlong,
-    orchard_roots: JObjectArray<'local>,
+    _orchard_start_index: jlong,
+    _orchard_roots: JObjectArray<'local>,
     network_id: jint,
 ) -> jboolean {
     let res = catch_unwind(&mut env, |env| {
@@ -1119,22 +1129,28 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
         };
         let sapling_roots = parse_roots(env, sapling_roots, |n| sapling::Node::read(n))?;
 
-        let orchard_start_index = if orchard_start_index >= 0 {
-            orchard_start_index as u64
-        } else {
-            return Err(anyhow!("Orchard start index must be nonnegative."));
-        };
-        let orchard_roots = parse_roots(env, orchard_roots, |n| {
-            orchard::tree::MerkleHashOrchard::read(n)
-        })?;
+	#[cfg(feature = "orchard")]
+        {
+            let orchard_start_index = if orchard_start_index >= 0 {
+                orchard_start_index as u64
+            } else {
+                return Err(anyhow!("Orchard start index must be nonnegative."));
+            };
+            let orchard_roots = parse_roots(env, orchard_roots, |n| {
+                orchard::tree::MerkleHashOrchard::read(n)
+            })?;
+        }
 
         db_data
             .put_sapling_subtree_roots(sapling_start_index, &sapling_roots)
             .map_err(|e| anyhow!("Error while storing Sapling subtree roots: {}", e))?;
 
-        db_data
-            .put_orchard_subtree_roots(orchard_start_index, &orchard_roots)
-            .map_err(|e| anyhow!("Error while storing Orchard subtree roots: {}", e))?;
+        #[cfg(feature = "orchard")]
+        {
+            db_data
+                .put_orchard_subtree_roots(orchard_start_index, &orchard_roots)
+                .map_err(|e| anyhow!("Error while storing Orchard subtree roots: {}", e))?;
+        }
 
         Ok(JNI_TRUE)
     });
@@ -1304,6 +1320,7 @@ fn encode_wallet_summary<'a, P: Parameters>(
             JValue::Long(progress_numerator as i64),
             JValue::Long(progress_denominator as i64),
             JValue::Long(summary.next_sapling_subtree_index() as i64),
+            #[cfg(feature = "orchard")]
             JValue::Long(summary.next_orchard_subtree_index() as i64),
         ],
     )?)
