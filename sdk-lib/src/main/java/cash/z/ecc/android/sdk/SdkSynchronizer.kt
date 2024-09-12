@@ -552,12 +552,14 @@ class SdkSynchronizer private constructor(
 
     // Not ready to be a public API; internal for testing only
     internal suspend fun createAccount(
+        transparentKey: ByteArray,
         seed: ByteArray,
         treeState: TreeState,
         recoverUntil: BlockHeight?
     ): UnifiedSpendingKey? {
         return runCatching {
             backend.createAccountAndGetSpendingKey(
+                transparentKey = transparentKey,
                 seed = seed,
                 treeState = treeState,
                 recoverUntil = recoverUntil

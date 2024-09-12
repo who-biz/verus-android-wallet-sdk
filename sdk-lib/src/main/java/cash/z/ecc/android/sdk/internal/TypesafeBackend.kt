@@ -21,6 +21,7 @@ internal interface TypesafeBackend {
     val network: ZcashNetwork
 
     suspend fun createAccountAndGetSpendingKey(
+        transparentKey: ByteArray?,
         seed: ByteArray,
         treeState: TreeState,
         recoverUntil: BlockHeight?

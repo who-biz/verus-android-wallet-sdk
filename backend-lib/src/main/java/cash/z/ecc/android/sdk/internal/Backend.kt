@@ -61,6 +61,7 @@ interface Backend {
      */
     @Throws(RuntimeException::class)
     suspend fun createAccount(
+        transparentKey: ByteArray?,
         seed: ByteArray,
         treeState: ByteArray,
         recoverUntil: Long?
@@ -70,7 +71,8 @@ interface Backend {
      * @throws RuntimeException as a common indicator of the operation failure
      */
     @Throws(RuntimeException::class)
-    suspend fun isSeedRelevantToAnyDerivedAccounts(seed: ByteArray): Boolean
+    suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, seed: ByteArray): Boolean
+    //TODO: pretty sure we don't need WIF evaluated here, but leaving here for completeness of process
 
     fun isValidSaplingAddr(addr: String): Boolean
 

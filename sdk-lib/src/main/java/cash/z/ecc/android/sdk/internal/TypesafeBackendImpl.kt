@@ -24,12 +24,14 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
         get() = ZcashNetwork.from(backend.networkId)
 
     override suspend fun createAccountAndGetSpendingKey(
+        transparentKey: ByteArray?,
         seed: ByteArray,
         treeState: TreeState,
         recoverUntil: BlockHeight?
     ): UnifiedSpendingKey {
         return UnifiedSpendingKey(
             backend.createAccount(
+                transparentKey = transparentKey,
                 seed = seed,
                 treeState = treeState.encoded,
                 recoverUntil = recoverUntil?.value

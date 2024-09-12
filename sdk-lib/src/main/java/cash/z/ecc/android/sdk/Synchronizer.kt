@@ -1,7 +1,6 @@
 package cash.z.ecc.android.sdk
 
 import android.content.Context
-import android.util.Log
 import cash.z.ecc.android.sdk.WalletInitMode.ExistingWallet
 import cash.z.ecc.android.sdk.WalletInitMode.NewWallet
 import cash.z.ecc.android.sdk.WalletInitMode.RestoreWallet
@@ -34,8 +33,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import java.io.Closeable
-import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
-
 
 @Suppress("TooManyFunctions")
 interface Synchronizer {
@@ -677,7 +674,7 @@ interface Synchronizer {
             seed: ByteArray?,
             birthday: BlockHeight?,
             walletInitMode: WalletInitMode,
-            transparentKey: ByteArray?
+            transparentKey: ByteArray
         ): CloseableSynchronizer =
             runBlocking {
                 new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode, transparentKey)

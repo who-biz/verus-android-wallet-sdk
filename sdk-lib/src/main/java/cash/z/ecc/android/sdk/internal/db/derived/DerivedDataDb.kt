@@ -76,6 +76,7 @@ internal class DerivedDataDb private constructor(
                 repeat(missingAccounts) {
                     runCatching {
                         backend.createAccountAndGetSpendingKey(
+                            transparentKey = transparentKey,
                             seed = checkedSeed,
                             treeState = checkpoint.treeState(),
                             recoverUntil = recoverUntil
