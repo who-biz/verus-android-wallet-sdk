@@ -10,7 +10,7 @@ import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 object WalletFixture {
     val WIF = ""
     val decodedWif: ByteArray = WIF.decodeBase58WithChecksum()
-    val decodedTrimmedWif: ByteArray = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+    val decodedTrimmedWif: ByteArray = decodedWif.copyOfRange(1, decodedWif.size)
 
     val NETWORK = ZcashNetwork.Mainnet
 

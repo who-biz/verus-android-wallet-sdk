@@ -82,7 +82,7 @@ class WalletCoordinator(
                                 birthday = persistableWallet.birthday,
                                 seed = persistableWallet.seedPhrase.toByteArray(),
                                 walletInitMode = persistableWallet.walletInitMode,
-                                transparentKey = persistableWallet.wif?.decodeBase58WithChecksum()?.copyOfRange(1,33)
+                                transparentKey = persistableWallet.wif?.decodeBase58WithChecksum()?.copyOfRange(1,34)
                             )
 
                         trySend(InternalSynchronizerStatus.Available(closeableSynchronizer))

@@ -111,12 +111,13 @@ internal class FakeRustBackend(
         error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
     override suspend fun createAccount(
+        transparentKey: ByteArray?,
         seed: ByteArray,
         treeState: ByteArray,
         recoverUntil: Long?
     ): JniUnifiedSpendingKey = error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
-    override suspend fun isSeedRelevantToAnyDerivedAccounts(seed: ByteArray): Boolean =
+    override suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, seed: ByteArray): Boolean =
         error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
     override fun isValidSaplingAddr(addr: String): Boolean =

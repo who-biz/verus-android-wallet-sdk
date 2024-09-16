@@ -62,7 +62,7 @@ class TestWallet(
     private val context = InstrumentationRegistry.getInstrumentation().context
     private val seed: ByteArray = Mnemonics.MnemonicCode(seedPhrase).toSeed()
     private val decodedWif = wif.decodeBase58WithChecksum()
-    private val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+    private val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
     private val shieldedSpendingKey =
         runBlocking {
                 DerivationTool.getInstance().deriveUnifiedSpendingKey(

@@ -22,7 +22,7 @@ object PersistableWalletFixture {
 
     val decodedWif = WIF.decodeBase58WithChecksum()
 
-    val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+    val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
 
     val SEED_PHRASE = SeedPhraseFixture.new()
 

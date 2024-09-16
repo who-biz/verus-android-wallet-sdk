@@ -78,7 +78,8 @@ class SharedViewModel(application: Application) : AndroidViewModel(application) 
                     // have the seed stored
                     val seedBytes = Mnemonics.MnemonicCode(seedPhrase.value).toSeed()
 
-                    val transparentKey = wifString.value.decodeBase58WithChecksum().copyOfRange(1, 33)
+                    val decodedWif = wifString.value.decodeBase58WithChecksum()
+                    val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
 
                     val network = ZcashNetwork.fromResources(application)
                     val synchronizer =

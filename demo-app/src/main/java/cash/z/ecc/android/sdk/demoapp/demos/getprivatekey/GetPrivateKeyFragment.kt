@@ -45,7 +45,7 @@ class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
         wif = sharedViewModel.wifString.value
 
         val decodedWif = wif.decodeBase58WithChecksum()
-        transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+        transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
     }
 
     private fun displayKeys() {

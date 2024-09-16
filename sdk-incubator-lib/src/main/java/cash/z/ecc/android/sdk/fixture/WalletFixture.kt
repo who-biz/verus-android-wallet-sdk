@@ -20,7 +20,7 @@ sealed class WalletFixture {
     abstract fun getAddresses(zcashNetwork: ZcashNetwork): Addresses
 
     suspend fun getUnifiedSpendingKey(
-        wif: ByteArray = wifString.decodeBase58WithChecksum().copyOfRange(1,33), //TODO: don't use hardcoded ints
+        wif: ByteArray = wifString.decodeBase58WithChecksum().copyOfRange(1,34), //TODO: don't use hardcoded ints
         seed: String = seedPhrase,
         network: ZcashNetwork,
         account: Account = Account.DEFAULT

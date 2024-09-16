@@ -117,7 +117,7 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                     Log.w("WifCheck", "WIF included for this Wallet! Using that instead of bip39!")
                     Log.w("WifCheck", "WIF value: " + it.wif)
                     val decodedWif = it.wif!!.decodeBase58WithChecksum()
-                    val decodedTrimmedWif = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+                    val decodedTrimmedWif = decodedWif.copyOfRange(1, decodedWif.size)
                     Log.w("WifCheck", "Decoded WIF: " + decodedTrimmedWif.toHexString())
                     val bip39Seed =
                         withContext(Dispatchers.IO) {

@@ -142,7 +142,7 @@ class TestnetIntegrationTest : ScopedTest() {
         val toAddress = "zs1vp7kvlqr4n9gpehztr76lcn6skkss9p8keqs3nv8avkdtjrcctrvmk9a7u494kluv756jeee5k0"
         val wif = ""
         val decodedWif = wif.decodeBase58WithChecksum()
-        val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+        val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
 
         private val context = InstrumentationRegistry.getInstrumentation().context
         private lateinit var synchronizer: Synchronizer

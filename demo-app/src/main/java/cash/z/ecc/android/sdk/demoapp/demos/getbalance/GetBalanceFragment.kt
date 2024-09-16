@@ -59,7 +59,7 @@ class GetBalanceFragment : BaseDemoFragment<FragmentGetBalanceBinding>() {
 
         val wifString = sharedViewModel.wifString.value
         val decodedWif = wifString.decodeBase58WithChecksum()
-        val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+        val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
 
         val network = ZcashNetwork.fromResources(requireApplicationContext())
 

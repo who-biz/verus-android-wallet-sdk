@@ -209,7 +209,7 @@ class SampleCodeTest {
     companion object {
         private val seed = "Insert seed for testing".toByteArray()
         private val decodedWif = "Insert WIF for testing".decodeBase58WithChecksum()
-        private val transparentKey = decodedWif.copyOfRange(1, decodedWif.lastIndex)
+        private val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
         private val lightwalletdHost = LightWalletEndpoint.Mainnet
 
         private val context = InstrumentationRegistry.getInstrumentation().targetContext
