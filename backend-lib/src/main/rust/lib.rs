@@ -5,6 +5,8 @@ use std::panic;
 use std::path::Path;
 use std::ptr;
 
+//use tracing::warn;
+
 use anyhow::anyhow;
 use jni::objects::{JByteArray, JObject, JObjectArray, JValue};
 use jni::{
@@ -322,7 +324,9 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
     let res = catch_unwind(&mut env, |env| {
         let network = parse_network(network_id as u32)?;
         let mut db_data = wallet_db(env, network, db_data)?;
-        let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap());
+        //let tkey = env.convert_byte_array(transparent_key).unwrap_or(Vec::new());
+        //warn!("Jni boundary, transparent_key: {:?}, length: {}", tkey, tkey.len());
+        let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap_or(Vec::new()));
         let seed = SecretVec::new(env.convert_byte_array(seed).unwrap());
         let treestate = TreeState::decode(&env.convert_byte_array(treestate).unwrap()[..])
             .map_err(|e| anyhow!("Invalid TreeState: {}", e))?;
