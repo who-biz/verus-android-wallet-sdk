@@ -40,7 +40,7 @@ sealed class WalletFixture {
         override val wifString = ""
 
         override val hexSeed: String
-            get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b477"
+            get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b4770a"
 
         // These birthdays were the latest checkpoint at the time this was implemented
         // Moving these forward will improve testing time, while leaving old transactions behind
@@ -88,7 +88,7 @@ sealed class WalletFixture {
 	    get() = "UxUY1K87of2ntgchEprKosZVt97DXPv4iZP6oGkcxXdVFNtbncMT"
 
         override val hexSeed: String
-            get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b477"
+            get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b4770a"
 
         /*override val seedPhrase: String
             get() =
