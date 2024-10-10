@@ -28,3 +28,14 @@ data class SeedPhrase(val split: List<String>) {
         fun new(phrase: String) = SeedPhrase(phrase.split(DEFAULT_DELIMITER))
     }
 }
+
+// from https://stackoverflow.com/questions/66613717/kotlin-convert-hex-string-to-bytearray
+fun String.decodeHex(): ByteArray {
+    require(length % 2 == 0) { "Must have an even length" }
+
+    val byteIterator = chunkedSequence(2)
+        .map { it.toInt(16).toByte() }
+        .iterator()
+
+    return ByteArray(length / 2) { byteIterator.next() }
+}

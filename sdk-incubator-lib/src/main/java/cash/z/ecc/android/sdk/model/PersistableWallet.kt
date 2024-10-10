@@ -16,7 +16,7 @@ import org.json.JSONObject
  * @param network the network in which the wallet operates
  * @param endpoint the endpoint with which the wallet communicates
  * @param birthday the birthday of the wallet
- * @param seedPhrase the seed phrase of the wallet
+ * @param hexSeed the RawHDSeed for the wallet, hex-encoded
  * @param walletInitMode required parameter with one of [WalletInitMode] values. Use [WalletInitMode.NewWallet] when
  * starting synchronizer for a newly created wallet. Or use [WalletInitMode.RestoreWallet] when restoring an existing
  * wallet that was created at some point in the past. Or use the last [WalletInitMode.ExistingWallet] type for a
@@ -27,7 +27,8 @@ data class PersistableWallet(
     val network: ZcashNetwork,
     val endpoint: LightWalletEndpoint,
     val birthday: BlockHeight?,
-    val seedPhrase: SeedPhrase,
+    //val seedPhrase: seedPhrase,
+    val hexSeed: String,
     val walletInitMode: WalletInitMode,
     val wif: String?
 ) {
@@ -51,7 +52,8 @@ data class PersistableWallet(
             birthday?.let {
                 put(KEY_BIRTHDAY, it.value)
             }
-            put(KEY_SEED_PHRASE, seedPhrase.joinToString())
+            //put(KEY_SEED_PHRASE, seedPhrase)
+            put(KEY_HEX_SEED, hexSeed)
             wif?.let {
                 put(KEY_WIF, wif)
             }
@@ -80,7 +82,8 @@ data class PersistableWallet(
         internal const val KEY_ENDPOINT_PORT = "key_endpoint_port"
         internal const val KEY_ENDPOINT_IS_SECURE = "key_endpoint_is_secure"
         internal const val KEY_BIRTHDAY = "birthday"
-        internal const val KEY_SEED_PHRASE = "seed_phrase"
+//        internal const val KEY_SEED_PHRASE = "seed_phrase"
+        internal const val KEY_HEX_SEED = "hex_seed"
         internal const val KEY_WIF = "wif"
 
         // Note: [walletInitMode] is excluded from the serialization to avoid persisting the wallet initialization mode
@@ -91,7 +94,8 @@ data class PersistableWallet(
             // Common parameters
             val network = getNetwork(jsonObject)
             val birthday = getBirthday(jsonObject, network)
-            val seedPhrase = getSeedPhrase(jsonObject)
+            //val seedPhrase = getSeedPhrase(jsonObject)
+            val hexSeed = getHexSeed(jsonObject)
             // From version 2
             val endpoint: LightWalletEndpoint
 
@@ -113,7 +117,7 @@ data class PersistableWallet(
                 network = network,
                 endpoint = endpoint,
                 birthday = birthday,
-                seedPhrase = SeedPhrase.new(seedPhrase),
+                hexSeed = hexSeed,
                 walletInitMode = walletInitModeHolder,
                 wif = wif
             )
@@ -123,8 +127,12 @@ data class PersistableWallet(
             return jsonObject.getInt(KEY_VERSION)
         }
 
-        internal fun getSeedPhrase(jsonObject: JSONObject): String {
+        /*internal fun getSeedPhrase(jsonObject: JSONObject): String {
             return jsonObject.getString(KEY_SEED_PHRASE)
+        }*/
+
+        internal fun getHexSeed(jsonObject: JSONObject): String {
+            return jsonObject.getString(KEY_HEX_SEED)
         }
 
         internal fun getWif(jsonObject: JSONObject): String? {
@@ -180,7 +188,7 @@ data class PersistableWallet(
         ): PersistableWallet {
             val birthday = BlockHeight.ofLatestCheckpoint(application, zcashNetwork)
 
-            val seedPhrase = newSeedPhrase()
+            val hexSeed = newRawHDSeed()
 
             val wif = null
 
@@ -188,7 +196,7 @@ data class PersistableWallet(
                 zcashNetwork,
                 endpoint,
                 birthday,
-                seedPhrase,
+                hexSeed,
                 walletInitMode,
                 wif
             )
@@ -205,7 +213,7 @@ data class PersistableWallet(
             network: ZcashNetwork,
             endpoint: LightWalletEndpoint?,
             birthday: BlockHeight?,
-            seed: SeedPhrase,
+            seed: String,
             wif: String?
         ) = JSONObject().apply {
             put(KEY_VERSION, version)
@@ -218,7 +226,8 @@ data class PersistableWallet(
             birthday?.let {
                 put(KEY_BIRTHDAY, it.value)
             }
-            put(KEY_SEED_PHRASE, seed.joinToString())
+            //put(KEY_SEED_PHRASE, seed.joinToString())
+            put(KEY_HEX_SEED, seed)
             wif?.let {
                 put(KEY_WIF, wif)
            }
@@ -234,6 +243,7 @@ private suspend fun newMnemonic() =
 
 private suspend fun newSeedPhrase() = SeedPhrase(newMnemonic().map { it.concatToString() })
 
+private suspend fun newRawHDSeed() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b477"
 /*
  * The following functions and variables are package private only and preserved to support backward compatibility for
  * [PersistableWallet] and testing purposes.

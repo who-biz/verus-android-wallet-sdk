@@ -107,7 +107,7 @@ private fun KeysMainContent(
         Text(stringResource(id = R.string.decoded_wif))
         persistableWallet.wif.also { wif ->
             if (wif != null) {
-                Text(wif.decodeBase58WithChecksum().toHexString(1,33))
+                Text(wif.decodeBase58WithChecksum().toHexString(1,34))
             } else {
                 Text("None Imported")
             }
@@ -116,8 +116,11 @@ private fun KeysMainContent(
         Spacer(Modifier.padding(8.dp))
 
         Text(stringResource(id = R.string.seed))
-        persistableWallet.seedPhrase.also { seed ->
-                Text(seed.joinToString())
+        persistableWallet.hexSeed.also { hexSeed ->
+            Text(hexSeed)
         }
+        /*persistableWallet.seedPhrase.also { seed ->
+                Text(seed.joinToString())
+        }*/
     }
 }

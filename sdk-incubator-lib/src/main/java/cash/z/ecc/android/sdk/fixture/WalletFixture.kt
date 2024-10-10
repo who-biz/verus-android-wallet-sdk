@@ -5,13 +5,16 @@ import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeHex
 import cash.z.ecc.android.sdk.tool.DerivationTool
 
 /**
  * Provides two default wallets, making it easy to test sending funds back and forth between them.
  */
 sealed class WalletFixture {
-    abstract val seedPhrase: String
+    //abstract val seedPhrase: String
+
+    abstract val hexSeed: String
 
     abstract val wifString: String
 
@@ -21,12 +24,12 @@ sealed class WalletFixture {
 
     suspend fun getUnifiedSpendingKey(
         wif: ByteArray = wifString.decodeBase58WithChecksum().copyOfRange(1,34), //TODO: don't use hardcoded ints
-        seed: String = seedPhrase,
+        seed: String = hexSeed,
         network: ZcashNetwork,
         account: Account = Account.DEFAULT
     ) = DerivationTool.getInstance().deriveUnifiedSpendingKey(
         wif,
-        Mnemonics.MnemonicCode(seed).toEntropy(),
+        seed.decodeHex(),
         network,
         account
     )
@@ -36,10 +39,8 @@ sealed class WalletFixture {
 
         override val wifString = ""
 
-        override val seedPhrase: String
-            get() =
-                "kitchen renew wide common vague fold vacuum tilt amazing pear square gossip jewel month tree" +
-                    " shock scan alpha just spot fluid toilet view dinner"
+        override val hexSeed: String
+            get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b477"
 
         // These birthdays were the latest checkpoint at the time this was implemented
         // Moving these forward will improve testing time, while leaving old transactions behind
@@ -86,10 +87,14 @@ sealed class WalletFixture {
 	override val wifString: String
 	    get() = "UxUY1K87of2ntgchEprKosZVt97DXPv4iZP6oGkcxXdVFNtbncMT"
 
-        override val seedPhrase: String
+        override val hexSeed: String
+            get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b477"
+
+        /*override val seedPhrase: String
             get() =
                 "wish puppy smile loan doll curve hole maze file ginger hair nose key relax knife witness cannon" +
                     " grab despair throw review deal slush frame"
+         */
 
         // These birthdays were the latest checkpoint at the time this was implemented
         // Moving these forward will improve testing time, while leaving old transactions behind

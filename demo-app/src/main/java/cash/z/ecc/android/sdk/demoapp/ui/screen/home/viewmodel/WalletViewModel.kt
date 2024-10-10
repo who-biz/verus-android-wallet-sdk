@@ -31,6 +31,7 @@ import cash.z.ecc.android.sdk.model.Zatoshi
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.model.ZecSend
 import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
+import cash.z.ecc.android.sdk.model.decodeHex
 import cash.z.ecc.android.sdk.model.proposeSend
 import cash.z.ecc.android.sdk.model.send
 import cash.z.ecc.android.sdk.tool.DerivationTool
@@ -103,13 +104,15 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
             .map { it.persistableWallet }
             .map {
                 if (null == it.wif) {
-                    val bip39Seed =
+                    val empty = byteArrayOf()
+                    val hexSeed = it.hexSeed.decodeHex()
+                    /*val bip39Seed =
                         withContext(Dispatchers.IO) {
                             Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
-                        }
+                        }*/
                     DerivationTool.getInstance().deriveUnifiedSpendingKey(
-                        transparentKey = bip39Seed,
-                        seed = bip39Seed,
+                        transparentKey = empty,
+                        seed = hexSeed,
                         network = it.network,
                         account = Account.DEFAULT
                     )
@@ -119,14 +122,16 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                     val decodedWif = it.wif!!.decodeBase58WithChecksum()
                     val decodedTrimmedWif = decodedWif.copyOfRange(1, decodedWif.size)
                     Log.w("WifCheck", "Decoded WIF: " + decodedTrimmedWif.toHexString())
-                    val bip39Seed =
+                    /*val bip39Seed =
                         withContext(Dispatchers.IO) {
                             Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
                         }
-                    Log.w("WifCheck", "bip39 calculated seed: " + bip39Seed.toHexString())
+                    */
+                    val hexSeed = it.hexSeed.decodeHex()
+                    Log.w("WifCheck", "bip39 calculated seed: " + hexSeed.toHexString())
                     DerivationTool.getInstance().deriveUnifiedSpendingKey(
                         transparentKey = decodedTrimmedWif,
-                        seed = bip39Seed,
+                        seed = hexSeed,
                         network = it.network,
                         account = Account.DEFAULT,
                     )
