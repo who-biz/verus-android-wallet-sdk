@@ -1102,8 +1102,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
     db_data: JString<'local>,
     sapling_start_index: jlong,
     sapling_roots: JObjectArray<'local>,
-    _orchard_start_index: jlong,
-    _orchard_roots: JObjectArray<'local>,
+    orchard_start_index: jlong,
+    orchard_roots: JObjectArray<'local>,
     network_id: jint,
 ) -> jboolean {
     let res = catch_unwind(&mut env, |env| {
@@ -1135,8 +1135,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
         };
         let sapling_roots = parse_roots(env, sapling_roots, |n| sapling::Node::read(n))?;
 
-	#[cfg(feature = "orchard")]
-        {
+	//#[cfg(feature = "orchard")]
+    //    {
             let orchard_start_index = if orchard_start_index >= 0 {
                 orchard_start_index as u64
             } else {
@@ -1145,18 +1145,18 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
             let orchard_roots = parse_roots(env, orchard_roots, |n| {
                 orchard::tree::MerkleHashOrchard::read(n)
             })?;
-        }
+    //    }
 
         db_data
             .put_sapling_subtree_roots(sapling_start_index, &sapling_roots)
             .map_err(|e| anyhow!("Error while storing Sapling subtree roots: {}", e))?;
 
-        #[cfg(feature = "orchard")]
-        {
+        //#[cfg(feature = "orchard")]
+        //{
             db_data
                 .put_orchard_subtree_roots(orchard_start_index, &orchard_roots)
                 .map_err(|e| anyhow!("Error while storing Orchard subtree roots: {}", e))?;
-        }
+        //}
 
         Ok(JNI_TRUE)
     });
@@ -1254,28 +1254,47 @@ fn encode_account_balance<'a>(
     let sapling_value_pending =
         Amount::from(balance.sapling_balance().value_pending_spendability());
 
-    let orchard_verified_balance = Amount::from(balance.orchard_balance().spendable_value());
-    let orchard_change_pending =
-        Amount::from(balance.orchard_balance().change_pending_confirmation());
-    let orchard_value_pending =
-        Amount::from(balance.orchard_balance().value_pending_spendability());
-
+    //#[cfg(feature = "orchard")]
+    //{
+        let orchard_verified_balance = Amount::from(balance.orchard_balance().spendable_value());
+        let orchard_change_pending =
+            Amount::from(balance.orchard_balance().change_pending_confirmation());
+        let orchard_value_pending =
+            Amount::from(balance.orchard_balance().value_pending_spendability());
+    //}
     let unshielded = Amount::from(balance.unshielded());
 
-    env.new_object(
-        JNI_ACCOUNT_BALANCE,
-        "(IJJJJJJJ)V",
-        &[
-            JValue::Int(u32::from(*account) as i32),
-            JValue::Long(sapling_verified_balance.into()),
-            JValue::Long(sapling_change_pending.into()),
-            JValue::Long(sapling_value_pending.into()),
-            JValue::Long(orchard_verified_balance.into()),
-            JValue::Long(orchard_change_pending.into()),
-            JValue::Long(orchard_value_pending.into()),
-            JValue::Long(unshielded.into()),
-        ],
-    )
+    //#[cfg(feature = "orchard")]
+    //{
+        env.new_object(
+            JNI_ACCOUNT_BALANCE,
+            "(IJJJJJJJ)V",
+            &[
+                JValue::Int(u32::from(*account) as i32),
+                JValue::Long(sapling_verified_balance.into()),
+                JValue::Long(sapling_change_pending.into()),
+                JValue::Long(sapling_value_pending.into()),
+                JValue::Long(orchard_verified_balance.into()),
+                JValue::Long(orchard_change_pending.into()),
+                JValue::Long(orchard_value_pending.into()),
+                JValue::Long(unshielded.into()),
+            ],
+        )
+    //}
+    /*#[cfg(not(feature = "orchard"))]
+    {
+            env.new_object(
+                JNI_ACCOUNT_BALANCE,
+                "(IJJJJJJJ)V",
+                &[
+                    JValue::Int(u32::from(*account) as i32),
+                    JValue::Long(sapling_verified_balance.into()),
+                    JValue::Long(sapling_change_pending.into()),
+                    JValue::Long(sapling_value_pending.into()),
+                    JValue::Long(unshielded.into()),
+                ],
+            )
+    }*/
 }
 
 /// Returns a `JniWalletSummary` object, provided that `progress_numerator` is
@@ -1326,7 +1345,7 @@ fn encode_wallet_summary<'a, P: Parameters>(
             JValue::Long(progress_numerator as i64),
             JValue::Long(progress_denominator as i64),
             JValue::Long(summary.next_sapling_subtree_index() as i64),
-            #[cfg(feature = "orchard")]
+            //#[cfg(feature = "orchard")]
             JValue::Long(summary.next_orchard_subtree_index() as i64),
         ],
     )?)
