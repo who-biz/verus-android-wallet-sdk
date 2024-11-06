@@ -2,9 +2,9 @@ import cash.z.ecc.android.Deps
 
 buildscript {
     ext.buildConfig = [
-        'compileSdkVersion': 29,
+        'compileSdkVersion': 35,
         'minSdkVersion': 16,
-        'targetSdkVersion': 29
+        'targetSdkVersion': 33
     ]
     ext.versions = [
         'architectureComponents': [
@@ -75,7 +75,7 @@ android {
 
     useLibrary 'android.test.runner'
 
-    ndkVersion "21.1.6352462"
+    ndkVersion "27.0.12077973"
 
     defaultConfig {
         minSdkVersion buildConfig.minSdkVersion
@@ -116,7 +116,7 @@ android {
             dimension 'network'
         }
 
-        zcashmainnet {
+        vrscmainnet {
             dimension 'network'
         }
     }

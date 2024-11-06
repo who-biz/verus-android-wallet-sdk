@@ -45,10 +45,10 @@ tls-api-rustls = { version = "0.4", optional = true }
 protobuf-codegen-pure = "2.14"
 
 [patch.crates-io]
-zcash_client_backend = { git = 'https://github.com/zcash/librustzcash.git', rev='04a2bd4ad86980e0c2862706bd402b85b9dd1965' }
-zcash_client_sqlite = { git = 'https://github.com/zcash/librustzcash.git', rev='04a2bd4ad86980e0c2862706bd402b85b9dd1965' }
-zcash_primitives = { git = 'https://github.com/zcash/librustzcash.git', rev='04a2bd4ad86980e0c2862706bd402b85b9dd1965' }
-zcash_proofs = { git = 'https://github.com/zcash/librustzcash.git', rev='04a2bd4ad86980e0c2862706bd402b85b9dd1965' }
+zcash_client_backend = { git = 'https://github.com/VerusCoin/librustzcash.git', branch = 'mutable_chain_network' }
+zcash_client_sqlite = { git = 'https://github.com/VerusCoin/librustzcash.git', branch = 'mutable_chain_network' }
+zcash_primitives = { git = 'https://github.com/VerusCoin/librustzcash.git', branch = 'mutable_chain_network' }
+zcash_proofs = { git = 'https://github.com/VerusCoin/librustzcash.git', branch = 'mutable_chain_network' }
 
 # Uncomment this to test librustzcash changes locally
 #[patch.crates-io]
