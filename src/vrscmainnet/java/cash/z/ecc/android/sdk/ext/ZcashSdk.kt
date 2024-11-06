@@ -12,7 +12,7 @@ object ZcashSdk : ZcashSdkCommon() {
      * The height of the first sapling block. When it comes to shielded transactions, we do not need to consider any blocks
      * prior to this height, at all.
      */
-    override val SAPLING_ACTIVATION_HEIGHT = 419_200
+    override val SAPLING_ACTIVATION_HEIGHT = 227_520
 
     /**
      * The default port to use for connecting to lightwalletd instances.
@@ -22,7 +22,7 @@ object ZcashSdk : ZcashSdkCommon() {
     /**
      * The default host to use for lightwalletd.
      */
-    override val DEFAULT_LIGHTWALLETD_HOST = "lightd-main.zecwallet.co"
+    override val DEFAULT_LIGHTWALLETD_HOST = "lwdlegacy.blur.cash"
 
     /**
      * The default alias to use for naming database and preference files.

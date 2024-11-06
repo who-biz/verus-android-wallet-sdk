@@ -13,9 +13,9 @@ use zcash_primitives::{merkle_tree::CommitmentTree, sapling::Node};
 #[cfg(feature = "mainnet")]
 const START_HEIGHT: u64 = 419200;
 #[cfg(feature = "mainnet")]
-const LIGHTWALLETD_HOST: &str = "lightwalletd.electriccoin.co";
+const LIGHTWALLETD_HOST: &str = "lwdlegacy.blur.cash";
 #[cfg(feature = "mainnet")]
-const NETWORK: &str = "mainnet";
+const NETWORK: &str = "vrsc";
 
 #[cfg(not(feature = "mainnet"))]
 const START_HEIGHT: u64 = 280000;
@@ -24,7 +24,7 @@ const LIGHTWALLETD_HOST: &str = "lightwalletd.testnet.electriccoin.co";
 #[cfg(not(feature = "mainnet"))]
 const NETWORK: &str = "testnet";
 
-const LIGHTWALLETD_PORT: u16 = 9067;
+const LIGHTWALLETD_PORT: u16 = 443;
 const BATCH_SIZE: u64 = 10_000;
 const TARGET_HEIGHT: u64 = 810000;
 
