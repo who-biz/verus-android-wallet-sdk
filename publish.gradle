@@ -90,27 +90,27 @@ publishing {
     }
 }
 
-bintray {
-    user = project.findProperty('bintrayUser') ?: System.getenv('BINTRAY_USER')
-    key = project.findProperty('bintrayApiKey') ?: System.getenv('BINTRAY_API_KEY')
-    publications = ['Production']
-    override = true
-    pkg {
-        repo = 'android'
-        name = activePublication.artifactId
-        description = Deps.description
-        publish = true
-        publicDownloadNumbers = true
-        userOrg = 'ecc-mobile'
-        labels = ['aar', 'native', 'android', 'zcash', 'ecc', 'sdk', 'kotlin', 'mobile', 'electric coin company', 'open source', 'crypto', 'cryptocurrency', 'cryptography', 'privacy']
-        licenses = ['MIT']
-        vcsUrl = Deps.githubUrl
-        dryRun = Deps.publishingDryRun
-        version {
-            name = Deps.versionName
-            desc = Deps.description
-            released = new Date()
-            vcsTag = this.version
-        }
-    }
-}
+//bintray {
+//    user = project.findProperty('bintrayUser') ?: System.getenv('BINTRAY_USER')
+//    key = project.findProperty('bintrayApiKey') ?: System.getenv('BINTRAY_API_KEY')
+//    publications = ['Production']
+//    override = true
+//    pkg {
+//        repo = 'android'
+//        name = activePublication.artifactId
+//        description = Deps.description
+//        publish = true
+//        publicDownloadNumbers = true
+//        userOrg = 'ecc-mobile'
+//        labels = ['aar', 'native', 'android', 'zcash', 'ecc', 'sdk', 'kotlin', 'mobile', 'electric coin company', 'open source', 'crypto', 'cryptocurrency', 'cryptography', 'privacy']
+//        licenses = ['MIT']
+//        vcsUrl = Deps.githubUrl
+//        dryRun = Deps.publishingDryRun
+//        version {
+//            name = Deps.versionName
+//            desc = Deps.description
+//            released = new Date()
+//            vcsTag = this.version
+//        }
+//    }
+//}
