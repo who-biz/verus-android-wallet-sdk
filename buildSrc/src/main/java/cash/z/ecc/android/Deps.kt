@@ -3,7 +3,7 @@ package cash.z.ecc.android
 object Deps {
     // For use in the top-level build.gradle which gives an error when provided
     // `Deps.Kotlin.version` directly
-    const val kotlinVersion =   "1.4.10"
+    const val kotlinVersion =   "1.7.10"
     const val group =           "com.github.who-biz"
     const val artifactName =    "zcash-android-sdk"
     const val versionName =     "1.2.1-beta04"
@@ -15,16 +15,16 @@ object Deps {
     //      NOTE: to upload run: ./gradlew bintrayUpload after setting BINTRAY_USER and BINTRAY_API_KEY as environment variable
     //            to publish for local development run: ./gradlew publishToMavenLocal
     //      Remember: publish both mainnet and testnet!
-    const val publishingDryRun = true
+    const val publishingDryRun = false
     val publishingTarget = Publication.Mainnet
 
     object Publication {
         object Mainnet {
-            const val variant = "zcashmainnetRelease"
+            const val variant = "vrscmainnetRelease"
             const val artifactId = "zcash-android-sdk-mainnet"
         }
         object Testnet {
-            const val variant = "zcashtestnetRelease"
+            const val variant = "vrsctestnetRelease"
             const val artifactId = "zcash-android-sdk-testnet"
         }
     }

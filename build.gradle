@@ -2,9 +2,9 @@ import cash.z.ecc.android.Deps
 
 buildscript {
     ext.buildConfig = [
-        'compileSdkVersion': 35,
+        'compileSdkVersion': 29,
         'minSdkVersion': 16,
-        'targetSdkVersion': 33
+        'targetSdkVersion': 29
     ]
     ext.versions = [
         'architectureComponents': [
@@ -19,12 +19,21 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
+        mavenLocal()
+// mavenLocal() needed for jitpack-compiled librustzcash (unless we host the files on MavenCentral
+// or other repository. http-builder-0.7.2 also is only present on some exotic repositories for
+// Maven artifacts. So I needed to download manually, and put them in $HOME/.m2/ with proper dirs
+// URL: https://groovy.jfrog.io/ui/native/libs-release/org/codehaus/groovy/modules/http-builder/http-builder/0.7.2/
         maven {
             url 'https://jitpack.io'
         }
         maven {
             url "https://plugins.gradle.org/m2/"
         }
+//        maven {
+//            url "https://groovy.jfrog.io/ui/native/libs-release/"
+//        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.2'
@@ -32,13 +41,13 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-allopen:${Deps.kotlinVersion}"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.10.1"
         classpath "com.github.ben-manes:gradle-versions-plugin:0.31.0"
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+//        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath "com.google.protobuf:protobuf-gradle-plugin:0.8.14"
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:1.0.2'
-        classpath 'com.github.str4d:rust-android-gradle:68b4ecc053'
-        classpath 'org.owasp:dependency-check-gradle:6.0.0'
-        classpath "gradle.plugin.com.dorongold.plugins:task-tree:1.5"
+        classpath 'org.mozilla.rust-android-gradle:plugin:0.9.4'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
+        //      classpath 'org.owasp:dependency-check-gradle:6.0.0'
+      classpath "gradle.plugin.com.dorongold.plugins:task-tree:1.5"
     }
 }
 
@@ -53,20 +62,22 @@ apply plugin: 'kotlin-allopen'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.google.protobuf'
 apply plugin: 'com.github.ben-manes.versions'
-apply plugin: 'com.github.dcendents.android-maven'
+//apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
-apply plugin: 'org.owasp.dependencycheck'
+//ply plugin: 'org.owasp.dependencycheck'
 apply plugin: "com.dorongold.task-tree"
-apply from: 'ci.gradle'
+
+//apply from: 'ci.gradle'
 apply from: 'publish.gradle'
+
 
 group = Deps.group
 version = Deps.versionName
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
     maven { url 'https://jitpack.io' }
 }
 
@@ -203,20 +214,28 @@ cargo {
         "x86_64"
     ]
     profile = "release"
-    forceTargets = true
+    //forceTargets = true
     prebuiltToolchains = true
-    variants {
-        zcashmainnetDebug {
-            defaultFeaturesAnd("mainnet")
-        }
-        zcashmainnetRelease {
-            defaultFeaturesAnd("mainnet")
-        }
-        zcashtestnetDebug {
-        }
-        zcashtestnetRelease {
+    features {
+            defaultAnd("mainnet")
+    }
+
+    rustupChannel = "1.65.0-x86_64-unknown-linux-gnu"
+
+    // As a workaround to the Gradle (starting from v7.4.1) and Rust Android Gradle plugin (starting from v0.9.3)
+    // incompatibility issue we need to add rust jni directory manually. See
+    // https://github.com/mozilla/rust-android-gradle/issues/118
+
+    tasks.whenTaskAdded { task ->
+        if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
+            task.dependsOn 'cargoBuild'
         }
     }
+
+   tasks.matching { it.name.matches(/merge.*JniLibFolders/) }.configureEach {
+      it.inputs.dir(new File(buildDir, "rustJniLibs/android"))
+      it.dependsOn("cargoBuild")
+   }
 }
 
 dependencies {
@@ -260,6 +279,8 @@ dependencies {
     // https://github.com/grpc/grpc-java/blob/v1.34.x/build.gradle#L154
     implementation 'com.squareup.okio:okio:1.13.0'
 
+//    implementation 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.2'
+
     // Tests
     testImplementation 'androidx.multidex:multidex:2.0.1'
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:${Deps.kotlinVersion}"
@@ -284,16 +305,16 @@ dependencies {
 
     // sample mnemonic plugin
     androidTestImplementation 'com.github.zcash:zcash-android-wallet-plugins:1.0.1'
-    androidTestImplementation 'cash.z.ecc.android:kotlin-bip39:1.0.1'
+//    androidTestImplementation 'cash.z.ecc.android:kotlin-bip39:1.0.1'
 }
 
-taskTree{
+taskTree {
     noRepeat = true  //do not print a sub-tree in the task-tree more than once
     impliesSubProjects = true  //do not print task-tree for child projects in a multi-project
     taskDepth = 2 // limit tree depth to 3. Equivalent to running with the --task-depth option.
 }
 
-defaultTasks 'ciBuild'
+//defaultTasks 'ciBuild'
 
 preBuild.dependsOn includeDirBugFix
-check.dependsOn dependencyCheckAggregate
+//check.dependsOn dependencyCheckAggregate
