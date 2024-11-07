@@ -24,7 +24,7 @@ open class ZcashSdkCommon {
      */
     open val SAPLING_ACTIVATION_HEIGHT = 280_000
 
-    open val NETWORK = "mainnet"
+    open val NETWORK = "vrsc"
 
     /**
      * The theoretical maximum number of blocks in a reorg, due to other bottlenecks in the protocol design.
@@ -79,12 +79,12 @@ open class ZcashSdkCommon {
     /**
      * The default port to use for connecting to lightwalletd instances.
      */
-    open val DEFAULT_LIGHTWALLETD_PORT = 9067
+    open val DEFAULT_LIGHTWALLETD_PORT = 443
 
     /**
      * The default host to use for lightwalletd.
      */
-    open val DEFAULT_LIGHTWALLETD_HOST = "listwallted.electriccoin.co"
+    open val DEFAULT_LIGHTWALLETD_HOST = "lwdlegacy.blur.cash"
 
     val DB_DATA_NAME = "Data.db"
     val DB_CACHE_NAME = "Cache.db"
@@ -109,6 +109,6 @@ open class ZcashSdkCommon {
      * We'll want to make this externally configurable, rather than baking it into the SDK but
      * this will do for now, since we're using a cloudfront URL that already redirects.
      */
-    val CLOUD_PARAM_DIR_URL = "https://z.cash/downloads/"
+    val CLOUD_PARAM_DIR_URL = "https://verus.io/zcparams/"
 
 }
