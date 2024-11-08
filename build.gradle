@@ -3,7 +3,7 @@ import cash.z.ecc.android.Deps
 buildscript {
     ext.buildConfig = [
         'compileSdkVersion': 29,
-        'minSdkVersion': 16,
+        'minSdkVersion': 21,
         'targetSdkVersion': 29
     ]
     ext.versions = [
@@ -216,21 +216,23 @@ cargo {
     profile = "release"
     //forceTargets = true
     prebuiltToolchains = true
-    features {
-            defaultAnd("mainnet")
-    }
 
-    rustupChannel = "1.65.0-x86_64-unknown-linux-gnu"
-
-    // As a workaround to the Gradle (starting from v7.4.1) and Rust Android Gradle plugin (starting from v0.9.3)
-    // incompatibility issue we need to add rust jni directory manually. See
-    // https://github.com/mozilla/rust-android-gradle/issues/118
+    rustupChannel = "1.75.0-x86_64-unknown-linux-gnu"
 
     tasks.whenTaskAdded { task ->
         if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
             task.dependsOn 'cargoBuild'
         }
     }
+
+    extraCargoBuildArguments = ['--locked']
+    //TODO: not sure if we need the double hyphen here or not
+
+    // As a workaround to the Gradle (starting from v7.4.1) and Rust Android Gradle plugin (starting from v0.9.3)
+    // incompatibility issue we need to add rust jni directory manually. See
+    // https://github.com/mozilla/rust-android-gradle/issues/118
+
+    //TODO: figure out if we actually need this
 
    tasks.matching { it.name.matches(/merge.*JniLibFolders/) }.configureEach {
       it.inputs.dir(new File(buildDir, "rustJniLibs/android"))
