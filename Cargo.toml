@@ -10,16 +10,16 @@ publish = false
 edition = "2018"
 
 [dependencies]
-android_logger = "0.14.1"
+android_logger = "0.11.3"
 failure = "0.1"
 hex = "0.4"
 jni = { version = "0.17", default-features = false }
 log = "0.4"
 log-panics = "2.0.0"
-zcash_client_backend = "0.10"
-zcash_client_sqlite = "0.8.1"
-zcash_primitives = "0.13.0"
-zcash_proofs = "0.13.0"
+zcash_client_backend = "0.4.0"
+zcash_client_sqlite = "0.2.1"
+zcash_primitives = "0.4.0"
+zcash_proofs = "0.4.0"
 
 #### Temporary additions: ####################################
 base58 = "0.1.0"
@@ -40,15 +40,14 @@ httpbis = { version = "0.9", optional = true }
 tls-api = { version = "0.4", optional = true }
 tls-api-rustls = { version = "0.4", optional = true }
 
-
 [build-dependencies]
 protobuf-codegen-pure = "2.14"
 
 [patch.crates-io]
-zcash_client_backend = { git = 'https://github.com/VerusCoin/librustzcash.git' }
-zcash_client_sqlite = { git = 'https://github.com/VerusCoin/librustzcash.git' }
-zcash_primitives = { git = 'https://github.com/VerusCoin/librustzcash.git' }
-zcash_proofs = { git = 'https://github.com/VerusCoin/librustzcash.git' }
+zcash_client_backend = { git = 'https://github.com/who-biz/librustzcash.git', branch = 'update-deps-lockfile' }
+zcash_client_sqlite = { git = 'https://github.com/who-biz/librustzcash.git', branch = 'update-deps-lockfile' }
+zcash_primitives = { git = 'https://github.com/who-biz/librustzcash.git', branch = 'update-deps-lockfile' }
+zcash_proofs = { git = 'https://github.com/who-biz/librustzcash.git', branch = 'update-deps-lockfile' }
 
 # Uncomment this to test librustzcash changes locally
 #[patch.crates-io]
@@ -58,7 +57,7 @@ zcash_proofs = { git = 'https://github.com/VerusCoin/librustzcash.git' }
 #zcash_proofs = { path = '../../clones/librustzcash/zcash_proofs' }
 
 [features]
-#mainnet = ["zcash_client_sqlite/mainnet"]
+mainnet = ["zcash_client_sqlite/mainnet"]
 updater = ["bls12_381", "futures", "grpc", "grpc-protobuf", "httpbis", "tls-api", "tls-api-rustls"]
 
 [lib]
