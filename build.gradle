@@ -219,13 +219,21 @@ cargo {
 
     rustupChannel = "1.75.0-x86_64-unknown-linux-gnu"
 
+    features {
+        defaultAnd("mainnet")
+    }
+
     tasks.whenTaskAdded { task ->
         if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
             task.dependsOn 'cargoBuild'
         }
     }
 
-    extraCargoBuildArguments = ['--locked']
+    // Uncomment below if we update Cargo dependencies, otherwise leave to prevent auto-updating
+    // i.e. zcash_keys module changes etc... in linked librustzcash
+    //extraCargoBuildArguments = ['--locked']
+
+
     //TODO: not sure if we need the double hyphen here or not
 
     // As a workaround to the Gradle (starting from v7.4.1) and Rust Android Gradle plugin (starting from v0.9.3)
