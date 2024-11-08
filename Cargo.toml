@@ -58,7 +58,7 @@ zcash_proofs = { git = 'https://github.com/VerusCoin/librustzcash.git' }
 #zcash_proofs = { path = '../../clones/librustzcash/zcash_proofs' }
 
 [features]
-mainnet = ["zcash_client_sqlite/mainnet"]
+#mainnet = ["zcash_client_sqlite/mainnet"]
 updater = ["bls12_381", "futures", "grpc", "grpc-protobuf", "httpbis", "tls-api", "tls-api-rustls"]
 
 [lib]
