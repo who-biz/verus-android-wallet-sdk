@@ -426,7 +426,6 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_getAddress(
     _: JClass<'_>,
     db_data: JString<'_>,
     account: jint,
-    chain_network_id: jint,
 ) -> jstring {
     let res = panic::catch_unwind(|| {
         let db_data = utils::java_string_to_rust(&env, db_data);
