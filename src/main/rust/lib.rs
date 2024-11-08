@@ -35,6 +35,7 @@ use zcash_client_sqlite::{
 };
 use zcash_primitives::{
     block::BlockHash,
+    constants::ChainNetwork,
     consensus::{BlockHeight, BranchId},
     note_encryption::Memo,
     transaction::{components::Amount, Transaction},
@@ -45,19 +46,19 @@ use zcash_primitives::consensus::MainNetwork as Network;
 #[cfg(not(feature = "mainnet"))]
 use zcash_primitives::consensus::TestNetwork as Network;
 #[cfg(feature = "mainnet")]
-use zcash_primitives::constants::mainnet::{
+use zcash_primitives::constants::vrsc::mainnet::{
     COIN_TYPE, HRP_SAPLING_EXTENDED_FULL_VIEWING_KEY, HRP_SAPLING_EXTENDED_SPENDING_KEY,
     HRP_SAPLING_PAYMENT_ADDRESS,
 };
 #[cfg(feature = "mainnet")]
-use zcash_primitives::constants::mainnet::B58_PUBKEY_ADDRESS_PREFIX;
+use zcash_primitives::constants::vrsc::mainnet::B58_PUBKEY_ADDRESS_PREFIX;
 #[cfg(not(feature = "mainnet"))]
-use zcash_primitives::constants::testnet::{
+use zcash_primitives::constants::vrsc::testnet::{
     COIN_TYPE, HRP_SAPLING_EXTENDED_FULL_VIEWING_KEY, HRP_SAPLING_EXTENDED_SPENDING_KEY,
     HRP_SAPLING_PAYMENT_ADDRESS,
 };
 #[cfg(not(feature = "mainnet"))]
-use zcash_primitives::constants::testnet::B58_PUBKEY_ADDRESS_PREFIX;
+use zcash_primitives::constants::vrsc::testnet::B58_PUBKEY_ADDRESS_PREFIX;
 use zcash_primitives::legacy::TransparentAddress;
 use zcash_proofs::prover::LocalTxProver;
 
@@ -77,6 +78,14 @@ mod utils;
 mod local_rpc_types;
 // use crate::extended_key::{key_index::KeyIndex, ExtendedPrivKey, ExtendedPubKey, KeySeed};
 // /////////////////////////////////////////////////////////////////////////////////////////////////
+
+fn chain_id_to_network(chain_network_id: u16) -> Option<ChainNetwork> {
+    return match chain_network_id {
+        1 => Some(ChainNetwork::VRSC),
+        2 => Some(ChainNetwork::ZEC),
+        _ => None,
+    }
+}
 
 #[cfg(debug_assertions)]
 fn print_debug_state() {
@@ -128,6 +137,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_initAccount
     db_data: JString<'_>,
     seed: jbyteArray,
     accounts: jint,
+    chain_network_id: jint,
 ) -> jobjectArray {
     let res = panic::catch_unwind(|| {
         let db_data = utils::java_string_to_rust(&env, db_data);
@@ -138,12 +148,18 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_initAccount
             return Err(format_err!("accounts argument must be positive"));
         };
 
+        let chain_network_id = if chain_network_id >= 0 {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
         let extsks: Vec<_> = (0..accounts)
             .map(|account| spending_key(&seed, COIN_TYPE, account))
             .collect();
         let extfvks: Vec<_> = extsks.iter().map(ExtendedFullViewingKey::from).collect();
 
-        match init_accounts_table(&db_data, &Network, &extfvks) {
+        match init_accounts_table(&db_data, &Network, &extfvks, chain_id_to_network(chain_network_id).unwrap()) {
             Ok(()) => {
                 // Return the ExtendedSpendingKeys for the created accounts
                 Ok(utils::rust_vec_to_java(
@@ -171,7 +187,9 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_initAccount
     _: JClass<'_>,
     db_data: JString<'_>,
     extfvks_arr: jobjectArray,
+    chain_network_id: jint,
 ) -> jboolean {
+
     let res = panic::catch_unwind(|| {
         let db_data = utils::java_string_to_rust(&env, db_data);
         // TODO: avoid all this unwrapping and also surface errors, better
@@ -186,7 +204,13 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_initAccount
             })
             .collect::<Vec<_>>();
 
-        match init_accounts_table(&db_data, &Network, &extfvks) {
+        let chain_network_id = if chain_network_id >= 0 {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        match init_accounts_table(&db_data, &Network, &extfvks, chain_id_to_network(chain_network_id).unwrap()) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!("Error while initializing accounts: {}", e)),
         }
@@ -402,6 +426,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_getAddress(
     _: JClass<'_>,
     db_data: JString<'_>,
     account: jint,
+    chain_network_id: jint,
 ) -> jstring {
     let res = panic::catch_unwind(|| {
         let db_data = utils::java_string_to_rust(&env, db_data);
@@ -427,11 +452,19 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_isValidShie
     env: JNIEnv<'_>,
     _: JClass<'_>,
     addr: JString<'_>,
+    chain_network_id: jint,
 ) -> jboolean {
+
     let res = panic::catch_unwind(|| {
         let addr = utils::java_string_to_rust(&env, addr);
 
-        match RecipientAddress::decode(&Network, &addr) {
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        match RecipientAddress::decode(&Network, &addr, chain_id_to_network(chain_network_id).unwrap()) {
             Some(addr) => match addr {
                 RecipientAddress::Shielded(_) => Ok(JNI_TRUE),
                 RecipientAddress::Transparent(_) => Ok(JNI_FALSE),
@@ -447,11 +480,19 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_isValidTran
     env: JNIEnv<'_>,
     _: JClass<'_>,
     addr: JString<'_>,
+    chain_network_id: jint,
 ) -> jboolean {
+
     let res = panic::catch_unwind(|| {
         let addr = utils::java_string_to_rust(&env, addr);
 
-        match RecipientAddress::decode(&Network, &addr) {
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        match RecipientAddress::decode(&Network, &addr, chain_id_to_network(chain_network_id).unwrap()) {
             Some(addr) => match addr {
                 RecipientAddress::Shielded(_) => Ok(JNI_FALSE),
                 RecipientAddress::Transparent(_) => Ok(JNI_TRUE),
@@ -556,12 +597,20 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_validateCom
     _: JClass<'_>,
     db_cache: JString<'_>,
     db_data: JString<'_>,
+    chain_network_id: jint,
 ) -> jint {
+
     let res = panic::catch_unwind(|| {
         let db_cache = utils::java_string_to_rust(&env, db_cache);
         let db_data = utils::java_string_to_rust(&env, db_data);
 
-        if let Err(e) = validate_combined_chain(Network, &db_cache, &db_data) {
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        if let Err(e) = validate_combined_chain(Network, &db_cache, &db_data, chain_id_to_network(chain_network_id).unwrap()) {
             match e.kind() {
                 ErrorKind::InvalidChain(upper_bound, _) => {
                     let upper_bound_u32 = u32::from(*upper_bound);
@@ -583,11 +632,18 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_rewindToHei
     _: JClass<'_>,
     db_data: JString<'_>,
     height: jint,
+    chain_network_id: jint,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let db_data = utils::java_string_to_rust(&env, db_data);
 
-        match rewind_to_height(Network, &db_data, BlockHeight::from(height as u32)) {
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        match rewind_to_height(Network, &db_data, BlockHeight::from(height as u32), chain_id_to_network(chain_network_id).unwrap()) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!(
                 "Error while rewinding data DB to height {}: {}",
@@ -605,12 +661,18 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_scanBlocks(
     _: JClass<'_>,
     db_cache: JString<'_>,
     db_data: JString<'_>,
+    chain_network_id: jint,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let db_cache = utils::java_string_to_rust(&env, db_cache);
         let db_data = utils::java_string_to_rust(&env, db_data);
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
 
-        match scan_cached_blocks(&Network, &db_cache, &db_data, None) {
+        match scan_cached_blocks(&Network, &db_cache, &db_data, None, chain_id_to_network(chain_network_id).unwrap()) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!("Error while scanning blocks: {}", e)),
         }
@@ -626,12 +688,18 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_scanBlockBa
     db_cache: JString<'_>,
     db_data: JString<'_>,
     limit: jint,
+    chain_network_id: jint,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let db_cache = utils::java_string_to_rust(&env, db_cache);
         let db_data = utils::java_string_to_rust(&env, db_data);
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
 
-        match scan_cached_blocks(&Network, &db_cache, &db_data, Some(limit.try_into().unwrap())) {
+        match scan_cached_blocks(&Network, &db_cache, &db_data, Some(limit.try_into().unwrap()), chain_id_to_network(chain_network_id).unwrap()) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!("Error while scanning blocks: {}", e)),
         }
@@ -732,13 +800,19 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_decryptAndS
     _: JClass<'_>,
     db_data: JString<'_>,
     tx: jbyteArray,
+    chain_network_id: jint,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
         let db_data = utils::java_string_to_rust(&env, db_data);
         let tx_bytes = env.convert_byte_array(tx).unwrap();
         let tx = Transaction::read(&tx_bytes[..])?;
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
 
-        match decrypt_and_store_transaction(&db_data, &Network, &tx) {
+        match decrypt_and_store_transaction(&db_data, &Network, &tx, chain_id_to_network(chain_network_id).unwrap()) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!("Error while decrypting transaction: {}", e)),
         }
@@ -759,6 +833,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_createToAdd
     memo: jbyteArray,
     spend_params: JString<'_>,
     output_params: JString<'_>,
+    chain_network_id: jint,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
         let db_data = utils::java_string_to_rust(&env, db_data);
@@ -788,7 +863,15 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_createToAdd
             }
         };
 
-        let to = match RecipientAddress::decode(&Network, &to) {
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let to = match RecipientAddress::decode(&Network, &to, chain_network) {
             Some(to) => to,
             None => {
                 return Err(format_err!("Address is for the wrong network"));
@@ -817,6 +900,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_createToAdd
             value,
             memo,
             OvkPolicy::Sender,
+            chain_network,
         )
         .map_err(|e| format_err!("Error while creating transaction: {}", e))
     });
@@ -828,9 +912,18 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_branchIdFor
     env: JNIEnv<'_>,
     _: JClass<'_>,
     height: jint,
+    chain_network_id: jint,
 ) -> jint {
     let res = panic::catch_unwind(|| {
-        let branch: BranchId = BranchId::for_height::<Network>(&Network, BlockHeight::from(height as u32));
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let branch: BranchId = BranchId::for_height::<Network>(&Network, BlockHeight::from(height as u32), chain_network);
         let branch_id: u32 = u32::from(branch);
         debug!("For height {} found consensus branch {:?}", height, branch);
         Ok(branch_id as i32)
