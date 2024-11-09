@@ -18,7 +18,7 @@ buildscript {
     ]
     repositories {
         google()
-        jcenter()
+//        jcenter()
         mavenCentral()
         mavenLocal()
 // mavenLocal() needed for jitpack-compiled librustzcash (unless we host the files on MavenCentral
@@ -36,14 +36,14 @@ buildscript {
 //        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.2'
+        classpath 'com.android.tools.build:gradle:4.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${Deps.kotlinVersion}"
         classpath "org.jetbrains.kotlin:kotlin-allopen:${Deps.kotlinVersion}"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.10.1"
+//        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.10.1"
         classpath "com.github.ben-manes:gradle-versions-plugin:0.31.0"
 //        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath "com.google.protobuf:protobuf-gradle-plugin:0.8.14"
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:1.0.2'
+        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:3.0.1'
         classpath 'org.mozilla.rust-android-gradle:plugin:0.9.4'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
         //      classpath 'org.owasp:dependency-check-gradle:6.0.0'
@@ -59,7 +59,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
-apply plugin: 'org.jetbrains.dokka'
+//apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.google.protobuf'
 apply plugin: 'com.github.ben-manes.versions'
 //apply plugin: 'com.github.dcendents.android-maven'
@@ -177,10 +177,10 @@ clean {
     delete "$project.projectDir/src/generated/source/grpc"
 }
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/docs/rtd"
-}
+//dokka {
+//    outputFormat = 'html'
+//    outputDirectory = "$buildDir/docs/rtd"
+//}
 
 protobuf {
     generatedFilesBaseDir = "$projectDir/src/generated/source/grpc"

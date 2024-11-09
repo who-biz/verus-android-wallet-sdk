@@ -36,12 +36,12 @@ task sourcesJar(type: Jar) {
 }
 
 // Jar containing docs
-task docsJar(type: Jar) {
-    archiveClassifier = "javadoc"
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    dependsOn dokka
-    from dokka
-}
+//task docsJar(type: Jar) {
+//    archiveClassifier = "javadoc"
+//    group = JavaBasePlugin.DOCUMENTATION_GROUP
+//    dependsOn dokka
+//    from dokka
+//}
 
 def activePublication = Deps.publishingTarget
 publishing {
@@ -52,7 +52,7 @@ publishing {
             Production(MavenPublication) {
                 artifact variant.outputs[0].packageLibrary // the AAR
                 artifact sourcesJar
-                artifact docsJar
+ //               artifact docsJar
                 groupId Deps.group
                 artifactId activePublication.artifactId
                 version Deps.versionName

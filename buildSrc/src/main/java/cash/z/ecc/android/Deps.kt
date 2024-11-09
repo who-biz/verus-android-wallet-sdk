@@ -3,7 +3,7 @@ package cash.z.ecc.android
 object Deps {
     // For use in the top-level build.gradle which gives an error when provided
     // `Deps.Kotlin.version` directly
-    const val kotlinVersion =   "1.7.10"
+    const val kotlinVersion =   "1.4.10"
     const val group =           "com.github.who-biz"
     const val artifactName =    "zcash-android-sdk"
     const val versionName =     "1.2.1-beta04"
