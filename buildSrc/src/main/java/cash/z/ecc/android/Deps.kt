@@ -5,9 +5,9 @@ object Deps {
     // `Deps.Kotlin.version` directly
     const val kotlinVersion =   "1.4.10"
     const val group =           "com.github.who-biz"
-    const val artifactName =    "zcash-android-sdk"
-    const val versionName =     "1.2.1-beta04"
-    const val versionCode =     1_02_01_204  // last digits are alpha(0XX) beta(2XX) rc(4XX) release(8XX). Ex: 1_08_04_401 is an release candidate build of version 1.8.4 and 1_08_04_800 would be the final release.
+    const val artifactName =    "verus-android-sdk"
+    const val versionName =     "1.2.1"
+    const val versionCode =     1_02_01 //_204  // last digits are alpha(0XX) beta(2XX) rc(4XX) release(8XX). Ex: 1_08_04_401 is an release candidate build of version 1.8.4 and 1_08_04_800 would be the final release.
     const val description =     "This lightweight SDK connects Android to Zcash. It welds together Rust and Kotlin in a minimal way, allowing third-party Android apps to send and receive shielded transactions easily, securely and privately."
     const val githubUrl =       "https://github.com/who-biz/verus-android-wallet-sdk"
 
@@ -21,11 +21,11 @@ object Deps {
     object Publication {
         object Mainnet {
             const val variant = "vrscmainnetRelease"
-            const val artifactId = "zcash-android-sdk-mainnet"
+            const val artifactId = "verus-android-sdk-mainnet"
         }
         object Testnet {
             const val variant = "vrsctestnetRelease"
-            const val artifactId = "zcash-android-sdk-testnet"
+            const val artifactId = "verus-android-sdk-testnet"
         }
     }
 
