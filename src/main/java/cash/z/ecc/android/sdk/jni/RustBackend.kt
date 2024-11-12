@@ -76,15 +76,15 @@ class RustBackend private constructor() : RustBackendWelding {
 
     override fun getSentMemoAsUtf8(idNote: Long) = getSentMemoAsUtf8(pathDataDb, idNote)
 
-    override fun validateCombinedChain() = validateCombinedChain(pathCacheDb, pathDataDb)
+    override fun validateCombinedChain(chainNetwork: String) = validateCombinedChain(pathCacheDb, pathDataDb, chainNetwork)
 
-    override fun rewindToHeight(height: Int) = rewindToHeight(pathDataDb, height)
+    override fun rewindToHeight(height: Int, chainNetwork: String) = rewindToHeight(pathDataDb, height, chainNetwork)
 
-    override fun scanBlocks(limit: Int): Boolean {
+    override fun scanBlocks(limit: Int, chainNetwork: String): Boolean {
         return if (limit > 0) {
-            scanBlockBatch(pathCacheDb, pathDataDb, limit)
+            scanBlockBatch(pathCacheDb, pathDataDb, limit, chainNetwork)
         } else {
-            scanBlocks(pathCacheDb, pathDataDb)
+            scanBlocks(pathCacheDb, pathDataDb, chainNetwork)
         }
     }
 
