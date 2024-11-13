@@ -36,7 +36,7 @@ use zcash_client_sqlite::{
 use zcash_primitives::{
     block::BlockHash,
     constants::ChainNetwork,
-    consensus::{BlockHeight, BranchId},
+    consensus::{BlockHeight, BranchId, Parameters},
     note_encryption::Memo,
     transaction::{components::Amount, Transaction},
     zip32::ExtendedFullViewingKey,
@@ -45,20 +45,9 @@ use zcash_primitives::{
 use zcash_primitives::consensus::MainNetwork as Network;
 #[cfg(not(feature = "mainnet"))]
 use zcash_primitives::consensus::TestNetwork as Network;
-#[cfg(feature = "mainnet")]
-use zcash_primitives::constants::vrsc::mainnet::{
-    COIN_TYPE, HRP_SAPLING_EXTENDED_FULL_VIEWING_KEY, HRP_SAPLING_EXTENDED_SPENDING_KEY,
-    HRP_SAPLING_PAYMENT_ADDRESS,
-};
-#[cfg(feature = "mainnet")]
+#[cfg(feature = "mainnet")] //TODO: remove these
+use zcash_primitives::constants::vrsc::mainnet::COIN_TYPE;
 use zcash_primitives::constants::vrsc::mainnet::B58_PUBKEY_ADDRESS_PREFIX;
-#[cfg(not(feature = "mainnet"))]
-use zcash_primitives::constants::vrsc::testnet::{
-    COIN_TYPE, HRP_SAPLING_EXTENDED_FULL_VIEWING_KEY, HRP_SAPLING_EXTENDED_SPENDING_KEY,
-    HRP_SAPLING_PAYMENT_ADDRESS,
-};
-#[cfg(not(feature = "mainnet"))]
-use zcash_primitives::constants::vrsc::testnet::B58_PUBKEY_ADDRESS_PREFIX;
 use zcash_primitives::legacy::TransparentAddress;
 use zcash_proofs::prover::LocalTxProver;
 
@@ -153,13 +142,17 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_initAccount
         } else {
             return Err(format_err!("chain_network_id must be non-negative!"));
         };
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let coin_type = Network.coin_type(chain_network);
+        let hrp_sapling_extended_spending_key = Network.hrp_sapling_extended_spending_key(chain_network);
 
         let extsks: Vec<_> = (0..accounts)
-            .map(|account| spending_key(&seed, COIN_TYPE, account))
+            .map(|account| spending_key(&seed, coin_type, account))
             .collect();
         let extfvks: Vec<_> = extsks.iter().map(ExtendedFullViewingKey::from).collect();
 
-        match init_accounts_table(&db_data, &Network, &extfvks, chain_id_to_network(chain_network_id).unwrap()) {
+        match init_accounts_table(&db_data, &Network, &extfvks, chain_network) {
             Ok(()) => {
                 // Return the ExtendedSpendingKeys for the created accounts
                 Ok(utils::rust_vec_to_java(
@@ -168,7 +161,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_initAccount
                     "java/lang/String",
                     |env, extsk| {
                         env.new_string(encode_extended_spending_key(
-                            HRP_SAPLING_EXTENDED_SPENDING_KEY,
+                            hrp_sapling_extended_spending_key,
                             &extsk,
                         ))
                     },
@@ -191,6 +184,15 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_initAccount
 ) -> jboolean {
 
     let res = panic::catch_unwind(|| {
+
+        let chain_network_id = if chain_network_id >= 0 {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+        let hrp_sapling_extended_spending_key = Network.hrp_sapling_extended_spending_key(chain_network);
+
         let db_data = utils::java_string_to_rust(&env, db_data);
         // TODO: avoid all this unwrapping and also surface errors, better
         let count = env.get_array_length(extfvks_arr).unwrap();
@@ -198,19 +200,13 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_initAccount
             .map(|i| env.get_object_array_element(extfvks_arr, i))
             .map(|jstr| utils::java_string_to_rust(&env, jstr.unwrap().into()))
             .map(|vkstr| {
-                decode_extended_full_viewing_key(HRP_SAPLING_EXTENDED_FULL_VIEWING_KEY, &vkstr)
+                decode_extended_full_viewing_key(hrp_sapling_extended_spending_key, &vkstr)
                     .unwrap()
                     .unwrap()
             })
             .collect::<Vec<_>>();
 
-        let chain_network_id = if chain_network_id >= 0 {
-            chain_network_id as u16
-        } else {
-            return Err(format_err!("chain_network_id must be non-negative!"));
-        };
-
-        match init_accounts_table(&db_data, &Network, &extfvks, chain_id_to_network(chain_network_id).unwrap()) {
+        match init_accounts_table(&db_data, &Network, &extfvks, chain_network) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!("Error while initializing accounts: {}", e)),
         }
@@ -224,6 +220,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveE
     _: JClass<'_>,
     seed: jbyteArray,
     accounts: jint,
+    chain_network_id: jint
 ) -> jobjectArray {
     let res = panic::catch_unwind(|| {
         let seed = env.convert_byte_array(seed).unwrap();
@@ -233,8 +230,19 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveE
             return Err(format_err!("accounts argument must be greater than zero"));
         };
 
+        let chain_network_id = if chain_network_id >= 0 {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let coin_type = Network.coin_type(chain_network);
+        let hrp_sapling_extended_spending_key = Network.hrp_sapling_extended_spending_key(chain_network);
+
         let extsks: Vec<_> = (0..accounts)
-            .map(|account| spending_key(&seed, COIN_TYPE, account))
+            .map(|account| spending_key(&seed, coin_type, account))
             .collect();
 
         Ok(utils::rust_vec_to_java(
@@ -243,7 +251,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveE
             "java/lang/String",
             |env, extsk| {
                 env.new_string(encode_extended_spending_key(
-                    HRP_SAPLING_EXTENDED_SPENDING_KEY,
+                    hrp_sapling_extended_spending_key,
                     &extsk,
                 ))
             },
@@ -259,6 +267,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveE
     _: JClass<'_>,
     seed: jbyteArray,
     accounts: jint,
+    chain_network_id: jint,
 ) -> jobjectArray {
     let res = panic::catch_unwind(|| {
         let seed = env.convert_byte_array(seed).unwrap();
@@ -268,8 +277,19 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveE
             return Err(format_err!("accounts argument must be greater than zero"));
         };
 
+        let chain_network_id = if chain_network_id >= 0 {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let coin_type = Network.coin_type(chain_network);
+        let hrp_sapling_extended_spending_key = Network.hrp_sapling_extended_spending_key(chain_network);
+
         let extfvks: Vec<_> = (0..accounts)
-            .map(|account| ExtendedFullViewingKey::from(&spending_key(&seed, COIN_TYPE, account)))
+            .map(|account| ExtendedFullViewingKey::from(&spending_key(&seed, coin_type, account)))
             .collect();
 
         Ok(utils::rust_vec_to_java(
@@ -278,7 +298,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveE
             "java/lang/String",
             |env, extfvk| {
                 env.new_string(encode_extended_full_viewing_key(
-                    HRP_SAPLING_EXTENDED_FULL_VIEWING_KEY,
+                    hrp_sapling_extended_spending_key,
                     &extfvk,
                 ))
             },
@@ -294,6 +314,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveS
     _: JClass<'_>,
     seed: jbyteArray,
     account_index: jint,
+    chain_network_id: jint,
 ) -> jstring {
     let res = panic::catch_unwind(|| {
         let seed = env.convert_byte_array(seed).unwrap();
@@ -303,11 +324,22 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveS
             return Err(format_err!("accountIndex argument must be positive"));
         };
 
-        let address = spending_key(&seed, COIN_TYPE, account_index)
+        let chain_network_id = if chain_network_id >= 0 {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let coin_type = Network.coin_type(chain_network);
+        let hrp_sapling_extended_spending_key = Network.hrp_sapling_extended_spending_key(chain_network);
+
+        let address = spending_key(&seed, coin_type, account_index)
             .default_address()
             .unwrap()
             .1;
-        let address_str = encode_payment_address(HRP_SAPLING_PAYMENT_ADDRESS, &address);
+        let address_str = encode_payment_address(hrp_sapling_extended_spending_key, &address);
         let output = env
             .new_string(address_str)
             .expect("Couldn't create Java string!");
@@ -321,11 +353,22 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveS
     env: JNIEnv<'_>,
     _: JClass<'_>,
     extfvk_string: JString<'_>,
+    chain_network_id: jint,
 ) -> jstring {
     let res = panic::catch_unwind(|| {
+        let chain_network_id = if chain_network_id >= 0 {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let hrp_sapling_extended_full_viewing_key = Network.hrp_sapling_extended_full_viewing_key(chain_network);
+        let hrp_sapling_payment_address = Network.hrp_sapling_payment_address(chain_network);
+
         let extfvk_string = utils::java_string_to_rust(&env, extfvk_string);
         let extfvk = match decode_extended_full_viewing_key(
-            HRP_SAPLING_EXTENDED_FULL_VIEWING_KEY,
+            hrp_sapling_extended_full_viewing_key,
             &extfvk_string,
         ) {
             Ok(Some(extfvk)) => extfvk,
@@ -341,7 +384,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveS
         };
 
         let address = extfvk.default_address().unwrap().1;
-        let address_str = encode_payment_address(HRP_SAPLING_PAYMENT_ADDRESS, &address);
+        let address_str = encode_payment_address(hrp_sapling_payment_address, &address);
         let output = env
             .new_string(address_str)
             .expect("Couldn't create Java string!");
@@ -355,11 +398,24 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveE
     env: JNIEnv<'_>,
     _: JClass<'_>,
     extsk_string: JString<'_>,
+    chain_network_id: jint,
 ) -> jobjectArray {
     let res = panic::catch_unwind(|| {
+
+        let chain_network_id = if chain_network_id >= 0 {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let hrp_sapling_extended_spending_key = Network.hrp_sapling_extended_spending_key(chain_network);
+        let hrp_sapling_extended_full_viewing_key = Network.hrp_sapling_extended_full_viewing_key(chain_network);
+
         let extsk_string = utils::java_string_to_rust(&env, extsk_string);
         let extfvk = match decode_extended_spending_key(
-            HRP_SAPLING_EXTENDED_SPENDING_KEY,
+            hrp_sapling_extended_spending_key,
             &extsk_string,
         ) {
             Ok(Some(extsk)) => ExtendedFullViewingKey::from(&extsk),
@@ -376,7 +432,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveE
 
         let output = env
             .new_string(encode_extended_full_viewing_key(
-                HRP_SAPLING_EXTENDED_FULL_VIEWING_KEY,
+                hrp_sapling_extended_full_viewing_key,
                 &extfvk,
             ))
             .expect("Couldn't create Java string!");
@@ -463,7 +519,9 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_isValidShie
             return Err(format_err!("chain_network_id must be non-negative!"));
         };
 
-        match RecipientAddress::decode(&Network, &addr, chain_id_to_network(chain_network_id).unwrap()) {
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+        
+        match RecipientAddress::decode(&Network, &addr, chain_network) {
             Some(addr) => match addr {
                 RecipientAddress::Shielded(_) => Ok(JNI_TRUE),
                 RecipientAddress::Transparent(_) => Ok(JNI_FALSE),
@@ -491,7 +549,9 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_isValidTran
             return Err(format_err!("chain_network_id must be non-negative!"));
         };
 
-        match RecipientAddress::decode(&Network, &addr, chain_id_to_network(chain_network_id).unwrap()) {
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        match RecipientAddress::decode(&Network, &addr, chain_network) {
             Some(addr) => match addr {
                 RecipientAddress::Shielded(_) => Ok(JNI_FALSE),
                 RecipientAddress::Transparent(_) => Ok(JNI_TRUE),
@@ -609,7 +669,9 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_validateCom
             return Err(format_err!("chain_network_id must be non-negative!"));
         };
 
-        if let Err(e) = validate_combined_chain(Network, &db_cache, &db_data, chain_id_to_network(chain_network_id).unwrap()) {
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        if let Err(e) = validate_combined_chain(Network, &db_cache, &db_data, chain_network) {
             match e.kind() {
                 ErrorKind::InvalidChain(upper_bound, _) => {
                     let upper_bound_u32 = u32::from(*upper_bound);
@@ -642,7 +704,9 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_rewindToHei
             return Err(format_err!("chain_network_id must be non-negative!"));
         };
 
-        match rewind_to_height(Network, &db_data, BlockHeight::from(height as u32), chain_id_to_network(chain_network_id).unwrap()) {
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        match rewind_to_height(Network, &db_data, BlockHeight::from(height as u32), chain_network) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!(
                 "Error while rewinding data DB to height {}: {}",
@@ -671,7 +735,9 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_scanBlocks(
             return Err(format_err!("chain_network_id must be non-negative!"));
         };
 
-        match scan_cached_blocks(&Network, &db_cache, &db_data, None, chain_id_to_network(chain_network_id).unwrap()) {
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        match scan_cached_blocks(&Network, &db_cache, &db_data, None, chain_network) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!("Error while scanning blocks: {}", e)),
         }
@@ -698,7 +764,9 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_scanBlockBa
             return Err(format_err!("chain_network_id must be non-negative!"));
         };
 
-        match scan_cached_blocks(&Network, &db_cache, &db_data, Some(limit.try_into().unwrap()), chain_id_to_network(chain_network_id).unwrap()) {
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        match scan_cached_blocks(&Network, &db_cache, &db_data, Some(limit.try_into().unwrap()), chain_network) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!("Error while scanning blocks: {}", e)),
         }
@@ -764,6 +832,8 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_tool_DerivationTool_deriveT
 
         // modified from: https://github.com/adityapk00/zecwallet-light-cli/blob/master/lib/src/lightwallet.rs
 
+        //TODO: modify this for use with verus, we don't have HD privkeys
+
         let ext_t_key = ExtendedPrivKey::with_seed(&seed).unwrap();
         let address_sk = ext_t_key
             .derive_private_key(KeyIndex::hardened_from_normalize_index(44).unwrap())
@@ -811,7 +881,9 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_decryptAndS
             return Err(format_err!("chain_network_id must be non-negative!"));
         };
 
-        match decrypt_and_store_transaction(&db_data, &Network, &tx, chain_id_to_network(chain_network_id).unwrap()) {
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        match decrypt_and_store_transaction(&db_data, &Network, &tx, chain_network) {
             Ok(()) => Ok(JNI_TRUE),
             Err(e) => Err(format_err!("Error while decrypting transaction: {}", e)),
         }
@@ -835,6 +907,17 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_createToAdd
     chain_network_id: jint,
 ) -> jlong {
     let res = panic::catch_unwind(|| {
+
+        let chain_network_id = if chain_network_id >= 0  {
+            chain_network_id as u16
+        } else {
+            return Err(format_err!("chain_network_id must be non-negative!"));
+        };
+
+        let chain_network = chain_id_to_network(chain_network_id).unwrap();
+
+        let hrp_sapling_extended_spending_key = Network.hrp_sapling_extended_spending_key(chain_network);
+
         let db_data = utils::java_string_to_rust(&env, db_data);
         let account = if account >= 0 {
             account as u32
@@ -852,7 +935,7 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_createToAdd
         let spend_params = utils::java_string_to_rust(&env, spend_params);
         let output_params = utils::java_string_to_rust(&env, output_params);
 
-        let extsk = match decode_extended_spending_key(HRP_SAPLING_EXTENDED_SPENDING_KEY, &extsk) {
+        let extsk = match decode_extended_spending_key(hrp_sapling_extended_spending_key, &extsk) {
             Ok(Some(extsk)) => extsk,
             Ok(None) => {
                 return Err(format_err!("ExtendedSpendingKey is for the wrong network"));
@@ -861,14 +944,6 @@ pub unsafe extern "C" fn Java_cash_z_ecc_android_sdk_jni_RustBackend_createToAdd
                 return Err(format_err!("Invalid ExtendedSpendingKey: {}", e));
             }
         };
-
-        let chain_network_id = if chain_network_id >= 0  {
-            chain_network_id as u16
-        } else {
-            return Err(format_err!("chain_network_id must be non-negative!"));
-        };
-
-        let chain_network = chain_id_to_network(chain_network_id).unwrap();
 
         let to = match RecipientAddress::decode(&Network, &to, chain_network) {
             Some(to) => to,
