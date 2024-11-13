@@ -32,5 +32,5 @@ object ZcashSdk : ZcashSdkCommon() {
     /**
      * The name of the network that this SDK build targets.
      */
-    override val NETWORK = "mainnet"
+    override val NETWORK = "VRSC"
 }

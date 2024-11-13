@@ -22,6 +22,7 @@ class Initializer constructor(appContext: Context, config: Config):  SdkSynchron
     override val port: Int
     val viewingKeys: List<String>
     val birthday: WalletBirthdayTool.WalletBirthday
+    val chainNetwork: String
 
     /**
      * True when accounts have been created by this initializer.
@@ -41,6 +42,7 @@ class Initializer constructor(appContext: Context, config: Config):  SdkSynchron
         alias = config.alias
         host = config.host
         port = config.port
+        chainNetwork = config.network
         rustBackend = initRustBackend(birthday)
         // TODO: get rid of this by first answering the question: why is this necessary?
         initMissingDatabases(birthday, *viewingKeys.toTypedArray())
@@ -102,7 +104,7 @@ class Initializer constructor(appContext: Context, config: Config):  SdkSynchron
         tryWarn(
             "Warning: did not initialize the accounts table. It probably was already initialized."
         ) {
-            rustBackend.initAccountsTable(*viewingKeys)
+            rustBackend.initAccountsTable(*viewingKeys, chainNetwork)
             accountsCreated = true
             twig("Initialized the accounts table with ${viewingKeys.size} viewingKey(s)")
         }
@@ -133,6 +135,7 @@ class Initializer constructor(appContext: Context, config: Config):  SdkSynchron
         var alias: String = ZcashSdk.DEFAULT_ALIAS,
         var host: String = ZcashSdk.DEFAULT_LIGHTWALLETD_HOST,
         var port: Int = ZcashSdk.DEFAULT_LIGHTWALLETD_PORT,
+        var network: String = ZcashSdk.NETWORK,
     ) {
         var birthdayHeight: Int? = null
             private set

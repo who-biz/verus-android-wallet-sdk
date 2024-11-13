@@ -24,6 +24,7 @@ import java.io.File
 class WalletTransactionEncoder(
     private val rustBackend: RustBackendWelding,
     private val repository: TransactionRepository
+
 ) : TransactionEncoder {
 
     /**

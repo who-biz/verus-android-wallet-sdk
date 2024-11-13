@@ -13,6 +13,7 @@ import cash.z.ecc.android.sdk.ext.*
 import cash.z.ecc.android.sdk.ext.ZcashSdk.DOWNLOAD_BATCH_SIZE
 import cash.z.ecc.android.sdk.ext.ZcashSdk.MAX_BACKOFF_INTERVAL
 import cash.z.ecc.android.sdk.ext.ZcashSdk.MAX_REORG_SIZE
+import cash.z.ecc.android.sdk.ext.ZcashSdk.NETWORK
 import cash.z.ecc.android.sdk.ext.ZcashSdk.POLL_INTERVAL
 import cash.z.ecc.android.sdk.ext.ZcashSdk.RETRIES
 import cash.z.ecc.android.sdk.ext.ZcashSdk.REWIND_DISTANCE
@@ -54,7 +55,8 @@ class CompactBlockProcessor(
     val downloader: CompactBlockDownloader,
     private val repository: TransactionRepository,
     private val rustBackend: RustBackendWelding,
-    minimumHeight: Int = SAPLING_ACTIVATION_HEIGHT
+    minimumHeight: Int = SAPLING_ACTIVATION_HEIGHT,
+    private val chainNetwork: String = NETWORK
 ) {
     /**
      * Callback for any non-trivial errors that occur while processing compact blocks.
@@ -280,7 +282,7 @@ class CompactBlockProcessor(
             downloader.fetchTransaction(transaction.rawTransactionId)?.let { tx ->
                 downloaded = true
                 twig("decrypting and storing transaction (id:${transaction.id}  block:${transaction.minedHeight})")
-                rustBackend.decryptAndStoreTransaction(tx.data.toByteArray())
+                rustBackend.decryptAndStoreTransaction(tx.data.toByteArray(), chainNetwork)
             } ?: twig("no transaction found. Nothing to enhance. This probably shouldn't happen.")
             twig("DONE: enhancing transaction (id:${transaction.id}  block:${transaction.minedHeight})")
         } catch (t: Throwable) {
@@ -355,7 +357,7 @@ class CompactBlockProcessor(
         }
         Twig.sprout("validating")
         twig("validating blocks in range $range in db: ${(rustBackend as RustBackend).pathCacheDb}")
-        val result = rustBackend.validateCombinedChain()
+        val result = rustBackend.validateCombinedChain(chainNetwork)
         Twig.clip("validating")
         return result
     }
@@ -383,7 +385,7 @@ class CompactBlockProcessor(
                 if (failedAttempts > 0) twig("retrying the scan after $failedAttempts failure(s)...")
                 do {
                     var scannedNewBlocks = false
-                    result = rustBackend.scanBlocks(SCAN_BATCH_SIZE)
+                    result = rustBackend.scanBlocks(SCAN_BATCH_SIZE, chainNetwork)
                     val lastScannedHeight = getLastScannedHeight()
                     twig("batch scanned: $lastScannedHeight/${range.last}")
                     if (currentInfo.lastScannedHeight != lastScannedHeight) {
@@ -437,7 +439,7 @@ class CompactBlockProcessor(
         determineLowerBound(errorHeight).let { lowerBound ->
             twig("handling chain error at $errorHeight by rewinding to block $lowerBound")
             onChainErrorListener?.invoke(errorHeight, lowerBound)
-            rustBackend.rewindToHeight(lowerBound)
+            rustBackend.rewindToHeight(lowerBound, chainNetwork)
             downloader.rewindToHeight(lowerBound)
         }
     }
