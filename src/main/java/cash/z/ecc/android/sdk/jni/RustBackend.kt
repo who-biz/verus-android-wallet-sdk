@@ -14,6 +14,16 @@ import java.io.File
  */
 class RustBackend private constructor() : RustBackendWelding {
 
+    fun getChainNetworkId(chainNetwork: String): UShort {
+        var networkId: Int
+        when (chainNetwork) {
+            "VRSC" -> networkId = 1
+            "ZEC" -> networkId = 2
+            else -> networkId = 0
+        }
+        return networkId as UShort
+    }
+
     init {
         load()
     }
@@ -48,13 +58,14 @@ class RustBackend private constructor() : RustBackendWelding {
 
     override fun initDataDb() = initDataDb(pathDataDb)
 
-    override fun initAccountsTable(vararg extfvks: String) =
-        initAccountsTableWithKeys(pathDataDb, extfvks)
+    override fun initAccountsTable(vararg extfvks: String, chainNetwork: String) =
+        initAccountsTableWithKeys(pathDataDb, extfvks, getChainNetworkId(chainNetwork))
 
     override fun initAccountsTable(
         seed: ByteArray,
-        numberOfAccounts: Int
-    ) = initAccountsTable(pathDataDb, seed, numberOfAccounts)
+        numberOfAccounts: Int,
+        chainNetwork: String
+    ) = initAccountsTable(pathDataDb, seed, numberOfAccounts, getChainNetworkId(chainNetwork))
 
     override fun initBlocksTable(
         height: Int,
@@ -76,19 +87,19 @@ class RustBackend private constructor() : RustBackendWelding {
 
     override fun getSentMemoAsUtf8(idNote: Long) = getSentMemoAsUtf8(pathDataDb, idNote)
 
-    override fun validateCombinedChain(chainNetwork: String) = validateCombinedChain(pathCacheDb, pathDataDb, chainNetwork)
+    override fun validateCombinedChain(chainNetwork: String) = validateCombinedChain(pathCacheDb, pathDataDb, getChainNetworkId(chainNetwork))
 
-    override fun rewindToHeight(height: Int, chainNetwork: String) = rewindToHeight(pathDataDb, height, chainNetwork)
+    override fun rewindToHeight(height: Int, chainNetwork: String) = rewindToHeight(pathDataDb, height, getChainNetworkId(chainNetwork))
 
     override fun scanBlocks(limit: Int, chainNetwork: String): Boolean {
         return if (limit > 0) {
-            scanBlockBatch(pathCacheDb, pathDataDb, limit, chainNetwork)
+            scanBlockBatch(pathCacheDb, pathDataDb, limit, getChainNetworkId(chainNetwork))
         } else {
-            scanBlocks(pathCacheDb, pathDataDb, chainNetwork)
+            scanBlocks(pathCacheDb, pathDataDb, getChainNetworkId(chainNetwork))
         }
     }
 
-    override fun decryptAndStoreTransaction(tx: ByteArray) = decryptAndStoreTransaction(pathDataDb, tx)
+    override fun decryptAndStoreTransaction(tx: ByteArray, chainNetwork: String) = decryptAndStoreTransaction(pathDataDb, tx, getChainNetworkId(chainNetwork))
 
     override fun createToAddress(
         consensusBranchId: Long,
@@ -96,7 +107,8 @@ class RustBackend private constructor() : RustBackendWelding {
         extsk: String,
         to: String,
         value: Long,
-        memo: ByteArray?
+        memo: ByteArray?,
+        chainNetwork: String
     ): Long = createToAddress(
         pathDataDb,
         consensusBranchId,
@@ -106,14 +118,15 @@ class RustBackend private constructor() : RustBackendWelding {
         value,
         memo ?: ByteArray(0),
         "${pathParamsDir}/$SPEND_PARAM_FILE_NAME",
-        "${pathParamsDir}/$OUTPUT_PARAM_FILE_NAME"
+        "${pathParamsDir}/$OUTPUT_PARAM_FILE_NAME",
+        getChainNetworkId(chainNetwork)
     )
 
-    override fun isValidShieldedAddr(addr: String) = isValidShieldedAddress(addr)
+    override fun isValidShieldedAddr(addr: String, chainNetwork: String) = isValidShieldedAddress(addr, getChainNetworkId(chainNetwork))
 
-    override fun isValidTransparentAddr(addr: String) = isValidTransparentAddress(addr)
+    override fun isValidTransparentAddr(addr: String, chainNetwork: String) = isValidTransparentAddress(addr, getChainNetworkId(chainNetwork))
 
-    override fun getBranchIdForHeight(height: Int): Long = branchIdForHeight(height)
+    override fun getBranchIdForHeight(height: Int, chainNetwork: String): Long = branchIdForHeight(height, getChainNetworkId(chainNetwork))
 
     /**
      * This is a proof-of-concept for doing Local RPC, where we are effectively using the JNI
@@ -194,12 +207,14 @@ class RustBackend private constructor() : RustBackendWelding {
         @JvmStatic private external fun initAccountsTable(
             dbDataPath: String,
             seed: ByteArray,
-            accounts: Int
+            accounts: Int,
+            chainNetwork: UShort
         ): Array<String>
 
         @JvmStatic private external fun initAccountsTableWithKeys(
             dbDataPath: String,
-            extfvk: Array<out String>
+            extfvk: Array<out String>,
+            chainNetwork: UShort
         ): Boolean
 
         @JvmStatic private external fun initBlocksTable(
@@ -212,9 +227,9 @@ class RustBackend private constructor() : RustBackendWelding {
 
         @JvmStatic private external fun getAddress(dbDataPath: String, account: Int): String
 
-        @JvmStatic private external fun isValidShieldedAddress(addr: String): Boolean
+        @JvmStatic private external fun isValidShieldedAddress(addr: String, chainNetwork: UShort): Boolean
 
-        @JvmStatic private external fun isValidTransparentAddress(addr: String): Boolean
+        @JvmStatic private external fun isValidTransparentAddress(addr: String, chainNetwork: UShort): Boolean
 
         @JvmStatic private external fun getBalance(dbDataPath: String, account: Int): Long
 
@@ -224,15 +239,15 @@ class RustBackend private constructor() : RustBackendWelding {
 
         @JvmStatic private external fun getSentMemoAsUtf8(dbDataPath: String, idNote: Long): String
 
-        @JvmStatic private external fun validateCombinedChain(dbCachePath: String, dbDataPath: String): Int
+        @JvmStatic private external fun validateCombinedChain(dbCachePath: String, dbDataPath: String, chainNetwork: UShort): Int
 
-        @JvmStatic private external fun rewindToHeight(dbDataPath: String, height: Int): Boolean
+        @JvmStatic private external fun rewindToHeight(dbDataPath: String, height: Int, chainNetwork: UShort): Boolean
 
-        @JvmStatic private external fun scanBlocks(dbCachePath: String, dbDataPath: String): Boolean
+        @JvmStatic private external fun scanBlocks(dbCachePath: String, dbDataPath: String, chainNetwork: UShort): Boolean
 
-        @JvmStatic private external fun scanBlockBatch(dbCachePath: String, dbDataPath: String, limit: Int): Boolean
+        @JvmStatic private external fun scanBlockBatch(dbCachePath: String, dbDataPath: String, limit: Int, chainNetwork: UShort): Boolean
 
-        @JvmStatic private external fun decryptAndStoreTransaction(dbDataPath: String, tx: ByteArray)
+        @JvmStatic private external fun decryptAndStoreTransaction(dbDataPath: String, tx: ByteArray, chainNetwork: UShort)
 
         @JvmStatic private external fun createToAddress(
             dbDataPath: String,
@@ -243,12 +258,13 @@ class RustBackend private constructor() : RustBackendWelding {
             value: Long,
             memo: ByteArray,
             spendParamsPath: String,
-            outputParamsPath: String
+            outputParamsPath: String,
+            chainNetwork: UShort
         ): Long
 
         @JvmStatic private external fun initLogs()
 
-        @JvmStatic private external fun branchIdForHeight(height: Int): Long
+        @JvmStatic private external fun branchIdForHeight(height: Int, chainNetwork: UShort): Long
 
         @JvmStatic private external fun parseTransactionDataList(serializedList: ByteArray): ByteArray
     }

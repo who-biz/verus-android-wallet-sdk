@@ -1,6 +1,7 @@
 package cash.z.ecc.android.sdk.jni
 
 import cash.z.ecc.android.sdk.rpc.LocalRpcTypes
+import com.google.common.base.Strings
 
 /**
  * Contract defining the exposed capabilities of the Rust backend.
@@ -16,28 +17,29 @@ interface RustBackendWelding {
         extsk: String,
         to: String,
         value: Long,
-        memo: ByteArray? = byteArrayOf()
+        memo: ByteArray? = byteArrayOf(),
+        chainNetwork: String
     ): Long
 
-    fun decryptAndStoreTransaction(tx: ByteArray)
+    fun decryptAndStoreTransaction(tx: ByteArray, chainNetwork: String)
 
-    fun initAccountsTable(seed: ByteArray, numberOfAccounts: Int): Array<String>
+    fun initAccountsTable(seed: ByteArray, numberOfAccounts: Int, chainNetwork: String): Array<String>
 
-    fun initAccountsTable(vararg extfvks: String): Boolean
+    fun initAccountsTable(vararg extfvks: String, chainNetwork: String): Boolean
 
     fun initBlocksTable(height: Int, hash: String, time: Long, saplingTree: String): Boolean
 
     fun initDataDb(): Boolean
 
-    fun isValidShieldedAddr(addr: String): Boolean
+    fun isValidShieldedAddr(addr: String, chainNetwork: String): Boolean
 
-    fun isValidTransparentAddr(addr: String): Boolean
+    fun isValidTransparentAddr(addr: String, chainNetwork: String): Boolean
 
     fun getAddress(account: Int = 0): String
 
     fun getBalance(account: Int = 0): Long
 
-    fun getBranchIdForHeight(height: Int): Long
+    fun getBranchIdForHeight(height: Int, chainNetwork: String): Long
 
     fun getReceivedMemoAsUtf8(idNote: Long): String
 
@@ -47,11 +49,11 @@ interface RustBackendWelding {
 
     fun parseTransactionDataList(tdl: LocalRpcTypes.TransactionDataList): LocalRpcTypes.TransparentTransactionList
 
-    fun rewindToHeight(height: Int): Boolean
+    fun rewindToHeight(height: Int, chainNetwork: String): Boolean
 
-    fun scanBlocks(limit: Int = -1): Boolean
+    fun scanBlocks(limit: Int = -1, chainNetwork: String): Boolean
 
-    fun validateCombinedChain(): Int
+    fun validateCombinedChain(ChainNetwork: String): Int
 
     // Implemented by `DerivationTool`
     interface Derivation {
