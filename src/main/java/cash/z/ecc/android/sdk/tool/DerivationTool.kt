@@ -6,6 +6,9 @@ import cash.z.ecc.android.sdk.jni.RustBackendWelding
 class DerivationTool {
     companion object : RustBackendWelding.Derivation {
 
+        private var chainId: UShort = 0u
+        // populated with real value within RustBackendLoaded function body
+
         /**
          * Given a seed and a number of accounts, return the associated viewing keys.
          *
@@ -17,7 +20,7 @@ class DerivationTool {
          */
         override fun deriveViewingKeys(seed: ByteArray, numberOfAccounts: Int): Array<String> =
             withRustBackendLoaded {
-                deriveExtendedFullViewingKeys(seed, numberOfAccounts)
+                deriveExtendedFullViewingKeys(seed, numberOfAccounts, chainId)
             }
 
         /**
@@ -28,7 +31,7 @@ class DerivationTool {
          * @return the viewing key that corresponds to the spending key.
          */
         override fun deriveViewingKey(spendingKey: String): String = withRustBackendLoaded {
-            deriveExtendedFullViewingKey(spendingKey)
+            deriveExtendedFullViewingKey(spendingKey, chainId)
         }
 
         /**
@@ -42,7 +45,7 @@ class DerivationTool {
          */
         override fun deriveSpendingKeys(seed: ByteArray, numberOfAccounts: Int): Array<String> =
             withRustBackendLoaded {
-                deriveExtendedSpendingKeys(seed, numberOfAccounts)
+                deriveExtendedSpendingKeys(seed, numberOfAccounts, chainId)
             }
 
         /**
@@ -56,7 +59,7 @@ class DerivationTool {
          */
         override fun deriveShieldedAddress(seed: ByteArray, accountIndex: Int): String =
             withRustBackendLoaded {
-                deriveShieldedAddressFromSeed(seed, accountIndex)
+                deriveShieldedAddressFromSeed(seed, accountIndex, chainId)
             }
 
         /**
@@ -68,14 +71,14 @@ class DerivationTool {
          * @return the address that corresponds to the viewing key.
          */
         override fun deriveShieldedAddress(viewingKey: String): String = withRustBackendLoaded {
-            deriveShieldedAddressFromViewingKey(viewingKey)
+            deriveShieldedAddressFromViewingKey(viewingKey, chainId)
         }
 
         // WIP probably shouldn't be used just yet. Why?
         //  - because we need the private key associated with this seed and this function doesn't return it.
         //  - the underlying implementation needs to be split out into a few lower-level calls
         override fun deriveTransparentAddress(seed: ByteArray): String = withRustBackendLoaded {
-            deriveTransparentAddressFromSeed(seed)
+            deriveTransparentAddressFromSeed(seed, chainId)
         }
 
 
@@ -90,7 +93,7 @@ class DerivationTool {
          * nice to have an annotation like @UsesSystemLibrary for this
          */
         private fun <T> withRustBackendLoaded(block: () -> T): T {
-            RustBackend.load()
+            chainId = RustBackend.load()
             return block()
         }
 
@@ -102,28 +105,31 @@ class DerivationTool {
         @JvmStatic
         private external fun deriveExtendedSpendingKeys(
             seed: ByteArray,
-            numberOfAccounts: Int
+            numberOfAccounts: Int,
+            chainId: UShort
         ): Array<String>
 
         @JvmStatic
         private external fun deriveExtendedFullViewingKeys(
             seed: ByteArray,
-            numberOfAccounts: Int
+            numberOfAccounts: Int,
+            chainId: UShort
         ): Array<String>
 
         @JvmStatic
-        private external fun deriveExtendedFullViewingKey(spendingKey: String): String
+        private external fun deriveExtendedFullViewingKey(spendingKey: String, chainId: UShort): String
 
         @JvmStatic
         private external fun deriveShieldedAddressFromSeed(
             seed: ByteArray,
-            accountIndex: Int
+            accountIndex: Int,
+            chainId: UShort
         ): String
 
         @JvmStatic
-        private external fun deriveShieldedAddressFromViewingKey(key: String): String
+        private external fun deriveShieldedAddressFromViewingKey(key: String, chainId: UShort): String
 
         @JvmStatic
-        private external fun deriveTransparentAddressFromSeed(seed: ByteArray): String
+        private external fun deriveTransparentAddressFromSeed(seed: ByteArray, chainId: UShort): String
     }
 }

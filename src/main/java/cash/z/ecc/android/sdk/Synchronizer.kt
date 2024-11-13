@@ -194,6 +194,7 @@ interface Synchronizer {
 
     /**
      * Validates the given address, returning information about why it is invalid. This is a
+     *
      * convenience method that combines the behavior of [isValidShieldedAddr] and
      * [isValidTransparentAddr] into one call so that the developer doesn't have to worry about
      * handling the exceptions that they throw. Rather, exceptions are converted to

@@ -153,6 +153,7 @@ class RustBackend private constructor() : RustBackendWelding {
      */
     companion object {
         private var loaded = false
+        private var chainId: UShort = 0u
 
         /**
          * Loads the library and initializes path variables. Although it is best to only call this
@@ -173,11 +174,11 @@ class RustBackend private constructor() : RustBackendWelding {
                     this.birthdayHeight = birthdayHeight
                 }
                 this.chainNetwork = chainNetwork
-
+                chainId = getChainNetworkId(chainNetwork)
             }
         }
 
-        fun load() {
+        fun load(): UShort {
             // It is safe to call these things twice but not efficient. So we add a loose check and
             // ignore the fact that it's not thread-safe.
             if (!loaded) {
@@ -186,6 +187,7 @@ class RustBackend private constructor() : RustBackendWelding {
                     initLogs()
                 }
             }
+            return chainId
         }
 
         /**
@@ -205,7 +207,6 @@ class RustBackend private constructor() : RustBackendWelding {
         //
         // External Functions
         //
-
         @JvmStatic private external fun initDataDb(dbDataPath: String): Boolean
 
         @JvmStatic private external fun initAccountsTable(
