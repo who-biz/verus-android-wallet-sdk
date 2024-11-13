@@ -1,6 +1,7 @@
 package cash.z.ecc.android.sdk
 
 import android.content.Context
+import android.net.Network
 import cash.z.ecc.android.sdk.Synchronizer.Status.*
 import cash.z.ecc.android.sdk.block.CompactBlockDbStore
 import cash.z.ecc.android.sdk.block.CompactBlockDownloader
@@ -484,19 +485,19 @@ class SdkSynchronizer internal constructor(
         txManager.monitorById(it.id)
     }.distinctUntilChanged()
 
-    override suspend fun isValidShieldedAddr(address: String) =
-        txManager.isValidShieldedAddress(address)
+    override suspend fun isValidShieldedAddr(address: String, chainNetwork: String) =
+        txManager.isValidShieldedAddress(address, chainNetwork)
 
-    override suspend fun isValidTransparentAddr(address: String) =
-        txManager.isValidTransparentAddress(address)
+    override suspend fun isValidTransparentAddr(address: String, chainNetwork: String) =
+        txManager.isValidTransparentAddress(address, chainNetwork)
 
-    override suspend fun validateAddress(address: String): AddressType {
+    override suspend fun validateAddress(address: String, chainNetwork: String): AddressType {
         return try {
-            if (isValidShieldedAddr(address)) Shielded else Transparent
+            if (isValidShieldedAddr(address, chainNetwork)) Shielded else Transparent
         } catch (zError: Throwable) {
             var message = zError.message
             try {
-                if (isValidTransparentAddr(address)) Transparent else Shielded
+                if (isValidTransparentAddr(address, chainNetwork)) Transparent else Shielded
             } catch (tError: Throwable) {
                 AddressType.Invalid(
                     if (message != tError.message) "$message and ${tError.message}" else (message
@@ -506,10 +507,10 @@ class SdkSynchronizer internal constructor(
         }
     }
 
-    override suspend fun validateConsensusBranch(): ConsensusMatchType {
+    override suspend fun validateConsensusBranch(chainNetwork: String): ConsensusMatchType {
         val serverBranchId = tryNull { processor.downloader.getServerInfo().consensusBranchId }
         val sdkBranchId = tryNull {
-            (txManager as PersistentTransactionManager).encoder.getConsensusBranchId()
+            (txManager as PersistentTransactionManager).encoder.getConsensusBranchId(chainNetwork)
         }
         return ConsensusMatchType(
             sdkBranchId?.let { ConsensusBranchId.fromId(it) },
@@ -594,7 +595,7 @@ fun Synchronizer(
     txManager: OutboundTransactionManager =
         PersistentTransactionManager(initializer.context, encoder, service),
     processor: CompactBlockProcessor =
-        CompactBlockProcessor(downloader, repository, initializer.rustBackend, initializer.rustBackend.birthdayHeight)
+        CompactBlockProcessor(downloader, repository, initializer.rustBackend, initializer.rustBackend.birthdayHeight, initializer.rustBackend.chainNetwork)
 ): Synchronizer {
     // call the actual constructor now that all dependencies have been injected
     // alternatively, this entire object graph can be supplied by Dagger

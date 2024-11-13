@@ -35,6 +35,8 @@ class RustBackend private constructor() : RustBackendWelding {
     internal set
     lateinit var pathParamsDir: String
     internal set
+    lateinit var chainNetwork: String
+    internal set
 
     internal var birthdayHeight: Int = -1
         get() = if (field != -1) field else throw BirthdayException.UninitializedBirthdayException
@@ -58,7 +60,7 @@ class RustBackend private constructor() : RustBackendWelding {
 
     override fun initDataDb() = initDataDb(pathDataDb)
 
-    override fun initAccountsTable(vararg extfvks: String, chainNetwork: String) =
+    override fun initAccountsTable(vararg extfvks: String) =
         initAccountsTableWithKeys(pathDataDb, extfvks, getChainNetworkId(chainNetwork))
 
     override fun initAccountsTable(
@@ -108,7 +110,6 @@ class RustBackend private constructor() : RustBackendWelding {
         to: String,
         value: Long,
         memo: ByteArray?,
-        chainNetwork: String
     ): Long = createToAddress(
         pathDataDb,
         consensusBranchId,
@@ -161,7 +162,8 @@ class RustBackend private constructor() : RustBackendWelding {
             cacheDbPath: String,
             dataDbPath: String,
             paramsPath: String,
-            birthdayHeight: Int? = null
+            birthdayHeight: Int? = null,
+            chainNetwork: String
         ): RustBackend {
             return RustBackend().apply {
                 pathCacheDb = cacheDbPath
@@ -170,6 +172,8 @@ class RustBackend private constructor() : RustBackendWelding {
                 if (birthdayHeight != null) {
                     this.birthdayHeight = birthdayHeight
                 }
+                this.chainNetwork = chainNetwork
+
             }
         }
 

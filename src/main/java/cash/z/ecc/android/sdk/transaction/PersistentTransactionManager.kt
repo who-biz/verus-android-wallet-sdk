@@ -182,11 +182,11 @@ class PersistentTransactionManager(
         return pendingTransactionDao { monitorById(id) }
     }
 
-    override suspend fun isValidShieldedAddress(address: String) =
-        encoder.isValidShieldedAddress(address)
+    override suspend fun isValidShieldedAddress(address: String, chainNetwork: String) =
+        encoder.isValidShieldedAddress(address, chainNetwork)
 
-    override suspend fun isValidTransparentAddress(address: String) =
-        encoder.isValidTransparentAddress(address)
+    override suspend fun isValidTransparentAddress(address: String, chainNetwork:String) =
+        encoder.isValidTransparentAddress(address, chainNetwork)
 
     override suspend fun cancel(pendingId: Long): Boolean {
         return pendingTransactionDao {

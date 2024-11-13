@@ -17,15 +17,14 @@ interface RustBackendWelding {
         extsk: String,
         to: String,
         value: Long,
-        memo: ByteArray? = byteArrayOf(),
-        chainNetwork: String
+        memo: ByteArray? = byteArrayOf()
     ): Long
 
     fun decryptAndStoreTransaction(tx: ByteArray, chainNetwork: String)
 
     fun initAccountsTable(seed: ByteArray, numberOfAccounts: Int, chainNetwork: String): Array<String>
 
-    fun initAccountsTable(vararg extfvks: String, chainNetwork: String): Boolean
+    fun initAccountsTable(vararg extfvks: String): Boolean
 
     fun initBlocksTable(height: Int, hash: String, time: Long, saplingTree: String): Boolean
 

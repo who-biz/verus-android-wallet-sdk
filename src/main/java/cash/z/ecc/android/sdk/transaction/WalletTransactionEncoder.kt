@@ -60,8 +60,8 @@ class WalletTransactionEncoder(
      *
      * @return true when the given address is a valid z-addr
      */
-    override suspend fun isValidShieldedAddress(address: String): Boolean = withContext(IO) {
-        rustBackend.isValidShieldedAddr(address)
+    override suspend fun isValidShieldedAddress(address: String, chainNetwork: String): Boolean = withContext(IO) {
+        rustBackend.isValidShieldedAddr(address, chainNetwork)
     }
 
     /**
@@ -72,15 +72,15 @@ class WalletTransactionEncoder(
      *
      * @return true when the given address is a valid t-addr
      */
-    override suspend fun isValidTransparentAddress(address: String): Boolean = withContext(IO) {
-        rustBackend.isValidTransparentAddr(address)
+    override suspend fun isValidTransparentAddress(address: String, chainNetwork: String): Boolean = withContext(IO) {
+        rustBackend.isValidTransparentAddr(address, chainNetwork)
     }
 
-    override suspend fun getConsensusBranchId(): Long {
+    override suspend fun getConsensusBranchId(chainNetwork: String): Long {
         val height = repository.lastScannedHeight()
         if (height < ZcashSdk.SAPLING_ACTIVATION_HEIGHT)
             throw TransactionEncoderException.IncompleteScanException(height)
-        return rustBackend.getBranchIdForHeight(height)
+        return rustBackend.getBranchIdForHeight(height, chainNetwork)
     }
 
     /**
@@ -106,8 +106,8 @@ class WalletTransactionEncoder(
         twigTask("creating transaction to spend $zatoshi zatoshi to" +
                 " ${toAddress.masked()} with memo $memo") {
             try {
-                val branchId = getConsensusBranchId()
-                ensureParams((rustBackend as RustBackend).pathParamsDir)
+                val branchId = getConsensusBranchId((rustBackend as RustBackend).chainNetwork)
+                ensureParams(rustBackend.pathParamsDir)
                 twig("params exist! attempting to send with consensus branchId $branchId...")
                 rustBackend.createToAddress(
                     branchId,

@@ -78,7 +78,7 @@ interface OutboundTransactionManager {
      *
      * @return true when the given address is a valid t-addr.
      */
-    suspend fun isValidShieldedAddress(address: String): Boolean
+    suspend fun isValidShieldedAddress(address: String, chainNetwork: String): Boolean
 
     /**
      * Return true when the given address is a valid z-addr.
@@ -87,7 +87,7 @@ interface OutboundTransactionManager {
      *
      * @return true when the given address is a valid z-addr.
      */
-    suspend fun isValidTransparentAddress(address: String): Boolean
+    suspend fun isValidTransparentAddress(address: String, chainNetwork: String): Boolean
 
     /**
      * Attempt to cancel a transaction.

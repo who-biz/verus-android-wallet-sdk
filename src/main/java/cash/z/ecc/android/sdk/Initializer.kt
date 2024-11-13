@@ -43,7 +43,7 @@ class Initializer constructor(appContext: Context, config: Config):  SdkSynchron
         host = config.host
         port = config.port
         chainNetwork = config.network
-        rustBackend = initRustBackend(birthday)
+        rustBackend = initRustBackend(birthday, chainNetwork)
         // TODO: get rid of this by first answering the question: why is this necessary?
         initMissingDatabases(birthday, *viewingKeys.toTypedArray())
     }
@@ -52,12 +52,13 @@ class Initializer constructor(appContext: Context, config: Config):  SdkSynchron
 
     fun erase() = erase(context, alias)
 
-    private fun initRustBackend(birthday: WalletBirthdayTool.WalletBirthday): RustBackend {
+    private fun initRustBackend(birthday: WalletBirthdayTool.WalletBirthday, chainNetwork: String): RustBackend {
         return RustBackend.init(
             cacheDbPath(context, alias),
             dataDbPath(context, alias),
             "${context.cacheDir.absolutePath}/params",
-            birthday.height
+            birthday.height,
+            chainNetwork
         )
     }
 
@@ -104,7 +105,7 @@ class Initializer constructor(appContext: Context, config: Config):  SdkSynchron
         tryWarn(
             "Warning: did not initialize the accounts table. It probably was already initialized."
         ) {
-            rustBackend.initAccountsTable(*viewingKeys, chainNetwork)
+            rustBackend.initAccountsTable(*viewingKeys)
             accountsCreated = true
             twig("Initialized the accounts table with ${viewingKeys.size} viewingKey(s)")
         }

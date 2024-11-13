@@ -32,7 +32,7 @@ interface TransactionEncoder {
      *
      * @return true when the given address is a valid z-addr
      */
-    suspend fun isValidShieldedAddress(address: String): Boolean
+    suspend fun isValidShieldedAddress(address: String, chainNetwork: String): Boolean
 
     /**
      * Utility function to help with validation. This is not called during [createTransaction]
@@ -42,10 +42,10 @@ interface TransactionEncoder {
      *
      * @return true when the given address is a valid t-addr
      */
-    suspend fun isValidTransparentAddress(address: String): Boolean
+    suspend fun isValidTransparentAddress(address: String, chainNetwork: String): Boolean
 
     /**
      * Return the consensus branch that the encoder is using when making transactions.
      */
-    suspend fun getConsensusBranchId(): Long
+    suspend fun getConsensusBranchId(chainNetwork: String): Long
 }

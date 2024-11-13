@@ -165,7 +165,7 @@ interface Synchronizer {
      *
      * @throws RuntimeException when the address is invalid.
      */
-    suspend fun isValidShieldedAddr(address: String): Boolean
+    suspend fun isValidShieldedAddr(address: String, chainNetwork: String): Boolean
 
     /**
      * Returns true when the given address is a valid t-addr. Invalid addresses will throw an
@@ -177,7 +177,7 @@ interface Synchronizer {
      *
      * @throws RuntimeException when the address is invalid.
      */
-    suspend fun isValidTransparentAddr(address: String): Boolean
+    suspend fun isValidTransparentAddr(address: String, chainNetwork: String): Boolean
 
     /**
      * Validate whether the server and this SDK share the same consensus branch. This is
@@ -190,7 +190,7 @@ interface Synchronizer {
      * @return an instance of [ConsensusMatchType] that is essentially a wrapper for both branch ids
      * and provides helper functions for communicating detailed errors to the user.
      */
-    suspend fun validateConsensusBranch(): ConsensusMatchType
+    suspend fun validateConsensusBranch(chainNetwork: String): ConsensusMatchType
 
     /**
      * Validates the given address, returning information about why it is invalid. This is a
@@ -203,7 +203,7 @@ interface Synchronizer {
      *
      * @return an instance of [AddressType] providing validation info regarding the given address.
      */
-    suspend fun validateAddress(address: String): AddressType
+    suspend fun validateAddress(address: String, chainNetwork: String): AddressType
 
     /**
      * Attempts to cancel a transaction that is about to be sent. Typically, cancellation is only
