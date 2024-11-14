@@ -14,14 +14,14 @@ import java.io.File
  */
 class RustBackend private constructor() : RustBackendWelding {
 
-    fun getChainNetworkId(chainNetwork: String): UShort {
+    fun getChainNetworkId(chainNetwork: String): Int {
         var networkId: Int
         when (chainNetwork) {
             "VRSC" -> networkId = 1
             "ZEC" -> networkId = 2
             else -> networkId = 0
         }
-        return networkId as UShort
+        return networkId
     }
 
     init {
@@ -35,7 +35,7 @@ class RustBackend private constructor() : RustBackendWelding {
     internal set
     lateinit var pathParamsDir: String
     internal set
-    lateinit var chainNetwork: String
+    lateinit var network: String
     internal set
 
     internal var birthdayHeight: Int = -1
@@ -61,7 +61,7 @@ class RustBackend private constructor() : RustBackendWelding {
     override fun initDataDb() = initDataDb(pathDataDb)
 
     override fun initAccountsTable(vararg extfvks: String) =
-        initAccountsTableWithKeys(pathDataDb, extfvks, getChainNetworkId(chainNetwork))
+        initAccountsTableWithKeys(pathDataDb, extfvks, getChainNetworkId(network))
 
     override fun initAccountsTable(
         seed: ByteArray,
@@ -120,7 +120,7 @@ class RustBackend private constructor() : RustBackendWelding {
         memo ?: ByteArray(0),
         "${pathParamsDir}/$SPEND_PARAM_FILE_NAME",
         "${pathParamsDir}/$OUTPUT_PARAM_FILE_NAME",
-        getChainNetworkId(chainNetwork)
+        getChainNetworkId(network)
     )
 
     override fun isValidShieldedAddr(addr: String, chainNetwork: String) = isValidShieldedAddress(addr, getChainNetworkId(chainNetwork))
@@ -153,7 +153,7 @@ class RustBackend private constructor() : RustBackendWelding {
      */
     companion object {
         private var loaded = false
-        private var chainId: UShort = 0u
+        private var chainId: Int = 0
 
         /**
          * Loads the library and initializes path variables. Although it is best to only call this
@@ -164,7 +164,7 @@ class RustBackend private constructor() : RustBackendWelding {
             dataDbPath: String,
             paramsPath: String,
             birthdayHeight: Int? = null,
-            chainNetwork: String
+            network: String
         ): RustBackend {
             return RustBackend().apply {
                 pathCacheDb = cacheDbPath
@@ -173,12 +173,12 @@ class RustBackend private constructor() : RustBackendWelding {
                 if (birthdayHeight != null) {
                     this.birthdayHeight = birthdayHeight
                 }
-                this.chainNetwork = chainNetwork
-                chainId = getChainNetworkId(chainNetwork)
+                this.network = network
+                chainId = getChainNetworkId(network)
             }
         }
 
-        fun load(): UShort {
+        fun load(): Int {
             // It is safe to call these things twice but not efficient. So we add a loose check and
             // ignore the fact that it's not thread-safe.
             if (!loaded) {
@@ -213,13 +213,13 @@ class RustBackend private constructor() : RustBackendWelding {
             dbDataPath: String,
             seed: ByteArray,
             accounts: Int,
-            chainNetwork: UShort
+            chainNetwork: Int
         ): Array<String>
 
         @JvmStatic private external fun initAccountsTableWithKeys(
             dbDataPath: String,
             extfvk: Array<out String>,
-            chainNetwork: UShort
+            chainNetwork: Int
         ): Boolean
 
         @JvmStatic private external fun initBlocksTable(
@@ -232,9 +232,9 @@ class RustBackend private constructor() : RustBackendWelding {
 
         @JvmStatic private external fun getAddress(dbDataPath: String, account: Int): String
 
-        @JvmStatic private external fun isValidShieldedAddress(addr: String, chainNetwork: UShort): Boolean
+        @JvmStatic private external fun isValidShieldedAddress(addr: String, chainNetwork: Int): Boolean
 
-        @JvmStatic private external fun isValidTransparentAddress(addr: String, chainNetwork: UShort): Boolean
+        @JvmStatic private external fun isValidTransparentAddress(addr: String, chainNetwork: Int): Boolean
 
         @JvmStatic private external fun getBalance(dbDataPath: String, account: Int): Long
 
@@ -244,15 +244,15 @@ class RustBackend private constructor() : RustBackendWelding {
 
         @JvmStatic private external fun getSentMemoAsUtf8(dbDataPath: String, idNote: Long): String
 
-        @JvmStatic private external fun validateCombinedChain(dbCachePath: String, dbDataPath: String, chainNetwork: UShort): Int
+        @JvmStatic private external fun validateCombinedChain(dbCachePath: String, dbDataPath: String, chainNetwork: Int): Int
 
-        @JvmStatic private external fun rewindToHeight(dbDataPath: String, height: Int, chainNetwork: UShort): Boolean
+        @JvmStatic private external fun rewindToHeight(dbDataPath: String, height: Int, chainNetwork: Int): Boolean
 
-        @JvmStatic private external fun scanBlocks(dbCachePath: String, dbDataPath: String, chainNetwork: UShort): Boolean
+        @JvmStatic private external fun scanBlocks(dbCachePath: String, dbDataPath: String, chainNetwork: Int): Boolean
 
-        @JvmStatic private external fun scanBlockBatch(dbCachePath: String, dbDataPath: String, limit: Int, chainNetwork: UShort): Boolean
+        @JvmStatic private external fun scanBlockBatch(dbCachePath: String, dbDataPath: String, limit: Int, chainNetwork: Int): Boolean
 
-        @JvmStatic private external fun decryptAndStoreTransaction(dbDataPath: String, tx: ByteArray, chainNetwork: UShort)
+        @JvmStatic private external fun decryptAndStoreTransaction(dbDataPath: String, tx: ByteArray, chainNetwork: Int)
 
         @JvmStatic private external fun createToAddress(
             dbDataPath: String,
@@ -264,12 +264,12 @@ class RustBackend private constructor() : RustBackendWelding {
             memo: ByteArray,
             spendParamsPath: String,
             outputParamsPath: String,
-            chainNetwork: UShort
+            chainNetwork: Int
         ): Long
 
         @JvmStatic private external fun initLogs()
 
-        @JvmStatic private external fun branchIdForHeight(height: Int, chainNetwork: UShort): Long
+        @JvmStatic private external fun branchIdForHeight(height: Int, chainNetwork: Int): Long
 
         @JvmStatic private external fun parseTransactionDataList(serializedList: ByteArray): ByteArray
     }

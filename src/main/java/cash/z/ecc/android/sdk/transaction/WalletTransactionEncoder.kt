@@ -106,7 +106,7 @@ class WalletTransactionEncoder(
         twigTask("creating transaction to spend $zatoshi zatoshi to" +
                 " ${toAddress.masked()} with memo $memo") {
             try {
-                val branchId = getConsensusBranchId((rustBackend as RustBackend).chainNetwork)
+                val branchId = getConsensusBranchId((rustBackend as RustBackend).network)
                 ensureParams(rustBackend.pathParamsDir)
                 twig("params exist! attempting to send with consensus branchId $branchId...")
                 rustBackend.createToAddress(

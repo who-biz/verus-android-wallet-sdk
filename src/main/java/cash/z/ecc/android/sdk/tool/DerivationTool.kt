@@ -6,7 +6,7 @@ import cash.z.ecc.android.sdk.jni.RustBackendWelding
 class DerivationTool {
     companion object : RustBackendWelding.Derivation {
 
-        private var chainId: UShort = 0u
+        private var chainId: Int = 0
         // populated with real value within RustBackendLoaded function body
 
         /**
@@ -106,30 +106,30 @@ class DerivationTool {
         private external fun deriveExtendedSpendingKeys(
             seed: ByteArray,
             numberOfAccounts: Int,
-            chainId: UShort
+            chainId: Int
         ): Array<String>
 
         @JvmStatic
         private external fun deriveExtendedFullViewingKeys(
             seed: ByteArray,
             numberOfAccounts: Int,
-            chainId: UShort
+            chainId: Int
         ): Array<String>
 
         @JvmStatic
-        private external fun deriveExtendedFullViewingKey(spendingKey: String, chainId: UShort): String
+        private external fun deriveExtendedFullViewingKey(spendingKey: String, chainId: Int): String
 
         @JvmStatic
         private external fun deriveShieldedAddressFromSeed(
             seed: ByteArray,
             accountIndex: Int,
-            chainId: UShort
+            chainId: Int
         ): String
 
         @JvmStatic
-        private external fun deriveShieldedAddressFromViewingKey(key: String, chainId: UShort): String
+        private external fun deriveShieldedAddressFromViewingKey(key: String, chainId: Int): String
 
         @JvmStatic
-        private external fun deriveTransparentAddressFromSeed(seed: ByteArray, chainId: UShort): String
+        private external fun deriveTransparentAddressFromSeed(seed: ByteArray, chainId: Int): String
     }
 }

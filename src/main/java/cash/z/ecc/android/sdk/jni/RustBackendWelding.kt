@@ -52,7 +52,7 @@ interface RustBackendWelding {
 
     fun scanBlocks(limit: Int = -1, chainNetwork: String): Boolean
 
-    fun validateCombinedChain(ChainNetwork: String): Int
+    fun validateCombinedChain(chainNetwork: String): Int
 
     // Implemented by `DerivationTool`
     interface Derivation {

@@ -595,7 +595,7 @@ fun Synchronizer(
     txManager: OutboundTransactionManager =
         PersistentTransactionManager(initializer.context, encoder, service),
     processor: CompactBlockProcessor =
-        CompactBlockProcessor(downloader, repository, initializer.rustBackend, initializer.rustBackend.birthdayHeight, initializer.rustBackend.chainNetwork)
+        CompactBlockProcessor(downloader, repository, initializer.rustBackend, initializer.rustBackend.birthdayHeight, initializer.rustBackend.network)
 ): Synchronizer {
     // call the actual constructor now that all dependencies have been injected
     // alternatively, this entire object graph can be supplied by Dagger
