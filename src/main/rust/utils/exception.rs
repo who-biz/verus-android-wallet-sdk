@@ -45,9 +45,9 @@ pub fn unwrap_exc_or<T>(env: &JNIEnv, res: ExceptionResult<T>, error_val: T) -> 
 }
 
 // Same as `unwrap_exc_or` but returns default value.
-pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) -> T {
+/*pub fn unwrap_exc_or_default<T: Default>(env: &JNIEnv, res: ExceptionResult<T>) -> T {
     unwrap_exc_or(env, res, T::default())
-}
+}*/
 
 // Calls a corresponding `JNIEnv` method, so exception will be thrown when execution returns to
 // the Java side.
