@@ -66,6 +66,13 @@ class RustBackend private constructor(
             )
         }
 
+    override suspend fun initBlockDb() =
+        withContext(SdkDispatchers.DATABASE_IO) {
+            initBlockDb(
+                fsBlockDbRoot.absolutePath,
+            )
+        }
+
     override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?) =
         withContext(SdkDispatchers.DATABASE_IO) {
             initDataDb(
@@ -436,6 +443,9 @@ class RustBackend private constructor(
 
         @JvmStatic
         private external fun initBlockMetaDb(fsBlockDbRoot: String): Int
+
+        @JvmStatic
+        private external fun initBlockDb(fsBlockDbRoot: String): Int
 
         @JvmStatic
         private external fun initDataDb(

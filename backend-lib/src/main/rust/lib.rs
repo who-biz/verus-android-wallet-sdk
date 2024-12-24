@@ -41,9 +41,10 @@ use zcash_client_backend::{
     ShieldedProtocol,
 };
 use zcash_client_sqlite::{
-    chain::{init::init_blockmeta_db, BlockMeta},
+//    chain::{init::init_blockmeta_db, BlockMeta},
+    chain::{init::init_cache_database},
     wallet::init::{init_wallet_db, WalletMigrationError},
-    AccountId, FsBlockDb, WalletDb,
+    AccountId, BlockDb, WalletDb,
 };
 use zcash_primitives::{
     block::BlockHash,
@@ -94,8 +95,8 @@ fn wallet_db<P: Parameters>(
         .map_err(|e| anyhow!("Error opening wallet database connection: {}", e))
 }
 
-fn block_db(env: &mut JNIEnv, fsblockdb_root: JString) -> anyhow::Result<FsBlockDb> {
-    FsBlockDb::for_path(utils::java_string_to_rust(env, &fsblockdb_root))
+fn block_db(env: &mut JNIEnv, fsblockdb_root: JString) -> anyhow::Result<BlockDb> {
+    BlockDb::for_path(utils::java_string_to_rust(env, &fsblockdb_root))
         .map_err(|e| anyhow!("Error opening block source database connection: {:?}", e))
 }
 
@@ -193,15 +194,15 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initOnLoa
 ///
 /// Returns 0 if successful, or -1 otherwise.
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initBlockMetaDb<'local>(
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initBlockDb<'local>(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     fsblockdb_root: JString<'local>,
 ) -> jint {
     let res = catch_unwind(&mut env, |env| {
-        let mut db_meta = block_db(env, fsblockdb_root)?;
+        let mut db_cache = block_db(env, fsblockdb_root)?;
 
-        match init_blockmeta_db(&mut db_meta) {
+        match init_cache_database(&mut db_cache) {
             Ok(()) => Ok(0),
             Err(e) => Err(anyhow!("Error while initializing block metadata DB: {}", e)),
         }
@@ -863,7 +864,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_getMemoAs
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
 
-fn encode_blockmeta<'a>(env: &mut JNIEnv<'a>, meta: BlockMeta) -> jni::errors::Result<JObject<'a>> {
+/*fn encode_blockmeta<'a>(env: &mut JNIEnv<'a>, meta: BlockMeta) -> jni::errors::Result<JObject<'a>> {
     let block_hash = env.byte_array_from_slice(&meta.block_hash.0)?;
     env.new_object(
         "cash/z/ecc/android/sdk/internal/model/JniBlockMeta",
@@ -1012,7 +1013,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_rewindBlo
 
     unwrap_exc_or(&mut env, res, ())
 }
-
+*/
 #[no_mangle]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_getNearestRewindHeight<
     'local,
@@ -1102,8 +1103,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
     db_data: JString<'local>,
     sapling_start_index: jlong,
     sapling_roots: JObjectArray<'local>,
-    orchard_start_index: jlong,
-    orchard_roots: JObjectArray<'local>,
+    _orchard_start_index: jlong,
+    _orchard_roots: JObjectArray<'local>,
     network_id: jint,
 ) -> jboolean {
     let res = catch_unwind(&mut env, |env| {
@@ -1137,14 +1138,14 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
 
 	//#[cfg(feature = "orchard")]
     //    {
-            let orchard_start_index = if orchard_start_index >= 0 {
-                orchard_start_index as u64
-            } else {
-                return Err(anyhow!("Orchard start index must be nonnegative."));
-            };
-            let orchard_roots = parse_roots(env, orchard_roots, |n| {
-                orchard::tree::MerkleHashOrchard::read(n)
-            })?;
+    //        let orchard_start_index = if orchard_start_index >= 0 {
+    //            orchard_start_index as u64
+     //       } else {
+    //            return Err(anyhow!("Orchard start index must be nonnegative."));
+     //       };
+     //       let orchard_roots = parse_roots(env, orchard_roots, |n| {
+    //            orchard::tree::MerkleHashOrchard::read(n)
+     //       })?;
     //    }
 
         db_data
@@ -1153,9 +1154,9 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
 
         //#[cfg(feature = "orchard")]
         //{
-            db_data
-                .put_orchard_subtree_roots(orchard_start_index, &orchard_roots)
-                .map_err(|e| anyhow!("Error while storing Orchard subtree roots: {}", e))?;
+        //    db_data
+        //        .put_orchard_subtree_roots(orchard_start_index, &orchard_roots)
+         //       .map_err(|e| anyhow!("Error while storing Orchard subtree roots: {}", e))?;
         //}
 
         Ok(JNI_TRUE)
@@ -1346,7 +1347,8 @@ fn encode_wallet_summary<'a, P: Parameters>(
             JValue::Long(progress_denominator as i64),
             JValue::Long(summary.next_sapling_subtree_index() as i64),
             //#[cfg(feature = "orchard")]
-            JValue::Long(summary.next_orchard_subtree_index() as i64),
+            //JValue::Long(summary.next_orchard_subtree_index() as i64),
+            JValue::Long(0 as i64),
         ],
     )?)
 }

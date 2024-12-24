@@ -8,7 +8,7 @@ authors = [
 description = "JNI backend for the Android wallet SDK"
 publish = false
 edition = "2018"
-rust-version = "1.77"
+rust-version = "1.81"
 
 [dependencies]
 hdwallet = "0.4"
@@ -24,8 +24,8 @@ secrecy = "0.8"
 zcash_address = "0.3"
 #zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs", "unstable"] }
 #zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs", "unstable"] }
-zcash_client_backend = { version = "0.12.1", features = ["orchard", "transparent-inputs", "unstable"] }
-zcash_client_sqlite = { version = "0.10.3", features = ["orchard", "transparent-inputs", "unstable"] }
+zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs","unstable"] }
+zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs"] }
 zcash_primitives = "0.15"
 zcash_proofs = "0.15"
 
@@ -52,11 +52,11 @@ orchard = []
 
 ## Uncomment this to test librustzcash changes locally
 #[patch.crates-io]
-#zcash_address = { path = '<pathtolibrustzcashroot>/zcash_address' }
-#zcash_client_backend = { path = '<pathtolibrustzcashroot>/zcash_client_backend' }
-#zcash_client_sqlite = { path = '<pathtolibrustzcashroot>/zcash_client_sqlite' }
-#zcash_primitives = { path = '<pathtolibrustzcashroot>/zcash_primitives' }
-#zcash_proofs = { path = '<pathtolibrustzcashroot>/zcash_proofs' }
+#zcash_address = { path = '/home/biz/Desktop/Verus_Development/librustzcash/zcash_address' }
+#zcash_client_backend = { path = '/home/biz/Desktop/Verus_Development/librustzcash/zcash_client_backend' }
+#zcash_client_sqlite = { path = '/home/biz/Desktop/Verus_Development/librustzcash/zcash_client_sqlite' }
+#zcash_primitives = { path = '/home/biz/Desktop/Verus_Development/librustzcash/zcash_primitives' }
+#zcash_proofs = { path = '/home/biz/Desktop/Verus_Development/librustzcash/zcash_proofs' }
 
 ## Uncomment this to test someone else's librustzcash changes in a branch
 [patch.crates-io]

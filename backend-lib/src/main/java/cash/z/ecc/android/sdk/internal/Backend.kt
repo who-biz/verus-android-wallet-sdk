@@ -20,6 +20,8 @@ interface Backend {
 
     suspend fun initBlockMetaDb(): Int
 
+    suspend fun initBlockDb(): Int
+
     @Suppress("LongParameterList")
     suspend fun proposeTransfer(
         account: Int,

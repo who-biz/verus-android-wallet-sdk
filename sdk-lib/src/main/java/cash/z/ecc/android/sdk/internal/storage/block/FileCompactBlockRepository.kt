@@ -45,13 +45,13 @@ internal class FileCompactBlockRepository(
 
             if (metaDataBuffer.isBufferFull()) {
                 processingBlocks.addAll(metaDataBuffer)
-                writeAndClearBuffer(metaDataBuffer)
+                //writeAndClearBuffer(metaDataBuffer)
             }
         }
 
         if (metaDataBuffer.isNotEmpty()) {
             processingBlocks.addAll(metaDataBuffer)
-            writeAndClearBuffer(metaDataBuffer)
+//            writeAndClearBuffer(metaDataBuffer)
         }
 
         return processingBlocks
@@ -147,7 +147,7 @@ internal class FileCompactBlockRepository(
                 error("${blocksDirectory.path} directory does not exist and could not be created.")
             }
 
-            backend.initBlockMetaDb()
+            backend.initBlockDb()
 
             return FileCompactBlockRepository(blocksDirectory, backend)
         }

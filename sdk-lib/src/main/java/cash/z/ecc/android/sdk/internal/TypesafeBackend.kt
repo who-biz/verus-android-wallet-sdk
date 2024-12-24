@@ -154,6 +154,8 @@ internal interface TypesafeBackend {
 
     suspend fun initBlockMetaDb(): Int
 
+    suspend fun initBlockDb(): Int
+
     /**
      * @throws RuntimeException as a common indicator of the operation failure
      */
