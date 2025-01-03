@@ -1095,7 +1095,7 @@ fn decode_subtree_root<H>(
     ))
 }
 
-#[no_mangle]
+/*#[no_mangle]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtreeRoots<'local>(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
@@ -1163,7 +1163,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtre
 
     unwrap_exc_or(&mut env, res, JNI_FALSE)
 }
-
+*/
 #[no_mangle]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_updateChainTip<'local>(
     mut env: JNIEnv<'local>,
@@ -1346,7 +1346,8 @@ fn encode_wallet_summary<'a, P: Parameters>(
             JValue::Long(progress_denominator as i64),
             JValue::Long(summary.next_sapling_subtree_index() as i64),
             //#[cfg(feature = "orchard")]
-            JValue::Long(summary.next_orchard_subtree_index() as i64),
+            //JValue::Long(summary.next_orchard_subtree_index() as i64),
+            JValue::Long(0 as i64),
         ],
     )?)
 }
