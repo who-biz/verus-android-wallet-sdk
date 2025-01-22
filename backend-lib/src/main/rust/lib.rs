@@ -75,6 +75,10 @@ const ANCHOR_OFFSET: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(ANCHOR_OFFS
 const DEFAULT_ADDRESS_REQUEST: UnifiedAddressRequest =
     UnifiedAddressRequest::unsafe_new(true, true, true);
 
+// Do not generate Orchard receivers until we support receiving Orchard funds.
+const SAPLING_ADDRESS_REQUEST: UnifiedAddressRequest =
+    UnifiedAddressRequest::unsafe_new(false, true, false);
+
 #[cfg(debug_assertions)]
 fn print_debug_state() {
     debug!("WARNING! Debugging enabled! This will likely slow things down 10X!");
@@ -479,7 +483,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let _span =
             tracing::info_span!("RustDerivationTool.deriveUnifiedAddressFromSeed").entered();
         let network = parse_network(network_id as u32)?;
-        let transparent_key = env.convert_byte_array(transparent_key).unwrap();
+        let transparent_key = env.convert_byte_array(transparent_key)?;
         let seed = env.convert_byte_array(seed).unwrap();
         let account_id = account_id_from_jint(account_index)?;
 
@@ -491,6 +495,39 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
             .find_address(DiversifierIndex::new(), DEFAULT_ADDRESS_REQUEST)
             .expect("At least one Unified Address should be derivable");
         let address_str = ua.encode(&network);
+        let output = env
+            .new_string(address_str)
+            .expect("Couldn't create Java string!");
+        Ok(output.into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_deriveShieldedAddressFromSeed<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    seed: JByteArray<'local>,
+    account_index: jint,
+    network_id: jint,
+) -> jstring {
+    let res = panic::catch_unwind(|| {
+        let _span =
+            tracing::info_span!("RustDerivationTool.deriveShieldedAddressFromSeed").entered();
+        let network = parse_network(network_id as u32)?;
+        let seed = env.convert_byte_array(seed).unwrap();
+        let account_id = account_id_from_jint(account_index)?;
+
+        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], &seed, account_id)
+            .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))
+            .map(|usk| usk.to_unified_full_viewing_key())?;
+
+        let (ua, _) = ufvk
+            .find_address(DiversifierIndex::new(), SAPLING_ADDRESS_REQUEST)
+            .expect("At least one Unified Address should be derivable");
+        let address_str = ua.sapling().expect("no sapling receiver in UAddr found!").encode(&network);
         let output = env
             .new_string(address_str)
             .expect("Couldn't create Java string!");
@@ -527,6 +564,42 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         // address that older SDKs used).
         let (ua, _) = ufvk.default_address(DEFAULT_ADDRESS_REQUEST)?;
         let address_str = ua.encode(&network);
+        let output = env
+            .new_string(address_str)
+            .expect("Couldn't create Java string!");
+        Ok(output.into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_deriveShieldedAddressFromViewingKey<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    ufvk_string: JString<'local>,
+    network_id: jint,
+) -> jstring {
+    let res = catch_unwind(&mut env, |env| {
+        let _span =
+            tracing::info_span!("RustDerivationTool.deriveShieldedAddressFromViewingKey").entered();
+        let network = parse_network(network_id as u32)?;
+        let ufvk_string = utils::java_string_to_rust(env, &ufvk_string);
+        let ufvk = match UnifiedFullViewingKey::decode(&network, &ufvk_string) {
+            Ok(ufvk) => ufvk,
+            Err(e) => {
+                return Err(anyhow!(
+                    "Error while deriving viewing key from string input: {}",
+                    e,
+                ));
+            }
+        };
+
+        // Derive the default Unified Address (containing the default Sapling payment
+        // address that older SDKs used).
+        let (ua, _) = ufvk.default_address(SAPLING_ADDRESS_REQUEST)?;
+        let address_str = ua.sapling().expect("No sapling receiver found in UAddr!").encode(&network);
         let output = env
             .new_string(address_str)
             .expect("Couldn't create Java string!");

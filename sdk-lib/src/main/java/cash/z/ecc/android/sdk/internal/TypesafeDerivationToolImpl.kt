@@ -35,4 +35,15 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         viewingKey: String,
         network: ZcashNetwork,
     ): String = derivation.deriveUnifiedAddress(viewingKey, network)
+
+    override suspend fun deriveShieldedAddress(
+        viewingKey: String,
+        network: ZcashNetwork,
+    ): String = derivation.deriveShieldedAddress(viewingKey, network)
+
+    override suspend fun deriveShieldedAddress(
+        seed: ByteArray,
+        network: ZcashNetwork,
+        account: Account
+    ): String = derivation.deriveShieldedAddress(seed, network, account)
 }

@@ -142,6 +142,25 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                 null
             )
 
+    @OptIn(ExperimentalStdlibApi::class)
+    val shieldedAddress =
+        secretState
+            .filterIsInstance<SecretState.Ready>()
+            .map { it.persistableWallet }
+            .map {
+                    val hexSeed = it.hexSeed.decodeHex()
+                    DerivationTool.getInstance().deriveShieldedAddress(
+                        seed = hexSeed,
+                        network = it.network,
+                        account = Account.DEFAULT
+                    )
+            }.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
+                null
+            )
+
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val walletSnapshot: StateFlow<WalletSnapshot?> =
         synchronizer

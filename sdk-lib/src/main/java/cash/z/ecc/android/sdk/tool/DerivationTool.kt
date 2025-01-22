@@ -71,6 +71,20 @@ interface DerivationTool {
     ): String
 
     /**
+     * Given a seed and account index, return the associated Shielded Address.
+     *
+     * @param seed the seed from which to derive the address.
+     * @param account the index of the account to use for deriving the address.
+     *
+     * @return the address that corresponds to the seed and account index.
+     */
+    suspend fun deriveShieldedAddress(
+        seed: ByteArray,
+        network: ZcashNetwork,
+        account: Account
+    ): String
+
+    /**
      * Given a Unified Full Viewing Key string, return the associated Unified Address.
      *
      * @param viewingKey the viewing key to use for deriving the address. The viewing key is tied to
@@ -79,6 +93,19 @@ interface DerivationTool {
      * @return the address that corresponds to the viewing key.
      */
     suspend fun deriveUnifiedAddress(
+        viewingKey: String,
+        network: ZcashNetwork
+    ): String
+
+    /**
+     * Given a Unified Full Viewing Key string, return the associated Unified Address.
+     *
+     * @param viewingKey the viewing key to use for deriving the address. The viewing key is tied to
+     * a specific account so no account index is required.
+     *
+     * @return the address that corresponds to the viewing key.
+     */
+    suspend fun deriveShieldedAddress(
         viewingKey: String,
         network: ZcashNetwork
     ): String

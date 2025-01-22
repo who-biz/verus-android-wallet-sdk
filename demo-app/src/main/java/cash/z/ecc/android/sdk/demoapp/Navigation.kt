@@ -164,8 +164,9 @@ internal fun ComposeActivity.Navigation() {
             //val synchronizer = walletViewModel.synchronizer.collectAsStateWithLifecycle().value
             val secretState = walletViewModel.secretState.collectAsStateWithLifecycle().value
             val spendingKey = walletViewModel.spendingKey.collectAsStateWithLifecycle().value
+            val shieldedAddress = walletViewModel.shieldedAddress.collectAsStateWithLifecycle().value
 
-            if (spendingKey == null || secretState !is SecretState.Ready) {
+            if (spendingKey == null || secretState !is SecretState.Ready || shieldedAddress == null) {
                 // Display loading indicator
             } else {
                 val wallet = secretState.persistableWallet
@@ -175,6 +176,7 @@ internal fun ComposeActivity.Navigation() {
                 Keys(
                     persistableWallet = wallet,
                     spendingKey = spendingKey,
+                    shieldedAddress = shieldedAddress,
                     onBack = {
                         navController.popBackStackJustOnce(KEYS)
                     }

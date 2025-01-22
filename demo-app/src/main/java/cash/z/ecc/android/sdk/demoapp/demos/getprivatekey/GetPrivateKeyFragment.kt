@@ -13,6 +13,7 @@ import cash.z.ecc.android.sdk.demoapp.BaseDemoFragment
 import cash.z.ecc.android.sdk.demoapp.databinding.FragmentGetPrivateKeyBinding
 import cash.z.ecc.android.sdk.demoapp.ext.requireApplicationContext
 import cash.z.ecc.android.sdk.demoapp.util.fromResources
+import cash.z.ecc.android.sdk.internal.Twig
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
@@ -29,12 +30,13 @@ class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
     private lateinit var seed: ByteArray
     private lateinit var wif: String
     private lateinit var transparentKey: ByteArray
+    lateinit var shieldedAddress: String
 
     /**
      * Initialize the required values that would normally live outside the demo but are repeated
      * here for completeness so that each demo file can serve as a standalone example.
      */
-    private fun setup() {
+    fun setup() {
         // defaults to the value of `DemoConfig.seedWords` but can also be set by the user
         seedPhrase = sharedViewModel.seedPhrase.value
 
@@ -46,9 +48,10 @@ class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
 
         val decodedWif = wif.decodeBase58WithChecksum()
         transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
+        displayKeys()
     }
 
-    private fun displayKeys() {
+    public fun displayKeys() {
         // derive the keys from the seed:
         // demonstrate deriving spending keys for five accounts but only take the first one
         lifecycleScope.launch {
@@ -69,8 +72,17 @@ class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
                         ZcashNetwork.fromResources(requireApplicationContext())
                     )
 
+                // derive the key that allows you to view but not spend transactions
+                shieldedAddress =
+                    DerivationTool.getInstance().deriveShieldedAddress(
+                        viewingKey.toString(),
+                        ZcashNetwork.fromResources(requireApplicationContext())
+                    )
+                Twig.info { "shilededAddress = $shieldedAddress"}
+
                 // display the keys in the UI
-                binding.textInfo.setText("Spending Key:\n$spendingKey\n\nViewing Key:\n$viewingKey")
+                binding.textInfo.setText("Spending Key:\n$spendingKey\n\nViewing " +
+                    "Key:\n$viewingKey\n\nShieldedAddress:\n$shieldedAddress")
             }
         }
     }
@@ -86,6 +98,7 @@ class GetPrivateKeyFragment : BaseDemoFragment<FragmentGetPrivateKeyBinding>() {
     ): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         setup()
+        displayKeys()
         return view
     }
 

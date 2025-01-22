@@ -8,7 +8,18 @@ interface Derivation {
         networkId: Int
     ): String
 
+    fun deriveShieldedAddress(
+        viewingKey: String,
+        networkId: Int
+    ): String
+
     fun deriveUnifiedAddress(
+        seed: ByteArray,
+        networkId: Int,
+        accountIndex: Int
+    ): String
+
+    fun deriveShieldedAddress(
         seed: ByteArray,
         networkId: Int,
         accountIndex: Int

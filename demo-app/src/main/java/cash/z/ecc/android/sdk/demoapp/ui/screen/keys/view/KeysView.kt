@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cash.z.ecc.android.sdk.demoapp.R
+import cash.z.ecc.android.sdk.demoapp.demos.getprivatekey.GetPrivateKeyFragment
 import cash.z.ecc.android.sdk.model.PersistableWallet
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
@@ -32,7 +33,6 @@ private fun ComposablePreview() {
     MaterialTheme {
         // TODO [#1090]: Demo: Add Addresses and Transactions Compose Previews
         // TODO [#1090]: https://github.com/zcash/zcash-android-wallet-sdk/issues/1090
-        // Keys()
     }
 }
 
@@ -41,6 +41,7 @@ private fun ComposablePreview() {
 fun Keys(
     persistableWallet: PersistableWallet,
     spendingKey: UnifiedSpendingKey,
+    shieldedAddress: String,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -50,8 +51,9 @@ fun Keys(
         KeysMainContent(
             paddingValues = paddingValues,
             persistableWallet = persistableWallet,
-            spendingKey = spendingKey
-        )
+            spendingKey = spendingKey,
+            shieldedAddress = shieldedAddress
+            )
     }
 }
 
@@ -79,13 +81,23 @@ private fun KeysTopAppBar(onBack: () -> Unit) {
 private fun KeysMainContent(
     paddingValues: PaddingValues,
     persistableWallet: PersistableWallet,
-    spendingKey: UnifiedSpendingKey
+    spendingKey: UnifiedSpendingKey,
+    shieldedAddress: String
 ) {
     Column(
         Modifier
             .verticalScroll(rememberScrollState())
             .padding(top = paddingValues.calculateTopPadding())
     ) {
+
+        Spacer(Modifier.padding(8.dp))
+        Text(stringResource(id = R.string.shielded_address))
+        //Text(spendingKey.toString())
+        // note: above value is overridden with placeholder, for security reasons
+        Text(shieldedAddress)
+
+
+        Spacer(Modifier.padding(8.dp))
         Text(stringResource(id = R.string.spending_key))
         //Text(spendingKey.toString())
         // note: above value is overridden with placeholder, for security reasons

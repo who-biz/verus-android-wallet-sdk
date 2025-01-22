@@ -17,6 +17,17 @@ fun Derivation.deriveUnifiedAddress(
     network: ZcashNetwork,
 ): String = deriveUnifiedAddress(viewingKey, network.id)
 
+fun Derivation.deriveShieldedAddress(
+    viewingKey: String,
+    network: ZcashNetwork,
+): String = deriveShieldedAddress(viewingKey, network.id)
+
+fun Derivation.deriveShieldedAddress(
+    seed: ByteArray,
+    network: ZcashNetwork,
+    account: Account
+): String = deriveShieldedAddress(seed, network.id, account.value)
+
 fun Derivation.deriveUnifiedSpendingKey(
     transparentKey: ByteArray,
     seed: ByteArray,
