@@ -32,6 +32,7 @@ use zcash_client_backend::{
         Account, AccountBalance, AccountBirthday, AccountSource, InputSource, SeedRelevance,
         WalletCommitmentTrees, WalletRead, WalletSummary, WalletWrite,
     },
+    encoding,
     encoding::AddressCodec,
     fees::{standard::SingleOutputChangeStrategy, DustOutputPolicy},
     keys::{DecodingError, Era, UnifiedAddressRequest, UnifiedFullViewingKey, UnifiedSpendingKey},
@@ -436,7 +437,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let _span = tracing::info_span!("RustDerivationTool.deriveUnifiedFullViewingKeysFromSeed")
             .entered();
         let network = parse_network(network_id as u32)?;
-        let transparent_key = env.convert_byte_array(transparent_key).unwrap();
+        let transparent_key = env.convert_byte_array(transparent_key)?;
         let seed = env.convert_byte_array(seed).unwrap();
         let accounts = if accounts > 0 {
             accounts as u32
@@ -464,6 +465,52 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
             |env| env.new_string(""),
         )?
         .into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_deriveViewingKey<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    seed: JByteArray<'local>,
+    accounts: jint,
+    network_id: jint,
+) -> jobjectArray {
+    let res = catch_unwind(&mut env, |env| {
+        let _span = tracing::info_span!("RustDerivationTool.deriveViewingKey")
+            .entered();
+        let network = parse_network(network_id as u32)?;
+        let seed = env.convert_byte_array(seed).unwrap();
+        let accounts = if accounts > 0 {
+            accounts as u32
+        } else {
+            return Err(anyhow!("accounts argument must be greater than zero"));
+        };
+
+        let extfvks: Vec<_> = (0..accounts)
+            .map(|account| {
+                let account_id = zip32::AccountId::try_from(account)
+                    .map_err(|_| anyhow!("Invalid account ID"))?;
+                UnifiedSpendingKey::from_seed(&network, &[], &seed, account_id)
+                    .map_err(|e| {
+                        anyhow!("error generating unified spending key from seed: {:?}", e)
+                    })
+                    .map(|usk| usk.to_unified_full_viewing_key().sapling()
+                        .expect("Something went wrong when converting ufvk to extfvk").to_bytes())
+            })
+            .collect::<Result<_, _>>()?;
+
+        Ok(utils::rust_vec_to_java(
+            env,
+            extfvks,
+            "java/lang/String",
+            |env, extfvk| env.new_string(std::str::from_utf8(&extfvk).unwrap()), // TODO: maybe we should use something different here than from_utf8
+            |env| env.new_string(""),
+        )?
+            .into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
