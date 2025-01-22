@@ -15,6 +15,7 @@ use jni::{
     JNIEnv,
 };
 use prost::Message;
+use sapling::zip32::ExtendedSpendingKey;
 use secrecy::{ExposeSecret, SecretVec};
 use tracing::{debug, error};
 use tracing_subscriber::prelude::*;
@@ -280,6 +281,21 @@ fn encode_usk<'a>(
     )
 }
 
+
+fn encode_extsk<'a>(
+    env: &mut JNIEnv<'a>,
+    account: zip32::AccountId,
+    extsk: ExtendedSpendingKey,
+) -> jni::errors::Result<JObject<'a>> {
+    let encoded = SecretVec::new(extsk.to_bytes().to_vec());
+    let bytes = env.byte_array_from_slice(encoded.expose_secret())?;
+    env.new_object(
+        "cash/z/ecc/android/sdk/internal/model/JniExtendedSpendingKey",
+        "(I[B)V",
+        &[JValue::Int(u32::from(account) as i32), (&bytes).into()],
+    )
+}
+
 fn decode_usk(env: &JNIEnv, usk: JByteArray) -> anyhow::Result<UnifiedSpendingKey> {
     let usk_bytes = SecretVec::new(env.convert_byte_array(usk).unwrap());
 
@@ -418,6 +434,32 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))?;
 
         Ok(encode_usk(env, account, usk)?.into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+
+/// Derives and returns a sapling spending key from the given seed for the given account ID.
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_deriveShieldedSpendingKey<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    seed: JByteArray<'local>,
+    account: jint,
+    network_id: jint,
+) -> jobject {
+    let res = catch_unwind(&mut env, |env| {
+        let _span = tracing::info_span!("RustDerivationTool.deriveSpendingKey").entered();
+        let network = parse_network(network_id as u32)?;
+        let seed = SecretVec::new(env.convert_byte_array(seed).unwrap());
+        let account = account_id_from_jint(account)?;
+
+        let usk = UnifiedSpendingKey::from_seed(&network, &[], seed.expose_secret(), account)
+            .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e)).expect("Unable to convert usk to sapling extsk");
+        let extsk = usk.sapling();
+
+        Ok(encode_extsk(env, account, extsk.clone())?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
