@@ -433,6 +433,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let usk = UnifiedSpendingKey::from_seed(&network, transparent_key.expose_secret(), seed.expose_secret(), account)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))?;
 
+        warn!("Seed({:?}), usk({:?})", seed.expose_secret(), usk);
         Ok(encode_usk(env, account, usk)?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
@@ -544,6 +545,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
                         .expect("Something went wrong when converting ufvk to extfvk").to_bytes())
             })
             .collect::<Result<_, _>>()?;
+        warn!("extfvks: {:?}", extfvks);
 
         Ok(utils::rust_vec_to_java(
             env,

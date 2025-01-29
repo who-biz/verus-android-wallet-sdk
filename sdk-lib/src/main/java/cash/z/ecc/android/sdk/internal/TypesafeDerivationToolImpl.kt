@@ -18,13 +18,25 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         network: ZcashNetwork
     ): UnifiedFullViewingKey = derivation.deriveUnifiedFullViewingKey(usk, network)
 
+
+/*    override suspend fun deriveViewingKey(
+        seed: ByteArray,
+        network: ZcashNetwork
+    ): ByteArray = derivation.deriveViewingKey(seed, network)
+*/
     override suspend fun deriveUnifiedSpendingKey(
         transparentKey: ByteArray,
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account
     ): UnifiedSpendingKey = derivation.deriveUnifiedSpendingKey(transparentKey, seed, network, account)
-
+/*
+    override suspend fun deriveShieldedSpendingKey(
+        seed: ByteArray,
+        network: ZcashNetwork,
+        account: Account
+    ): ByteArray = derivation.deriveShieldedSpendingKey(seed, network, account)
+*/
     override suspend fun deriveUnifiedAddress(
         seed: ByteArray,
         network: ZcashNetwork,

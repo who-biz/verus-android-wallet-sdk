@@ -26,12 +26,12 @@ interface DerivationTool {
     ): List<UnifiedFullViewingKey>
 
 
-    suspend fun deriveViewingKey(
+/*    suspend fun deriveViewingKey(
         seed: ByteArray,
         network: ZcashNetwork,
         numberOfAccounts: Int
-    ): ExtendedFullViewingKey
-
+    ): ByteArray
+*/
     /**
      * Given a unified spending key, return the associated unified full viewing key.
      *
@@ -64,12 +64,12 @@ interface DerivationTool {
     ): UnifiedSpendingKey
 
 
-    suspend fun deriveUnifiedSpendingKey(
+/*    suspend fun deriveShieldedSpendingKey(
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account
-    ): ExtendedSpendingKey
-
+    ): ByteArray
+*/
     /**
      * Given a seed and account index, return the associated Unified Address.
      *

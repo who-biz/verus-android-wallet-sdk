@@ -35,6 +35,18 @@ fun Derivation.deriveUnifiedSpendingKey(
     account: Account
 ): UnifiedSpendingKey = UnifiedSpendingKey(deriveUnifiedSpendingKey(transparentKey, seed, network.id, account.value))
 
+/*fun Derivation.deriveShieldedSpendingKey(
+    seed: ByteArray,
+    network: ZcashNetwork,
+    account: Account
+): ByteArray = deriveShieldedSpendingKey(seed, network.id, account.value)
+
+fun Derivation.deriveViewingKey(
+    seed: ByteArray,
+    network: ZcashNetwork,
+    account: Account
+): ByteArray = deriveViewingKey(seed, network.id, account.value)*/
+
 fun Derivation.deriveUnifiedFullViewingKey(
     usk: UnifiedSpendingKey,
     network: ZcashNetwork
