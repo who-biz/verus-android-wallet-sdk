@@ -290,7 +290,7 @@ fn encode_extsk<'a>(
     let encoded = SecretVec::new(extsk.to_bytes().to_vec());
     let bytes = env.byte_array_from_slice(encoded.expose_secret())?;
     env.new_object(
-        "cash/z/ecc/android/sdk/internal/model/JniExtendedSpendingKey",
+        "cash/z/ecc/android/sdk/internal/model/JniShieldedSpendingKey",
         "(I[B)V",
         &[JValue::Int(u32::from(account) as i32), (&bytes).into()],
     )
