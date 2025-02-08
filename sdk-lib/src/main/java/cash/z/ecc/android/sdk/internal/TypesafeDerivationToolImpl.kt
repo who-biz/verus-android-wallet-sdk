@@ -3,6 +3,7 @@ package cash.z.ecc.android.sdk.internal
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
+import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.tool.DerivationTool
 
@@ -30,13 +31,15 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         network: ZcashNetwork,
         account: Account
     ): UnifiedSpendingKey = derivation.deriveUnifiedSpendingKey(transparentKey, seed, network, account)
-/*
-    override suspend fun deriveShieldedSpendingKey(
+
+
+    override suspend fun deriveSaplingSpendingKey(
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account
-    ): ByteArray = derivation.deriveShieldedSpendingKey(seed, network, account)
-*/
+    ): ShieldedSpendingKey = derivation.deriveSaplingSpendingKey(seed, network, account)
+
+
     override suspend fun deriveUnifiedAddress(
         seed: ByteArray,
         network: ZcashNetwork,

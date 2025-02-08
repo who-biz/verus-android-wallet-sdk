@@ -7,6 +7,7 @@ import cash.z.ecc.android.sdk.internal.jni.RustDerivationTool
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
+import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 
 interface DerivationTool {
@@ -64,12 +65,13 @@ interface DerivationTool {
     ): UnifiedSpendingKey
 
 
-/*    suspend fun deriveShieldedSpendingKey(
+    suspend fun deriveSaplingSpendingKey(
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account
-    ): ByteArray
-*/
+    ): ShieldedSpendingKey
+
+
     /**
      * Given a seed and account index, return the associated Unified Address.
      *

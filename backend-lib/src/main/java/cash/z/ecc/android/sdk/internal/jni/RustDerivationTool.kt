@@ -2,6 +2,7 @@ package cash.z.ecc.android.sdk.internal.jni
 
 import cash.z.ecc.android.sdk.internal.Derivation
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
+import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
 
 class RustDerivationTool private constructor() : Derivation {
     override fun deriveUnifiedFullViewingKeys(
@@ -21,6 +22,12 @@ class RustDerivationTool private constructor() : Derivation {
         networkId: Int,
         accountIndex: Int
     ): JniUnifiedSpendingKey = deriveSpendingKey(transparentKey, seed, accountIndex, networkId = networkId)
+
+    override fun deriveSaplingSpendingKey(
+        seed: ByteArray,
+        networkId: Int,
+        accountIndex: Int
+    ): JniShieldedSpendingKey = deriveShieldedSpendingKey(seed, accountIndex, networkId = networkId)
 
     override fun deriveUnifiedAddress(
         seed: ByteArray,
@@ -74,6 +81,13 @@ class RustDerivationTool private constructor() : Derivation {
             account: Int,
             networkId: Int
         ): JniUnifiedSpendingKey
+
+        @JvmStatic
+        private external fun deriveShieldedSpendingKey(
+            seed: ByteArray,
+            account: Int,
+            networkId: Int
+        ): JniShieldedSpendingKey
 
         @JvmStatic
         private external fun deriveUnifiedFullViewingKeysFromSeed(

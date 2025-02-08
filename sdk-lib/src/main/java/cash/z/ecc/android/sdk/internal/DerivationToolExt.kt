@@ -1,9 +1,11 @@
 package cash.z.ecc.android.sdk.internal
 
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
+//import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
+import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 
 fun Derivation.deriveUnifiedAddress(
@@ -35,17 +37,20 @@ fun Derivation.deriveUnifiedSpendingKey(
     account: Account
 ): UnifiedSpendingKey = UnifiedSpendingKey(deriveUnifiedSpendingKey(transparentKey, seed, network.id, account.value))
 
-/*fun Derivation.deriveShieldedSpendingKey(
+
+fun Derivation.deriveSaplingSpendingKey(
     seed: ByteArray,
     network: ZcashNetwork,
     account: Account
-): ByteArray = deriveShieldedSpendingKey(seed, network.id, account.value)
+): ShieldedSpendingKey = ShieldedSpendingKey(deriveSaplingSpendingKey(seed, network.id, account.value))
 
+/*
 fun Derivation.deriveViewingKey(
     seed: ByteArray,
     network: ZcashNetwork,
     account: Account
-): ByteArray = deriveViewingKey(seed, network.id, account.value)*/
+): ByteArray = deriveViewingKey(seed, network.id, account.value)
+*/
 
 fun Derivation.deriveUnifiedFullViewingKey(
     usk: UnifiedSpendingKey,
