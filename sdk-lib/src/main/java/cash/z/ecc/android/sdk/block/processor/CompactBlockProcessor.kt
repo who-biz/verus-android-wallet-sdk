@@ -153,6 +153,7 @@ class CompactBlockProcessor internal constructor(
     private val _progress = MutableStateFlow(PercentDecimal.ZERO_PERCENT)
     private val _processorInfo = MutableStateFlow(ProcessorInfo(null, null, null))
     private val _networkHeight = MutableStateFlow<BlockHeight?>(null)
+    private val _lastScannedHeight = MutableStateFlow<BlockHeight?>(null)
 
     // pools
     internal val saplingBalances = MutableStateFlow<WalletBalance?>(null)
@@ -193,6 +194,12 @@ class CompactBlockProcessor internal constructor(
      * updated but this allows consumers to have the information pushed instead of polling.
      */
     val networkHeight = _networkHeight.asStateFlow()
+
+    /**
+     * The flow of network height. This value is updated at the same time that [processorInfo] is
+     * updated but this allows consumers to have the information pushed instead of polling.
+     */
+    val lastScannedHeight = _lastScannedHeight.asStateFlow()
 
     /**
      * The first block this wallet cares about anything prior can be ignored. If a wallet has no
@@ -458,6 +465,8 @@ class CompactBlockProcessor internal constructor(
         var verifyRangeResult = preparationResult.verifyRangeResult
         var suggestedRangesResult = preparationResult.suggestedRangesResult
         val lastPreparationTime = System.currentTimeMillis()
+
+        setLastScannedHeight(lastValidHeight);
 
         // Running synchronization for the [ScanRange.SuggestScanRangePriority.Verify] range
         while (verifyRangeResult is VerifySuggestedScanRange.ShouldVerify) {
@@ -2072,6 +2081,15 @@ class CompactBlockProcessor internal constructor(
                 overallSyncRange = overallSyncRange,
                 firstUnenhancedHeight = firstUnenhancedHeight
             )
+    }
+
+    /**
+     * Sets the last scanned block for this [CompactBlockProcessor].
+     *
+     * @param lastScannedHeight the last height that blockProcessor has scanned fully
+     */
+    private fun setLastScannedHeight(lastScannedHeight: BlockHeight = _lastScannedHeight.value) {
+        _lastScannedHeight.value = lastScannedHeight
     }
 
     /**

@@ -72,6 +72,13 @@ interface Synchronizer {
     val networkHeight: StateFlow<BlockHeight?>
 
     /**
+     * The latest height observed on the network, which does not necessarily correspond to the
+     * latest downloaded height or scanned height. Although this is present in [processorInfo], it
+     * is such a frequently used value that it is convenient to have the real-time value by itself.
+     */
+    val lastScannedHeight: StateFlow<BlockHeight?>
+
+    /**
      * A stream of balance values for the orchard pool.
      */
     val orchardBalances: StateFlow<WalletBalance?>

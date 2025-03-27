@@ -232,6 +232,12 @@ class SdkSynchronizer private constructor(
      */
     override val networkHeight: StateFlow<BlockHeight?> = processor.networkHeight
 
+    /**
+     * The lastScannedHeight seen on the network while processing blocks. This may differ from the
+     * latest height scanned and is useful for determining block confirmations and expiration.
+     */
+    override val lastScannedHeight: StateFlow<BlockHeight?> = processor.lastScannedHeight
+
     //
     // Error Handling
     //
