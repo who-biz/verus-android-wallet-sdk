@@ -151,7 +151,7 @@ class CompactBlockProcessor internal constructor(
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(State.Initialized)
     private val _progress = MutableStateFlow(PercentDecimal.ZERO_PERCENT)
-    private val _processorInfo = MutableStateFlow(ProcessorInfo(null, null, null))
+    private val _processorInfo = MutableStateFlow(ProcessorInfo(null, null, null, null))
     private val _networkHeight = MutableStateFlow<BlockHeight?>(null)
     private val _lastScannedHeight = MutableStateFlow<BlockHeight?>(null)
 
@@ -810,6 +810,10 @@ class CompactBlockProcessor internal constructor(
         // Get the first un-enhanced transaction from the repository
         val firstUnenhancedHeight = getFirstUnenhancedHeight(repository)
 
+
+        // Get the last scanned block height from ranges
+        val lastScannedHeight = ranges[0].range.start
+
         // The overall sync range computation
         val syncRange =
             if (ranges.isNotEmpty()) {
@@ -832,7 +836,8 @@ class CompactBlockProcessor internal constructor(
         setProcessorInfo(
             networkBlockHeight = networkBlockHeight,
             overallSyncRange = syncRange,
-            firstUnenhancedHeight = firstUnenhancedHeight
+            firstUnenhancedHeight = firstUnenhancedHeight,
+            lastScannedHeight = lastScannedHeight
         )
 
         return true
@@ -2073,13 +2078,16 @@ class CompactBlockProcessor internal constructor(
         networkBlockHeight: BlockHeight? = _processorInfo.value.networkBlockHeight,
         overallSyncRange: ClosedRange<BlockHeight>? = _processorInfo.value.overallSyncRange,
         firstUnenhancedHeight: BlockHeight? = _processorInfo.value.firstUnenhancedHeight,
+        lastScannedHeight: BlockHeight? = _processorInfo.value.lastScannedHeight,
     ) {
         _networkHeight.value = networkBlockHeight
+        _lastScannedHeight.value = lastScannedHeight
         _processorInfo.value =
             ProcessorInfo(
                 networkBlockHeight = networkBlockHeight,
                 overallSyncRange = overallSyncRange,
-                firstUnenhancedHeight = firstUnenhancedHeight
+                firstUnenhancedHeight = firstUnenhancedHeight,
+                lastScannedHeight = lastScannedHeight
             )
     }
 
@@ -2088,7 +2096,7 @@ class CompactBlockProcessor internal constructor(
      *
      * @param lastScannedHeight the last height that blockProcessor has scanned fully
      */
-    private fun setLastScannedHeight(lastScannedHeight: BlockHeight = _lastScannedHeight.value) {
+    private fun setLastScannedHeight(lastScannedHeight: BlockHeight? = _lastScannedHeight.value) {
         _lastScannedHeight.value = lastScannedHeight
     }
 
@@ -2365,7 +2373,8 @@ class CompactBlockProcessor internal constructor(
     data class ProcessorInfo(
         val networkBlockHeight: BlockHeight?,
         val overallSyncRange: ClosedRange<BlockHeight>?,
-        val firstUnenhancedHeight: BlockHeight?
+        val firstUnenhancedHeight: BlockHeight?,
+        val lastScannedHeight: BlockHeight?
     )
 
     data class ValidationErrorInfo(
