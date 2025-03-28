@@ -76,7 +76,7 @@ interface Synchronizer {
      * latest downloaded height or scanned height. Although this is present in [processorInfo], it
      * is such a frequently used value that it is convenient to have the real-time value by itself.
      */
-    val lastScannedHeight: StateFlow<BlockHeight?>
+    //val lastScannedHeight: StateFlow<BlockHeight?>
 
     /**
      * A stream of balance values for the orchard pool.

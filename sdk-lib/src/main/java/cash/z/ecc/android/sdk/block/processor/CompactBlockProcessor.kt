@@ -153,7 +153,7 @@ class CompactBlockProcessor internal constructor(
     private val _progress = MutableStateFlow(PercentDecimal.ZERO_PERCENT)
     private val _processorInfo = MutableStateFlow(ProcessorInfo(null, null, null, null))
     private val _networkHeight = MutableStateFlow<BlockHeight?>(null)
-    private val _lastScannedHeight = MutableStateFlow<BlockHeight?>(null)
+    //private val _lastScannedHeight = MutableStateFlow<BlockHeight?>(null)
 
     // pools
     internal val saplingBalances = MutableStateFlow<WalletBalance?>(null)
@@ -199,7 +199,7 @@ class CompactBlockProcessor internal constructor(
      * The flow of network height. This value is updated at the same time that [processorInfo] is
      * updated but this allows consumers to have the information pushed instead of polling.
      */
-    val lastScannedHeight = _lastScannedHeight.asStateFlow()
+    //val lastScannedHeight = _lastScannedHeight.asStateFlow()
 
     /**
      * The first block this wallet cares about anything prior can be ignored. If a wallet has no
@@ -466,7 +466,7 @@ class CompactBlockProcessor internal constructor(
         var suggestedRangesResult = preparationResult.suggestedRangesResult
         val lastPreparationTime = System.currentTimeMillis()
 
-        setLastScannedHeight(lastValidHeight);
+        //setLastScannedHeight(lastValidHeight);
 
         // Running synchronization for the [ScanRange.SuggestScanRangePriority.Verify] range
         while (verifyRangeResult is VerifySuggestedScanRange.ShouldVerify) {
@@ -1767,6 +1767,7 @@ class CompactBlockProcessor internal constructor(
                 runCatching {
                     backend.scanBlocks(batch.range.start, fromState, batch.range.length())
                 }.onSuccess {
+                    setProcessorScannedHeight(batch.range.endInclusive)
                     Twig.verbose { "Successfully scanned batch $batch" }
                 }.onFailure {
                     Twig.error { "Failed while scanning batch $batch with $it" }
@@ -2073,6 +2074,7 @@ class CompactBlockProcessor internal constructor(
      * @param firstUnenhancedHeight the height at which the enhancing should start. Use null if you have no
      * preferences. The height will be calculated automatically for you to continue where it previously ended, or
      * it'll be set to the sync start height in case of the first sync attempt.
+     * @param lastScannedHeight the height at which we have processed all blocks up to.
      */
     private fun setProcessorInfo(
         networkBlockHeight: BlockHeight? = _processorInfo.value.networkBlockHeight,
@@ -2092,13 +2094,32 @@ class CompactBlockProcessor internal constructor(
     }
 
     /**
+     * Sets new values of ProcessorInfo, changing only lastScannedHeight corresponding to the data for this
+     * [CompactBlockProcessor].
+     *
+     * @param lastScannedHeight The height at which we have processed all blocks including and prior.
+     */
+
+    private fun setProcessorScannedHeight(
+        lastScannedHeight: BlockHeight? = _processorInfo.value.lastScannedHeight
+    ) {
+       _processorInfo.value = 
+           ProcessorInfo(
+               networkBlockHeight = _processorInfo.value.networkBlockHeight,
+               overallSyncRange = _processorInfo.value.overallSyncRange,
+               firstUnenhancing = _processorInfo.value.firstUnenhancedHeight,
+               lastScannedHeight = lastScannedHeight  // only update this value
+           )
+    }
+
+    /**
      * Sets the last scanned block for this [CompactBlockProcessor].
      *
      * @param lastScannedHeight the last height that blockProcessor has scanned fully
      */
-    private fun setLastScannedHeight(lastScannedHeight: BlockHeight? = _lastScannedHeight.value) {
+    /*private fun setLastScannedHeight(lastScannedHeight: BlockHeight? = _lastScannedHeight.value) {
         _lastScannedHeight.value = lastScannedHeight
-    }
+    }*/
 
     /**
      * Sets the progress for this [CompactBlockProcessor].
