@@ -1777,11 +1777,11 @@ class CompactBlockProcessor internal constructor(
                     //TODO: if these are causing Updates to EventChannels too frequently, we should move them
                     val lastScannedHeight = batch.range.endInclusive
                     processor.setProcessorScannedHeight(lastScannedHeight)
-                    val networkHeight = processor.networkHeight.value?.value ?: 0L 
-                    val scanProgressPercentage = PercentDecimal(ScanProgress(lastScannedHeight.value, networkHeight).getSafeRatio())
+//                    val networkHeight = processor.networkHeight.value?.value ?: 0L 
+                    /*val scanProgressPercentage = PercentDecimal(ScanProgress(lastScannedHeight.value, networkHeight).getSafeRatio())
                     if (scanProgressPercentage != processor.progress.value) {
                         processor.setProgress(scanProgressPercentage)
-                    }
+                    }*/
 
                     Twig.verbose { "Successfully scanned batch $batch" }
                 }.onFailure {
