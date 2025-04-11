@@ -433,8 +433,9 @@ class CompactBlockProcessor internal constructor(
         lastValidHeight: BlockHeight,
         firstUnenhancedHeight: BlockHeight?
     ): BlockProcessingResult {
+
         Twig.info {
-            "Beginning to process new blocks with Spend-before-Sync approach with lower bound: $lastValidHeight)..."
+            "Beginning to process new blocks Spend-before-Sync (or Linear, toggled with rust features) at height: $lastValidHeight)..."
         }
         val traceScope = TraceScope("CompactBlockProcessor.processNewBlocksInSbSOrder")
 
@@ -1775,14 +1776,9 @@ class CompactBlockProcessor internal constructor(
                     backend.scanBlocks(batch.range.start, fromState, batch.range.length())
                 }.onSuccess {
 
-                    //TODO: if these are causing Updates to EventChannels too frequently, we should move them
+                    // lastScannedHeight only set here, when we have non-null ranges
                     val lastScannedHeight = batch.range.endInclusive
                     processor.setProcessorScannedHeight(lastScannedHeight)
-//                    val networkHeight = processor.networkHeight.value?.value ?: 0L 
-                    /*val scanProgressPercentage = PercentDecimal(ScanProgress(lastScannedHeight.value, networkHeight).getSafeRatio())
-                    if (scanProgressPercentage != processor.progress.value) {
-                        processor.setProgress(scanProgressPercentage)
-                    }*/
 
                     Twig.verbose { "Successfully scanned batch $batch" }
                 }.onFailure {
@@ -2090,7 +2086,6 @@ class CompactBlockProcessor internal constructor(
      * @param firstUnenhancedHeight the height at which the enhancing should start. Use null if you have no
      * preferences. The height will be calculated automatically for you to continue where it previously ended, or
      * it'll be set to the sync start height in case of the first sync attempt.
-     * @param lastScannedHeight the height at which we have processed all blocks up to.
      */
     private fun setProcessorInfo(
         networkBlockHeight: BlockHeight? = _processorInfo.value.networkBlockHeight,
@@ -2106,6 +2101,15 @@ class CompactBlockProcessor internal constructor(
                 lastScannedHeight = _processorInfo.value.lastScannedHeight
             )
     }
+
+    /*
+     * Sets new values of lastScannedHeight in Processorinfo to the provided data for this 
+     * [CompactBlockProcessor]. This function should only be called within functions guaranteed
+     * to have a non-null SyncRange, i.e. ScanBatchOfBlocks, etc.
+     *
+     * @param lastScannedHeight the height at which we have processed all blocks up to. Particularly
+     * useful with linear scanning, where we have a certain linear progression lower bound.
+     */
 
     private fun setProcessorScannedHeight(
         lastScannedHeight: BlockHeight? = _processorInfo.value.lastScannedHeight
