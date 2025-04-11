@@ -150,7 +150,7 @@ class CompactBlockProcessor internal constructor(
             )
         )
 
-    private val _state: MutableStateFlow<State> = MutableStateFlow(State.Initialized)
+    private val _state: MutableStateFlow<State> = MutableStateFlow(State.Initializing)
     private val _progress = MutableStateFlow(PercentDecimal.ZERO_PERCENT)
     private val _processorInfo = MutableStateFlow(ProcessorInfo(null, null, null, null))
     private val _networkHeight = MutableStateFlow<BlockHeight?>(null)
@@ -792,9 +792,15 @@ class CompactBlockProcessor internal constructor(
 
         object RestartSynchronization : BlockProcessingResult()
 
-        data class SyncFailure(val failedAtHeight: BlockHeight?, val error: Throwable) : BlockProcessingResult()
+        data class SyncFailure(
+            val failedAtHeight: BlockHeight?,
+            val error: Throwable
+        ) : BlockProcessingResult()
 
-        data class ContinuityError(val failedAtHeight: BlockHeight?, val error: Throwable) : BlockProcessingResult()
+        data class ContinuityError(
+            val failedAtHeight: BlockHeight?,
+            val error: Throwable
+        ) : BlockProcessingResult()
     }
 
     /**
@@ -2362,7 +2368,11 @@ class CompactBlockProcessor internal constructor(
          * [State] for when we are done with syncing the blocks, for now, i.e. all necessary stages done (download,
          * scan).
          */
-        class Synced(val syncedRange: ClosedRange<BlockHeight>?) : IConnected, ISyncing, State()
+        class Synced(
+            val syncedRange: ClosedRange<BlockHeight>?
+        ) : State(),
+            IConnected,
+            ISyncing
 
         /**
          * [State] for when we have no connection to lightwalletd.
@@ -2378,7 +2388,7 @@ class CompactBlockProcessor internal constructor(
         /**
          * [State] the initial state of the processor, once it is constructed.
          */
-        object Initialized : State()
+        object Initializing : State()
     }
 
     /**

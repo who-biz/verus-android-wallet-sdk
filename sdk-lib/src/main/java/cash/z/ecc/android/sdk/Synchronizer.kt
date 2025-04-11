@@ -487,6 +487,11 @@ interface Synchronizer {
      */
     enum class Status {
         /**
+         * Indicates the initial state of Synchronizer
+         */
+        INITIALIZING,
+
+        /**
          * Indicates that [stop] has been called on this Synchronizer and it will no longer be used.
          */
         STOPPED,
