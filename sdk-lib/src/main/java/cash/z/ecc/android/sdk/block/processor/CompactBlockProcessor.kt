@@ -813,10 +813,6 @@ class CompactBlockProcessor internal constructor(
         // Get the first un-enhanced transaction from the repository
         val firstUnenhancedHeight = getFirstUnenhancedHeight(repository)
 
-
-        // Get the last scanned block height from ranges
-        val lastScannedHeight = ranges[0].range.start
-
         // The overall sync range computation
         val syncRange =
             if (ranges.isNotEmpty()) {
@@ -839,8 +835,7 @@ class CompactBlockProcessor internal constructor(
         setProcessorInfo(
             networkBlockHeight = networkBlockHeight,
             overallSyncRange = syncRange,
-            firstUnenhancedHeight = firstUnenhancedHeight,
-            lastScannedHeight = lastScannedHeight
+            firstUnenhancedHeight = firstUnenhancedHeight
         )
 
         return true
@@ -2095,7 +2090,6 @@ class CompactBlockProcessor internal constructor(
         networkBlockHeight: BlockHeight? = _processorInfo.value.networkBlockHeight,
         overallSyncRange: ClosedRange<BlockHeight>? = _processorInfo.value.overallSyncRange,
         firstUnenhancedHeight: BlockHeight? = _processorInfo.value.firstUnenhancedHeight,
-        lastScannedHeight: BlockHeight? = _processorInfo.value.lastScannedHeight
     ) {
         _networkHeight.value = networkBlockHeight
         _processorInfo.value =
@@ -2103,7 +2097,7 @@ class CompactBlockProcessor internal constructor(
                 networkBlockHeight = networkBlockHeight,
                 overallSyncRange = overallSyncRange,
                 firstUnenhancedHeight = firstUnenhancedHeight,
-                lastScannedHeight = lastScannedHeight
+                lastScannedHeight = _processorInfo.value.lastScannedHeight
             )
     }
 
