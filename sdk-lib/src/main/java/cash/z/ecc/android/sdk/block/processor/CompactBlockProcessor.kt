@@ -476,7 +476,6 @@ class CompactBlockProcessor internal constructor(
 
             var syncingResult: SyncingResult = SyncingResult.AllSuccess
             runSyncingAndEnhancingOnRange(
-                processor = this,
                 backend = backend,
                 downloader = downloader,
                 repository = repository,
@@ -573,7 +572,6 @@ class CompactBlockProcessor internal constructor(
             // TODO [#1145]: https://github.com/zcash/zcash-android-wallet-sdk/issues/1145
             var syncingResult: SyncingResult = SyncingResult.AllSuccess
             runSyncingAndEnhancingOnRange(
-                processor = this,
                 backend = backend,
                 downloader = downloader,
                 repository = repository,
@@ -820,6 +818,8 @@ class CompactBlockProcessor internal constructor(
         // Get the first un-enhanced transaction from the repository
         val firstUnenhancedHeight = getFirstUnenhancedHeight(repository)
 
+        val lastScannedHeight = if (ranges.isEmpty()) networkBlockHeight else ranges[0].range.start
+
         // The overall sync range computation
         val syncRange =
             if (ranges.isNotEmpty()) {
@@ -842,7 +842,8 @@ class CompactBlockProcessor internal constructor(
         setProcessorInfo(
             networkBlockHeight = networkBlockHeight,
             overallSyncRange = syncRange,
-            firstUnenhancedHeight = firstUnenhancedHeight
+            firstUnenhancedHeight = firstUnenhancedHeight,
+            lastScannedHeight = lastScannedHeight
         )
 
         return true
@@ -1445,7 +1446,6 @@ class CompactBlockProcessor internal constructor(
         @VisibleForTesting
         @Suppress("CyclomaticComplexMethod", "LongParameterList", "LongMethod")
         internal suspend fun runSyncingAndEnhancingOnRange(
-            processor: CompactBlockProcessor,
             backend: TypesafeBackend,
             downloader: CompactBlockDownloader,
             repository: DerivedDataRepository,
@@ -1501,7 +1501,6 @@ class CompactBlockProcessor internal constructor(
                             SyncStageResult(
                                 downloadStageResult.batch,
                                 scanBatchOfBlocks(
-                                    processor = processor,
                                     backend = backend,
                                     batch = downloadStageResult.batch,
                                     fromState = downloadStageResult.stageResult.fromState
@@ -1765,7 +1764,7 @@ class CompactBlockProcessor internal constructor(
 
         @VisibleForTesting
         internal suspend fun scanBatchOfBlocks(
-            processor: CompactBlockProcessor,
+//            processor: CompactBlockProcessor,
             batch: BlockBatch,
             fromState: TreeState,
             backend: TypesafeBackend
@@ -1775,11 +1774,6 @@ class CompactBlockProcessor internal constructor(
                 runCatching {
                     backend.scanBlocks(batch.range.start, fromState, batch.range.length())
                 }.onSuccess {
-
-                    // lastScannedHeight only set here, when we have non-null ranges
-                    val lastScannedHeight = batch.range.endInclusive
-                    processor.setProcessorScannedHeight(lastScannedHeight)
-
                     Twig.verbose { "Successfully scanned batch $batch" }
                 }.onFailure {
                     Twig.error { "Failed while scanning batch $batch with $it" }
@@ -2091,6 +2085,7 @@ class CompactBlockProcessor internal constructor(
         networkBlockHeight: BlockHeight? = _processorInfo.value.networkBlockHeight,
         overallSyncRange: ClosedRange<BlockHeight>? = _processorInfo.value.overallSyncRange,
         firstUnenhancedHeight: BlockHeight? = _processorInfo.value.firstUnenhancedHeight,
+        lastScannedHeight: BlockHeight? = _processorInfo.value.lastScannedHeight,
     ) {
         _networkHeight.value = networkBlockHeight
         _processorInfo.value =
@@ -2098,7 +2093,7 @@ class CompactBlockProcessor internal constructor(
                 networkBlockHeight = networkBlockHeight,
                 overallSyncRange = overallSyncRange,
                 firstUnenhancedHeight = firstUnenhancedHeight,
-                lastScannedHeight = _processorInfo.value.lastScannedHeight
+                lastScannedHeight = lastScannedHeight
             )
     }
 
