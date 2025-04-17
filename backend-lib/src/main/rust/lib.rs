@@ -21,6 +21,7 @@ use tracing::{debug, error};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::reload;
 use zcash_address::{ToAddress, ZcashAddress};
+#[cfg(feature = "transparent-inputs")]
 use zcash_client_backend::{
     address::{Address, UnifiedAddress},
     data_api::{
@@ -42,6 +43,29 @@ use zcash_client_backend::{
     zip321::{Payment, TransactionRequest},
     ShieldedProtocol,
 };
+#[cfg(not(feature = "transparent-inputs"))]
+use zcash_client_backend::{
+    address::{Address, UnifiedAddress},
+    data_api::{
+        chain::{scan_cached_blocks, CommitmentTreeRoot, ScanSummary},
+        scanning::{ScanPriority, ScanRange},
+        wallet::{
+            create_proposed_transactions, decrypt_and_store_transaction,
+            input_selection::GreedyInputSelector, propose_transfer,
+        },
+        Account, AccountBalance, AccountBirthday, AccountSource, InputSource, SeedRelevance,
+        WalletCommitmentTrees, WalletRead, WalletSummary, WalletWrite,
+    },
+    encoding,
+    encoding::AddressCodec,
+    fees::{standard::SingleOutputChangeStrategy, DustOutputPolicy},
+    keys::{DecodingError, Era, UnifiedAddressRequest, UnifiedFullViewingKey, UnifiedSpendingKey},
+    proto::{proposal::Proposal, service::TreeState},
+    wallet::{NoteId, OvkPolicy, WalletTransparentOutput},
+    zip321::{Payment, TransactionRequest},
+    ShieldedProtocol,
+};
+
 use zcash_client_sqlite::{
     chain::{init::init_blockmeta_db, BlockMeta},
     wallet::init::{init_wallet_db, WalletMigrationError},
@@ -939,6 +963,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidUn
 }
 
 #[no_mangle]
+#[cfg(feature = "transparent-inputs")]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_getTotalTransparentBalance<
     'local,
 >(
@@ -1827,7 +1852,9 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_proposeTr
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
 
+
 #[no_mangle]
+#[cfg(feature = "transparent-inputs")]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_proposeShielding<'local>(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
@@ -2032,6 +2059,7 @@ fn parse_network(value: u32) -> anyhow::Result<Network> {
 /// - Call [`zcashlc_free_keys`] to free the memory associated with the returned pointer
 ///   when done using it.
 #[no_mangle]
+#[cfg(feature = "transparent-inputs")]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_listTransparentReceivers<
     'local,
 >(

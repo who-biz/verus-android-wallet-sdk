@@ -24,8 +24,10 @@ secrecy = "0.8"
 zcash_address = "0.3"
 #zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs", "unstable"] }
 #zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs", "unstable"] }
-zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs", "unstable"] }
-zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs", "unstable", "linearscanning"] }
+#zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs", "unstable"] }
+#zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs", "unstable", "linearscanning"] }
+zcash_client_backend = { version = "0.12.1", features = ["unstable"] }
+zcash_client_sqlite = { version = "0.10.3", features = ["unstable", "linearscanning"] }
 zcash_primitives = "0.15"
 zcash_proofs = "0.15"
 
@@ -49,6 +51,7 @@ libc = "0.2"
 # Uncomment this to use orchard-specific functions
 [features]
 orchard = []
+transparent-inputs = []
 
 ## Uncomment this to test librustzcash changes locally
 #[patch.crates-io]
