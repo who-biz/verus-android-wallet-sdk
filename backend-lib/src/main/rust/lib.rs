@@ -47,16 +47,15 @@ use zcash_client_backend::{
 use zcash_client_backend::{
     address::{Address, UnifiedAddress},
     data_api::{
-        chain::{scan_cached_blocks, CommitmentTreeRoot, ScanSummary},
+        chain::{scan_cached_blocks, ScanSummary},
         scanning::{ScanPriority, ScanRange},
         wallet::{
             create_proposed_transactions, decrypt_and_store_transaction,
             input_selection::GreedyInputSelector, propose_transfer,
         },
-        Account, AccountBalance, AccountBirthday, AccountSource, InputSource, SeedRelevance,
-        WalletCommitmentTrees, WalletRead, WalletSummary, WalletWrite,
+        Account, AccountBalance, AccountBirthday, AccountSource, SeedRelevance,
+        WalletRead, WalletSummary, WalletWrite,
     },
-    encoding,
     encoding::AddressCodec,
     fees::{standard::SingleOutputChangeStrategy, DustOutputPolicy},
     keys::{DecodingError, Era, UnifiedAddressRequest, UnifiedFullViewingKey, UnifiedSpendingKey},
@@ -80,7 +79,7 @@ use zcash_primitives::{
     },
     legacy::{Script, TransparentAddress},
     memo::{Memo, MemoBytes},
-    merkle_tree::HashSer,
+    //merkle_tree::HashSer,
     transaction::{
         components::{amount::NonNegativeAmount, Amount, OutPoint, TxOut},
         fees::StandardFeeRule,
@@ -1264,7 +1263,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_rewindToH
     unwrap_exc_or(&mut env, res, JNI_FALSE)
 }
 
-fn decode_subtree_root<H>(
+/*fn decode_subtree_root<H>(
     env: &mut JNIEnv,
     obj: JObject,
     node_parser: impl FnOnce(&[u8]) -> std::io::Result<H>,
@@ -1282,7 +1281,7 @@ fn decode_subtree_root<H>(
         BlockHeight::from_u32(long_as_u32(env, &obj, "completingBlockHeight")?),
         node_parser(&byte_array(env, &obj, "rootHash")?[..])?,
     ))
-}
+}*/
 
 /*#[no_mangle]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_putSubtreeRoots<'local>(
