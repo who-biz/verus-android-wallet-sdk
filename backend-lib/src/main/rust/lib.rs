@@ -89,7 +89,9 @@ use zcash_primitives::{
 };
 use zcash_proofs::prover::LocalTxProver;
 
-use sapling::note_encryption::SaplingDomain;
+use zcash_note_encryption::{ Domain, EphemeralKeyBytes };
+use sapling::note_encryption::{ PreparedIncomingViewingKey, SaplingDomain, /*Zip212Enforcement*/};
+use crate::zip32::Scope;
 
 use crate::utils::{catch_unwind, exception::unwrap_exc_or};
 
@@ -756,10 +758,10 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     ufvk_string: JString<'local>,
-    epk_bytes: JByteArray<'local>,
+    epk_jbytes: JByteArray<'local>,
     network_id: jint,
-) -> jstring {
-    let res = panic::catch_unwind(|| {
+) -> jbyteArray {
+    let res = catch_unwind(&mut env, |env| {
         let _span = tracing::info_span!("RustDerivationTool.ka_agree").entered();
         let network = parse_network(network_id as u32)?;
         let ufvk_string = utils::java_string_to_rust(env, &ufvk_string);
@@ -776,16 +778,23 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
         let sapling_dfvk = ufvk.sapling().expect("Sapling key is present").clone();
         let sapling_ivk = PreparedIncomingViewingKey::new(&sapling_dfvk.to_ivk(Scope::Internal));
  
-        let epk = SaplingDomain::epk(env.convert_byte_array(epk_bytes).unwrap()).unwrap();
-        let prepared_epk = PreparedEphemeralPublicKey::new(epk);
+//        let sapling_domain = SaplingDomain::new(Zip212Enforcement::Off);
 
-        let shared_secret = SaplingDomain::ka_agree_dec(sapling_ivk, prepared_epk);
+        let epk_vec = env.convert_byte_array(epk_jbytes).unwrap();
+        let epk_array: [u8; 32] = epk_vec.try_into().unwrap();
+        let epk_bytes = EphemeralKeyBytes(epk_array);
 
-        let output = env
-            .new_string(shared_secret)
-            .expect("Couldn't create Java string!");
+        let epk = <SaplingDomain as Domain>::epk(&epk_bytes).unwrap();
+        let prepared_epk = <SaplingDomain as Domain>::prepare_epk(epk);
 
-        Ok(output.into_raw())
+        let shared_secret = <SaplingDomain as Domain>::ka_agree_dec(&sapling_ivk, &prepared_epk).to_bytes();
+        //let shared_vec = Vec::from(shared_secret);
+
+        Ok(utils::rust_bytes_to_java(
+            env,
+            &shared_secret
+        )?
+        .into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
