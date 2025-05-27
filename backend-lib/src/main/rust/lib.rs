@@ -758,7 +758,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     ufvk_string: JString<'local>,
-    epk_jbytes: JByteArray<'local>,
+    ephemeralpk_jbytes: JByteArray<'local>,
     network_id: jint,
 ) -> jbyteArray {
     let res = catch_unwind(&mut env, |env| {
@@ -777,18 +777,14 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
 
         let sapling_dfvk = ufvk.sapling().expect("Sapling key is present").clone();
         let sapling_ivk = PreparedIncomingViewingKey::new(&sapling_dfvk.to_ivk(Scope::Internal));
- 
 //        let sapling_domain = SaplingDomain::new(Zip212Enforcement::Off);
-
-        let epk_vec = env.convert_byte_array(epk_jbytes).unwrap();
-        let epk_array: [u8; 32] = epk_vec.try_into().unwrap();
+        let epk_array: [u8; 32] = env.convert_byte_array(ephemeralpk_jbytes)?.try_into().unwrap();
         let epk_bytes = EphemeralKeyBytes(epk_array);
 
         let epk = <SaplingDomain as Domain>::epk(&epk_bytes).unwrap();
         let prepared_epk = <SaplingDomain as Domain>::prepare_epk(epk);
 
         let shared_secret = <SaplingDomain as Domain>::ka_agree_dec(&sapling_ivk, &prepared_epk).to_bytes();
-        //let shared_vec = Vec::from(shared_secret);
 
         Ok(utils::rust_bytes_to_java(
             env,
