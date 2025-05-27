@@ -58,6 +58,12 @@ interface Derivation {
         numberOfAccounts: Int
     ): Array<String>
 
+    fun ka_agree(
+    viewingKey: String,
+    ephemeralPublicKey: ByteArray,
+    networkId: Int
+    ): ByteArray
+
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = 1
     }

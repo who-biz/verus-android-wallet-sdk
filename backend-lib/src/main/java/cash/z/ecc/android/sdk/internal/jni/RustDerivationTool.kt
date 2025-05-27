@@ -67,6 +67,12 @@ class RustDerivationTool private constructor() : Derivation {
         networkId: Int
     ): String = deriveUnifiedAddressFromViewingKey(viewingKey, networkId = networkId)
 
+    override fun ka_agree(
+        viewingKey: String, 
+        ephemeralPublicKey: ByteArray,
+        networkId: Int
+    ): ByteArray =  ka_agree(viewingKey, ephemeralPublicKey, networkId = networkId)
+
     companion object {
         suspend fun new(): Derivation {
             RustBackend.loadLibrary()
@@ -127,5 +133,12 @@ class RustDerivationTool private constructor() : Derivation {
             key: String,
             networkId: Int
         ): String
+
+        @JvmStatic
+        private external fun ka_agree(
+            viewingKey: String,
+            ephemeralPublicKey: ByteArray,
+            networkId: Int
+        ): ByteArray
     }
 }

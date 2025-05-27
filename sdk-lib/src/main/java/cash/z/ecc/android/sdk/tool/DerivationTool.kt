@@ -126,6 +126,14 @@ interface DerivationTool {
         network: ZcashNetwork
     ): String
 
+
+    suspend fun ka_agree(
+        viewingKey: String,
+        ephemeralPublicKey: ByteArray,
+        network: ZcashNetwork
+    ): ByteArray
+    //TODO: add a type for SharedSecret, if we wind up exposing ka_agree fully
+
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS
 

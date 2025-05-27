@@ -61,4 +61,10 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         network: ZcashNetwork,
         account: Account
     ): String = derivation.deriveShieldedAddress(seed, network, account)
+
+    override suspend fun ka_agree(
+        viewingKey: String,
+        ephemeralPublicKey: ByteArray,
+        network: ZcashNetwork
+    ): ByteArray = derivation.ka_agree(viewingKey, ephemeralPublicKey, network)
 }

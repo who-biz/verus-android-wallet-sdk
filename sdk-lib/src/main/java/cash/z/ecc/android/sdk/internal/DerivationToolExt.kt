@@ -76,3 +76,10 @@ fun Derivation.deriveUnifiedFullViewingKeysTypesafe(
         network.id,
         numberOfAccounts
     ).map { UnifiedFullViewingKey(it) }
+
+fun Derivation.ka_agree(
+    viewingKey: String,
+    ephemeralPublicKey: ByteArray,
+    network: ZcashNetwork
+): ByteArray = ka_agree(viewingKey, ephemeralPublicKey, network.id)
+
