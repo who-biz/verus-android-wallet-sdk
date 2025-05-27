@@ -3,6 +3,7 @@ package cash.z.ecc.android.sdk.internal.jni
 import cash.z.ecc.android.sdk.internal.Derivation
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
+import cash.z.ecc.android.sdk.internal.model.JniSharedSecret
 
 class RustDerivationTool private constructor() : Derivation {
     override fun deriveUnifiedFullViewingKeys(
@@ -136,9 +137,9 @@ class RustDerivationTool private constructor() : Derivation {
 
         @JvmStatic
         private external fun ka_agree(
-            viewingKey: String,
-            ephemeralPublicKey: ByteArray,
+            vk: String,
+            epk: ByteArray,
             networkId: Int
-        ): ByteArray
+        ): JniSharedSecret
     }
 }
