@@ -89,6 +89,8 @@ use zcash_primitives::{
 };
 use zcash_proofs::prover::LocalTxProver;
 
+use sapling::note_encryption::SaplingDomain;
+
 use crate::utils::{catch_unwind, exception::unwrap_exc_or};
 
 mod utils;
@@ -740,6 +742,47 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
 
         let output = env
             .new_string(ufvk.encode(&network))
+            .expect("Couldn't create Java string!");
+
+        Ok(output.into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_agree<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    ufvk_string: JString<'local>,
+    epk_bytes: JByteArray<'local>,
+    network_id: jint,
+) -> jstring {
+    let res = panic::catch_unwind(|| {
+        let _span = tracing::info_span!("RustDerivationTool.ka_agree").entered();
+        let network = parse_network(network_id as u32)?;
+        let ufvk_string = utils::java_string_to_rust(env, &ufvk_string);
+        let ufvk = match UnifiedFullViewingKey::decode(&network, &ufvk_string) {
+            Ok(ufvk) => ufvk,
+            Err(e) => {
+                return Err(anyhow!(
+                    "Error while deriving viewing key from string input: {}",
+                    e,
+                ));
+            }
+        };
+
+        let sapling_dfvk = ufvk.sapling().expect("Sapling key is present").clone();
+        let sapling_ivk = PreparedIncomingViewingKey::new(&sapling_dfvk.to_ivk(Scope::Internal));
+ 
+        let epk = SaplingDomain::epk(env.convert_byte_array(epk_bytes).unwrap()).unwrap();
+        let prepared_epk = PreparedEphemeralPublicKey::new(epk);
+
+        let shared_secret = SaplingDomain::ka_agree_dec(sapling_ivk, prepared_epk);
+
+        let output = env
+            .new_string(shared_secret)
             .expect("Couldn't create Java string!");
 
         Ok(output.into_raw())
