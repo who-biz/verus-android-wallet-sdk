@@ -2,6 +2,7 @@ package cash.z.ecc.android.sdk.internal
 
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
+import cash.z.ecc.android.sdk.internal.model.JniSharedSecret
 
 interface Derivation {
     fun deriveUnifiedAddress(
@@ -62,7 +63,7 @@ interface Derivation {
     viewingKey: String,
     ephemeralPublicKey: ByteArray,
     networkId: Int
-    ): ByteArray
+    ): JniSharedSecret
 
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = 1

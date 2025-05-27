@@ -4,6 +4,7 @@ import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
+import cash.z.ecc.android.sdk.model.SharedSecret
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.tool.DerivationTool
 
@@ -66,5 +67,5 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
         network: ZcashNetwork
-    ): ByteArray = derivation.ka_agree(viewingKey, ephemeralPublicKey, network)
+    ): SharedSecret = derivation.ka_agree(viewingKey, ephemeralPublicKey, network)
 }

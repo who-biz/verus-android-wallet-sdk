@@ -308,6 +308,19 @@ fn encode_usk<'a>(
     )
 }
 
+fn encode_shared_secret<'a>(
+    env: &mut JNIEnv<'a>,
+    shared_secret: <SaplingDomain as Domain>::SharedSecret
+) -> jni::errors::Result<JObject<'a>> {
+    let encoded = SecretVec::new(shared_secret.to_bytes().to_vec());
+    let bytes = env.byte_array_from_slice(encoded.expose_secret())?;
+    env.new_object(
+        "cash/z/ecc/android/sdk/internal/model/JniSharedSecret",
+        "([B)V",
+        &[(&bytes).into()],
+    )
+}
+
 
 fn encode_extsk<'a>(
     env: &mut JNIEnv<'a>,
@@ -752,7 +765,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_agree<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_agree_dec<
     'local,
 >(
     mut env: JNIEnv<'local>,
@@ -760,7 +773,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
     ufvk_string: JString<'local>,
     ephemeralpk_jbytes: JByteArray<'local>,
     network_id: jint,
-) -> jbyteArray {
+) -> jobject {
     let res = catch_unwind(&mut env, |env| {
         let _span = tracing::info_span!("RustDerivationTool.ka_agree").entered();
         let network = parse_network(network_id as u32)?;
@@ -784,13 +797,9 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
         let epk = <SaplingDomain as Domain>::epk(&epk_bytes).unwrap();
         let prepared_epk = <SaplingDomain as Domain>::prepare_epk(epk);
 
-        let shared_secret = <SaplingDomain as Domain>::ka_agree_dec(&sapling_ivk, &prepared_epk).to_bytes();
+        let shared_secret = <SaplingDomain as Domain>::ka_agree_dec(&sapling_ivk, &prepared_epk);
 
-        Ok(utils::rust_bytes_to_java(
-            env,
-            &shared_secret
-        )?
-        .into_raw())
+        Ok(encode_shared_secret(env, shared_secret)?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }

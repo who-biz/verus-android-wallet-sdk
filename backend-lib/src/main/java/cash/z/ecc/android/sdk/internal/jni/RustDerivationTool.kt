@@ -72,7 +72,7 @@ class RustDerivationTool private constructor() : Derivation {
         viewingKey: String, 
         ephemeralPublicKey: ByteArray,
         networkId: Int
-    ): ByteArray =  ka_agree(viewingKey, ephemeralPublicKey, networkId = networkId)
+    ): JniSharedSecret =  ka_agree_dec(viewingKey, ephemeralPublicKey, networkId = networkId)
 
     companion object {
         suspend fun new(): Derivation {
@@ -136,7 +136,7 @@ class RustDerivationTool private constructor() : Derivation {
         ): String
 
         @JvmStatic
-        private external fun ka_agree(
+        private external fun ka_agree_dec(
             vk: String,
             epk: ByteArray,
             networkId: Int

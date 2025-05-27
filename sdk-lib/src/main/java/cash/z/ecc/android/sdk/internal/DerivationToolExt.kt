@@ -6,6 +6,7 @@ import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
+import cash.z.ecc.android.sdk.model.SharedSecret
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 
 fun Derivation.deriveUnifiedAddress(
@@ -81,5 +82,5 @@ fun Derivation.ka_agree(
     viewingKey: String,
     ephemeralPublicKey: ByteArray,
     network: ZcashNetwork
-): ByteArray = ka_agree(viewingKey, ephemeralPublicKey, network.id)
+): SharedSecret = SharedSecret(ka_agree(viewingKey, ephemeralPublicKey, network.id))
 

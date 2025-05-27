@@ -8,6 +8,7 @@ import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
+import cash.z.ecc.android.sdk.model.SharedSecret
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 
 interface DerivationTool {
@@ -131,8 +132,7 @@ interface DerivationTool {
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
         network: ZcashNetwork
-    ): ByteArray
-    //TODO: add a type for SharedSecret, if we wind up exposing ka_agree fully
+    ): SharedSecret
 
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS
