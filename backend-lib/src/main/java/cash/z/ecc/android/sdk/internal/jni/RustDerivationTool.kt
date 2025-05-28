@@ -74,6 +74,12 @@ class RustDerivationTool private constructor() : Derivation {
         networkId: Int
     ): JniSharedSecret =  ka_agree_dec(viewingKey, ephemeralPublicKey, networkId = networkId)
 
+    override fun ka_derive_public(
+        saplingAddress: String,
+        ephemeralSecretKey: ByteArray,
+        networkId: Int
+    ): ByteArray =  ka_derive_public_from_recipient(saplingAddress, ephemeralSecretKey, networkId = networkId)
+
     companion object {
         suspend fun new(): Derivation {
             RustBackend.loadLibrary()
@@ -141,5 +147,12 @@ class RustDerivationTool private constructor() : Derivation {
             epk: ByteArray,
             networkId: Int
         ): JniSharedSecret
+
+        @JvmStatic
+        private external fun ka_derive_public_from_recipient(
+            saplingAddress: String,
+            esk: ByteArray,
+            networkId: Int
+        ): ByteArray
     }
 }
