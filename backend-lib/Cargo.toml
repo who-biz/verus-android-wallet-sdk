@@ -71,6 +71,7 @@ zcash_primitives = { git = "https://github.com/who-biz/librustzcash", branch = "
 zcash_proofs = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
 sapling-crypto = { git = "https://github.com/who-biz/sapling-crypto", branch = "0.1.3_verus" }
 zcash_note_encryption = { git = "https://github.com/who-biz/zcash_note_encryption", branch = "0.4.1_verus" }
+orchard = { git = "https://github.com/who-biz/orchard", branch = "0.8.0_verus" }
 
 [lib]
 name = "zcashwalletsdk"

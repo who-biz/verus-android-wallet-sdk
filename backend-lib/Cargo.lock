@@ -423,9 +423,9 @@ dependencies = [
 
 [[package]]
 name = "dlopen2_derive"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2b99bf03862d7f545ebc28ddd33a665b50865f4dfd84031a393823879bd4c54"
+checksum = "788160fb30de9cdd857af31c6a2675904b16ece8fc2737b2c7127ba368c9d0f4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1030,8 +1030,7 @@ checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
 [[package]]
 name = "orchard"
 version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0462569fc8b0d1b158e4d640571867a4e4319225ebee2ab6647e60c70af19ae3"
+source = "git+https://github.com/who-biz/orchard?branch=0.8.0_verus#cbb598590a70df981221e3ba8572500bac187461"
 dependencies = [
  "aes",
  "bitvec",
@@ -1472,7 +1471,7 @@ dependencies = [
 [[package]]
 name = "sapling-crypto"
 version = "0.1.3"
-source = "git+https://github.com/who-biz/sapling-crypto?branch=0.1.3_verus#03906ae54473ddc82e0844427b5ff99a19ad531c"
+source = "git+https://github.com/who-biz/sapling-crypto?branch=0.1.3_verus#900106991e9447b76f5e93e1c94b6496bd21070b"
 dependencies = [
  "aes",
  "bellman",
@@ -2359,8 +2358,7 @@ dependencies = [
 [[package]]
 name = "zcash_note_encryption"
 version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77efec759c3798b6e4d829fcc762070d9b229b0f13338c40bf993b7b609c2272"
+source = "git+https://github.com/who-biz/zcash_note_encryption?branch=0.4.1_verus#4f5fd3a65abbfdb897fb16de197e800702d5fa3d"
 dependencies = [
  "chacha20",
  "chacha20poly1305",
