@@ -830,10 +830,11 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
         let esk_array: [u8; 32] = env.convert_byte_array(ephemeral_sk_jbytes)?.try_into().unwrap();
         let esk_bytes = EphemeralKeyBytes(esk_array);
 
-        let epk = <SaplingDomain as Domain>::ka_derive_public_from_recipient(recipient, &esk_bytes);
+        let epk = <SaplingDomain as Domain>::ka_derive_public_from_recipient(&recipient, &esk_bytes);
+        let epk_bytes = <SaplingDomain as Domain>::epk_bytes(&epk);
         Ok(utils::rust_bytes_to_java(
             &env,
-            epk.to_bytes().to_vec().as_ref(),
+            epk_bytes.0.to_vec().as_ref(),
         )?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
