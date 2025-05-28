@@ -1,6 +1,7 @@
 package cash.z.ecc.android.sdk.internal
 
 import cash.z.ecc.android.sdk.model.Account
+import cash.z.ecc.android.sdk.model.EphemeralPublicKey
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
@@ -68,4 +69,10 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         ephemeralPublicKey: ByteArray,
         network: ZcashNetwork
     ): SharedSecret = derivation.ka_agree(viewingKey, ephemeralPublicKey, network)
+
+    override suspend fun ka_derive_public(
+        saplingAddress: String,
+        ephemeralSecretKey: ByteArray,
+        network: ZcashNetwork
+    ): EphemeralPublicKey = derivation.ka_derive_public(saplingAddress, ephemeralSecretKey, network)
 }

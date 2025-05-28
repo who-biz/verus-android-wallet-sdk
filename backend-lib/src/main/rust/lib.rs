@@ -771,7 +771,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     ufvk_string: JString<'local>,
-    ephemeralpk_jbytes: JByteArray<'local>,
+    ephemeral_pk_jbytes: JByteArray<'local>,
     network_id: jint,
 ) -> jobject {
     let res = catch_unwind(&mut env, |env| {
@@ -791,7 +791,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
         let sapling_dfvk = ufvk.sapling().expect("Sapling key is present").clone();
         let sapling_ivk = PreparedIncomingViewingKey::new(&sapling_dfvk.to_ivk(Scope::Internal));
 //        let sapling_domain = SaplingDomain::new(Zip212Enforcement::Off);
-        let epk_array: [u8; 32] = env.convert_byte_array(ephemeralpk_jbytes)?.try_into().unwrap();
+        let epk_array: [u8; 32] = env.convert_byte_array(ephemeral_pk_jbytes)?.try_into().unwrap();
         let epk_bytes = EphemeralKeyBytes(epk_array);
 
         let epk = <SaplingDomain as Domain>::epk(&epk_bytes).unwrap();
@@ -800,6 +800,41 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
         let shared_secret = <SaplingDomain as Domain>::ka_agree_dec(&sapling_ivk, &prepared_epk);
 
         Ok(encode_shared_secret(env, shared_secret)?.into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_derive_public<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    sapling_address: JString<'local>,
+    ephemeral_sk_jbytes: JByteArray<'local>,
+    network_id: jint,
+) -> jbyteArray {
+    let res = catch_unwind(&mut env, |env| {
+        let _span = tracing::info_span!("RustDerivationTool.ka_agree").entered();
+        let network = parse_network(network_id as u32)?;
+        let addr = utils::java_string_to_rust(env, &sapling_address);
+        let recipient = match Address::decode(&network, &addr) {
+            Some(addr) => match addr {
+                Address::Sapling(addr) => addr,
+                // reject everything except saplingAddresses
+                _ => return Err(anyhow!("Incompatible Address used in ka_derive_public!"))
+            },
+            None => return Err(anyhow!("Address is for the wrong network")),
+        };
+
+        let esk_array: [u8; 32] = env.convert_byte_array(ephemeral_sk_jbytes)?.try_into().unwrap();
+        let esk_bytes = EphemeralKeyBytes(esk_array);
+
+        let epk = <SaplingDomain as Domain>::ka_derive_public_from_recipient(recipient, &esk_bytes);
+        Ok(utils::rust_bytes_to_java(
+            &env,
+            epk.to_bytes().to_vec().as_ref(),
+        )?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }

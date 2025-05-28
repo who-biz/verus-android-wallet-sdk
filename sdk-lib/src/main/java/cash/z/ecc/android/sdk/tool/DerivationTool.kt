@@ -5,6 +5,7 @@ import cash.z.ecc.android.sdk.internal.SuspendingLazy
 import cash.z.ecc.android.sdk.internal.TypesafeDerivationToolImpl
 import cash.z.ecc.android.sdk.internal.jni.RustDerivationTool
 import cash.z.ecc.android.sdk.model.Account
+import cash.z.ecc.android.sdk.model.EphemeralPublicKey
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
@@ -133,6 +134,12 @@ interface DerivationTool {
         ephemeralPublicKey: ByteArray,
         network: ZcashNetwork
     ): SharedSecret
+
+    suspend fun ka_derive_public(
+        saplingAddress: String,
+        ephemeralSecretKey: ByteArray,
+        network: ZcashNetwork
+    ): EphemeralPublicKey
 
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS

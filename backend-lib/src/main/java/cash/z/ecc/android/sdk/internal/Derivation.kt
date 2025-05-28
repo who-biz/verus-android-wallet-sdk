@@ -60,10 +60,16 @@ interface Derivation {
     ): Array<String>
 
     fun ka_agree(
-    viewingKey: String,
-    ephemeralPublicKey: ByteArray,
-    networkId: Int
+        viewingKey: String,
+        ephemeralPublicKey: ByteArray,
+        networkId: Int
     ): JniSharedSecret
+
+    fun ka_derive_public(
+        saplingAddress: String,
+        ephemeralSecretKey: ByteArray,
+        networkId: Int
+    ): ByteArray
 
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = 1

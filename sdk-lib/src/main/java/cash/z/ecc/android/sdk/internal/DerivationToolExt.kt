@@ -3,6 +3,7 @@ package cash.z.ecc.android.sdk.internal
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 //import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.Account
+import cash.z.ecc.android.sdk.model.EphemeralPublicKey
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
@@ -83,4 +84,10 @@ fun Derivation.ka_agree(
     ephemeralPublicKey: ByteArray,
     network: ZcashNetwork
 ): SharedSecret = SharedSecret(ka_agree(viewingKey, ephemeralPublicKey, network.id))
+
+fun Derivation.ka_derive_public(
+    saplingAddress: String,
+    ephemeralSecretKey: ByteArray,
+    network: ZcashNetwork
+): EphemeralPublicKey = EphemeralPublicKey(ka_derive_public(saplingAddress, ephemeralSecretKey, network.id))
 
