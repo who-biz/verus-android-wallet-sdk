@@ -30,7 +30,7 @@ zcash_client_backend = { version = "0.12.1", features = ["unstable"] }
 zcash_client_sqlite = { version = "0.10.3", features = ["unstable", "linearscanning"] }
 zcash_primitives = "0.15"
 zcash_proofs = "0.15"
-zcash_note_encryption = "0.4"
+zcash_note_encryption = "0.4.1"
 
 # Initialization
 rayon = "1.7"
@@ -70,6 +70,7 @@ zcash_client_sqlite = { git = "https://github.com/who-biz/librustzcash", branch 
 zcash_primitives = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
 zcash_proofs = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
 sapling-crypto = { git = "https://github.com/who-biz/sapling-crypto", branch = "0.1.3_verus" }
+zcash_note_encryption = { git = "https://github.com/who-biz/zcash_note_encryption", branch = "0.4.1_verus" }
 
 [lib]
 name = "zcashwalletsdk"
