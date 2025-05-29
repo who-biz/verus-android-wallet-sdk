@@ -792,9 +792,19 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
         let sapling_ivk = PreparedIncomingViewingKey::new(&sapling_dfvk.to_ivk(Scope::Internal));
 //        let sapling_domain = SaplingDomain::new(Zip212Enforcement::Off);
         let epk_array: [u8; 32] = env.convert_byte_array(ephemeral_pk_jbytes)?.try_into().unwrap();
+        warn!("epk_array: {:?}", epk_array);
         let epk_bytes = EphemeralKeyBytes(epk_array);
+        warn!("epk_bytes: {:?}", epk_bytes);
 
-        let epk = <SaplingDomain as Domain>::epk(&epk_bytes).unwrap();
+        let epk = match <SaplingDomain as Domain>::epk(&epk_bytes) {
+            Some(epk) => epk,
+            None => { 
+                return Err(anyhow!(
+                    "Unable to convert EphemeralKeyBytes to EphemeralPublicKey!"
+                ));
+            }
+        };
+
         let prepared_epk = <SaplingDomain as Domain>::prepare_epk(epk);
 
         let shared_secret = <SaplingDomain as Domain>::ka_agree_dec(&sapling_ivk, &prepared_epk);
