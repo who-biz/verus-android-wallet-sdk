@@ -765,7 +765,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_agree_dec<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_1agree_1dec<
     'local,
 >(
     mut env: JNIEnv<'local>,
@@ -805,7 +805,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_derive_public_from_recipient<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_1derive_1public_1from_1recipient<
     'local,
 >(
     mut env: JNIEnv<'local>,
