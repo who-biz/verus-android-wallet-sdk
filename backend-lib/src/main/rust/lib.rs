@@ -5,7 +5,7 @@ use std::panic;
 use std::path::Path;
 use std::ptr;
 
-use tracing::warn;
+//use tracing::warn;
 
 use anyhow::anyhow;
 use jni::objects::{JByteArray, JObject, JObjectArray, JValue};
@@ -372,7 +372,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
         //warn!("Jni boundary, transparent_key: {:?}, length: {}", tkey, tkey.len());
         let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap_or(Vec::new()));
         let hd_seed = env.convert_byte_array(seed).unwrap();
-        warn!("Jni boundary, seed: {:?}, length: {}", hd_seed, hd_seed.len());
+        //warn!("Jni boundary, seed: {:?}, length: {}", hd_seed, hd_seed.len());
         let seed = SecretVec::new(hd_seed);
         let treestate = TreeState::decode(&env.convert_byte_array(treestate).unwrap()[..])
             .map_err(|e| anyhow!("Invalid TreeState: {}", e))?;
@@ -456,7 +456,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let usk = UnifiedSpendingKey::from_seed(&network, transparent_key.expose_secret(), seed.expose_secret(), account)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))?;
 
-        warn!("Seed({:?}), usk({:?})", seed.expose_secret(), usk);
+        //warn!("Seed({:?}), usk({:?})", seed.expose_secret(), usk);
         Ok(encode_usk(env, account, usk)?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
@@ -568,7 +568,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
                         .expect("Something went wrong when converting ufvk to extfvk").to_bytes())
             })
             .collect::<Result<_, _>>()?;
-        warn!("extfvks: {:?}", extfvks);
+        //warn!("extfvks: {:?}", extfvks);
 
         Ok(utils::rust_vec_to_java(
             env,
