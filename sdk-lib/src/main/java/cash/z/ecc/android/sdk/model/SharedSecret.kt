@@ -35,7 +35,7 @@ class SharedSecret private constructor(
     fun copyBytes() = bytes.byteArray.copyOf()
 
     // Override to prevent leaking key to logs
-    override fun toString() = "SharedSecret(bytes=***)"
+//    override fun toString() = "SharedSecret(bytes=***)"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

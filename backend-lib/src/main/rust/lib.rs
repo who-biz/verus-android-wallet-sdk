@@ -7,6 +7,9 @@ use std::ptr;
 
 use tracing::warn;
 
+use rand::rngs::OsRng;
+use rand::RngCore;
+
 use anyhow::anyhow;
 use jni::objects::{JByteArray, JObject, JObjectArray, JValue};
 use jni::{
@@ -90,7 +93,10 @@ use zcash_primitives::{
 use zcash_proofs::prover::LocalTxProver;
 
 use zcash_note_encryption::{ Domain, EphemeralKeyBytes };
-use sapling::note_encryption::{ PreparedIncomingViewingKey, SaplingDomain, /*Zip212Enforcement*/};
+use sapling::note_encryption::{ PreparedIncomingViewingKey, SaplingDomain, Zip212Enforcement};
+use jubjub::Fr;
+use sapling::{ Note, util };
+
 use crate::zip32::Scope;
 
 use crate::utils::{catch_unwind, exception::unwrap_exc_or};
@@ -793,7 +799,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
 //        let sapling_domain = SaplingDomain::new(Zip212Enforcement::Off);
         let epk_array: [u8; 32] = env.convert_byte_array(ephemeral_pk_jbytes)?.try_into().unwrap();
         warn!("epk_array: {:?}", epk_array);
-        let epk_bytes = EphemeralKeyBytes(epk_array);
+        let epk_bytes = EphemeralKeyBytes::from(epk_array);
         warn!("epk_bytes: {:?}", epk_bytes);
 
         let epk = match <SaplingDomain as Domain>::epk(&epk_bytes) {
@@ -825,7 +831,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
     network_id: jint,
 ) -> jbyteArray {
     let res = catch_unwind(&mut env, |env| {
-        let _span = tracing::info_span!("RustDerivationTool.ka_agree").entered();
+        let _span = tracing::info_span!("RustDerivationTool.ka_derive_public_from_recipient").entered();
         let network = parse_network(network_id as u32)?;
         let addr = utils::java_string_to_rust(env, &sapling_address);
         let recipient = match Address::decode(&network, &addr) {
@@ -837,8 +843,21 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
             None => return Err(anyhow!("Address is for the wrong network")),
         };
 
-        let esk_array: [u8; 32] = env.convert_byte_array(ephemeral_sk_jbytes)?.try_into().unwrap();
-        let esk_bytes = EphemeralKeyBytes(esk_array);
+        let mut rng = OsRng;
+        let mut buf = [0; 64];
+        rng.fill_bytes(&mut buf);
+        let esk = Fr::from_bytes_wide(&buf);
+        let rseed = util::generate_random_rseed(Zip212Enforcement::Off, &mut rng);
+//        let esk = Fr::random(&mut rng);
+//Note::generate_or_derive_esk(&note, &mut rng);
+        let esk_bytes = EphemeralKeyBytes::from(esk.to_bytes());
+        //let rseed_bytes = &rseed.as_bytes();
+        warn!("rseed: {:?}, esk {:?}", rseed, esk);
+
+//        let esk_array: [u8; 32] = env.convert_byte_array(ephemeral_sk_jbytes)?.try_into().unwrap();
+//        warn!("esk_array: {:?}", esk_array);
+//        let esk_bytes = EphemeralKeyBytes::from(esk_array);
+//        warn!("esk_bytes: {:?}", esk_bytes);
 
         let epk = <SaplingDomain as Domain>::ka_derive_public_from_recipient(&recipient, &esk_bytes);
         let epk_bytes = <SaplingDomain as Domain>::epk_bytes(&epk);
