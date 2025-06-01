@@ -251,9 +251,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.23"
+version = "1.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f4ac86a9e5bc1e2b3449ab9d7d3a6a405e3d1bb28d7b9be8614f55846ae3766"
+checksum = "d0fc897dc1e865cc67c0e05a836d9d3f1df3cbe442aa4a9473b18e12624a4951"
 dependencies = [
  "shlex",
 ]
@@ -423,9 +423,9 @@ dependencies = [
 
 [[package]]
 name = "dlopen2_derive"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2b99bf03862d7f545ebc28ddd33a665b50865f4dfd84031a393823879bd4c54"
+checksum = "788160fb30de9cdd857af31c6a2675904b16ece8fc2737b2c7127ba368c9d0f4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -460,7 +460,7 @@ dependencies = [
 [[package]]
 name = "equihash"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -485,7 +485,7 @@ dependencies = [
 [[package]]
 name = "f4jumble"
 version = "0.1.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "blake2b_simd",
 ]
@@ -708,9 +708,9 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hermit-abi"
-version = "0.3.9"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
+checksum = "f154ce46856750ed433c8649605bf7ed2de3bc35fd9d2a9f30cddd873c80cb08"
 
 [[package]]
 name = "hex"
@@ -1007,9 +1007,9 @@ dependencies = [
 
 [[package]]
 name = "num_cpus"
-version = "1.16.0"
+version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
+checksum = "91df4bbde75afed763b708b7eee1e8e7651e02d97f6d5dd763e89367e957b23b"
 dependencies = [
  "hermit-abi",
  "libc",
@@ -1188,9 +1188,9 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.2.32"
+version = "0.2.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "664ec5419c51e34154eec046ebcba56312d5a2fc3b09a06da188e1ad21afadf6"
+checksum = "9dee91521343f4c5c6a63edd65e54f31f5c92fe8978c40a4282f8372194c6a7d"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -1453,6 +1453,12 @@ dependencies = [
  "linux-raw-sys 0.9.4",
  "windows-sys 0.59.0",
 ]
+
+[[package]]
+name = "rustversion"
+version = "1.0.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a0d197bd2c9dc6e53b84da9556a69ba4cdfab8619eb41a8bd1cc2027a0f6b1d"
 
 [[package]]
 name = "same-file"
@@ -1871,9 +1877,13 @@ checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 
 [[package]]
 name = "uuid"
-version = "1.16.0"
+version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "458f7a779bf54acc9f347480ac654f68407d3aab21269a6e3c9f922acd9e2da9"
+checksum = "3cf4199d1e5d15ddd86a694e4d0dffa9c323ce759fea589f00fef9d81cc1931d"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
+]
 
 [[package]]
 name = "valuable"
@@ -1926,6 +1936,7 @@ checksum = "1edc8929d7499fc4e8f0be2262a241556cfc54a0bea223790e71446f2aab1ef5"
 dependencies = [
  "cfg-if",
  "once_cell",
+ "rustversion",
  "wasm-bindgen-macro",
 ]
 
@@ -2224,7 +2235,7 @@ dependencies = [
 [[package]]
 name = "zcash_address"
 version = "0.3.2"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "bech32",
  "bs58",
@@ -2237,7 +2248,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_backend"
 version = "0.12.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "android_logger",
  "base64",
@@ -2278,7 +2289,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_sqlite"
 version = "0.10.3"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "android_logger",
  "bs58",
@@ -2313,7 +2324,7 @@ dependencies = [
 [[package]]
 name = "zcash_encoding"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "byteorder",
  "nonempty",
@@ -2322,7 +2333,7 @@ dependencies = [
 [[package]]
 name = "zcash_keys"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "bech32",
  "blake2b_simd",
@@ -2361,7 +2372,7 @@ dependencies = [
 [[package]]
 name = "zcash_primitives"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "aes",
  "bip0039",
@@ -2396,7 +2407,7 @@ dependencies = [
 [[package]]
 name = "zcash_proofs"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "bellman",
  "blake2b_simd",
@@ -2418,7 +2429,7 @@ dependencies = [
 [[package]]
 name = "zcash_protocol"
 version = "0.1.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#966a8a837d95990fa3256c3e7f2211af988c45c6"
+source = "git+https://github.com/who-biz/librustzcash?branch=verus-revert#7b515874319070f0a114076f10f7bc471d3108cc"
 dependencies = [
  "document-features",
  "memuse",
