@@ -68,11 +68,11 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
         network: ZcashNetwork
-    ): SharedSecret = derivation.ka_agree(viewingKey, ephemeralPublicKey, network)
+    ): String = derivation.ka_agree(viewingKey, ephemeralPublicKey, network)
 
     override suspend fun ka_derive_public(
         saplingAddress: String,
         ephemeralSecretKey: ByteArray,
         network: ZcashNetwork
-    ): EphemeralPublicKey = derivation.ka_derive_public(saplingAddress, ephemeralSecretKey, network)
+    ): String = derivation.ka_derive_public(saplingAddress, ephemeralSecretKey, network)
 }

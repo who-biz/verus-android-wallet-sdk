@@ -72,13 +72,13 @@ class RustDerivationTool private constructor() : Derivation {
         viewingKey: String, 
         ephemeralPublicKey: ByteArray,
         networkId: Int
-    ): JniSharedSecret =  ka_agree_dec(viewingKey, ephemeralPublicKey, networkId = networkId)
+    ): String =  ka_agree_dec(viewingKey, ephemeralPublicKey, networkId = networkId)
 
     override fun ka_derive_public(
         saplingAddress: String,
         ephemeralSecretKey: ByteArray,
         networkId: Int
-    ): ByteArray =  ka_derive_public_from_recipient(saplingAddress, ephemeralSecretKey, networkId = networkId)
+    ): String =  ka_derive_public_from_recipient(saplingAddress, ephemeralSecretKey, networkId = networkId)
 
     companion object {
         suspend fun new(): Derivation {
@@ -146,13 +146,13 @@ class RustDerivationTool private constructor() : Derivation {
             vk: String,
             epk: ByteArray,
             networkId: Int
-        ): JniSharedSecret
+        ): String
 
         @JvmStatic
         private external fun ka_derive_public_from_recipient(
             saplingAddress: String,
             esk: ByteArray,
             networkId: Int
-        ): ByteArray
+        ): String
     }
 }

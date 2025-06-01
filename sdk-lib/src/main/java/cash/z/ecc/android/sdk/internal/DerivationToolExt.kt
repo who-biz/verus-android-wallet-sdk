@@ -83,11 +83,11 @@ fun Derivation.ka_agree(
     viewingKey: String,
     ephemeralPublicKey: ByteArray,
     network: ZcashNetwork
-): SharedSecret = SharedSecret(ka_agree(viewingKey, ephemeralPublicKey, network.id))
+): String = ka_agree(viewingKey, ephemeralPublicKey, network.id)
 
 fun Derivation.ka_derive_public(
     saplingAddress: String,
     ephemeralSecretKey: ByteArray,
     network: ZcashNetwork
-): EphemeralPublicKey = EphemeralPublicKey(ka_derive_public(saplingAddress, ephemeralSecretKey, network.id))
+): String = ka_derive_public(saplingAddress, ephemeralSecretKey, network.id)
 

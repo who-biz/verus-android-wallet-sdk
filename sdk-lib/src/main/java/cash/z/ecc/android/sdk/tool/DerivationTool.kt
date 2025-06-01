@@ -133,13 +133,13 @@ interface DerivationTool {
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
         network: ZcashNetwork
-    ): SharedSecret
+    ): String
 
     suspend fun ka_derive_public(
         saplingAddress: String,
         ephemeralSecretKey: ByteArray,
         network: ZcashNetwork
-    ): EphemeralPublicKey
+    ): String
 
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS

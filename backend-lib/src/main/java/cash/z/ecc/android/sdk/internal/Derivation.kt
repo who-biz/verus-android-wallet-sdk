@@ -63,13 +63,13 @@ interface Derivation {
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
         networkId: Int
-    ): JniSharedSecret
+    ): String
 
     fun ka_derive_public(
         saplingAddress: String,
         ephemeralSecretKey: ByteArray,
         networkId: Int
-    ): ByteArray
+    ): String
 
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = 1
