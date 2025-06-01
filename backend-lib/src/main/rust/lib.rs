@@ -1041,7 +1041,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSp
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSaplingAddress<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_isValidSaplingAddress<
     'local,
 >(
     mut env: JNIEnv<'local>,
@@ -1054,9 +1054,14 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSa
         let network = parse_network(network_id as u32)?;
         let addr = utils::java_string_to_rust(env, &addr);
 
+        warn!("isValidAddress: address({:?}", addr);
+
         match Address::decode(&network, &addr) {
             Some(addr) => match addr {
-                Address::Sapling(_) => Ok(JNI_TRUE),
+                Address::Sapling(_) => {
+                    warn!("address::sapling condition hit!");
+                    Ok(JNI_TRUE)
+                },
                 Address::Transparent(_) | Address::Unified(_) => Ok(JNI_FALSE),
             },
             None => Err(anyhow!("Address is for the wrong network")),

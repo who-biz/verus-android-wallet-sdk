@@ -79,6 +79,11 @@ fun Derivation.deriveUnifiedFullViewingKeysTypesafe(
         numberOfAccounts
     ).map { UnifiedFullViewingKey(it) }
 
+fun Derivation.isValidShieldedAddress(
+    address: String,
+    network: ZcashNetwork
+): Boolean = isValidShieldedAddress(address, network.id)
+
 fun Derivation.ka_agree(
     viewingKey: String,
     ephemeralPublicKey: ByteArray,

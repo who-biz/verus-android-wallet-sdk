@@ -128,6 +128,10 @@ interface DerivationTool {
         network: ZcashNetwork
     ): String
 
+    suspend fun isValidShieldedAddress(
+        address: String,
+        network: ZcashNetwork
+    ): Boolean
 
     suspend fun ka_agree(
         viewingKey: String,

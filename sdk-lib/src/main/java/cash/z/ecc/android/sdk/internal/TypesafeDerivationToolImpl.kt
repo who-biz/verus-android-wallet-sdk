@@ -64,6 +64,11 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         account: Account
     ): String = derivation.deriveShieldedAddress(seed, network, account)
 
+    override suspend fun isValidShieldedAddress(
+        address: String,
+        network: ZcashNetwork
+    ): Boolean = derivation.isValidShieldedAddress(address, network)
+
     override suspend fun ka_agree(
         viewingKey: String,
         ephemeralPublicKey: ByteArray,

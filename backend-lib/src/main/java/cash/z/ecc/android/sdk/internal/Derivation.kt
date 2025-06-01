@@ -59,6 +59,11 @@ interface Derivation {
         numberOfAccounts: Int
     ): Array<String>
 
+    fun isValidShieldedAddress(
+        address: String,
+        networkId: Int
+    ): Boolean
+
     fun ka_agree(
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
