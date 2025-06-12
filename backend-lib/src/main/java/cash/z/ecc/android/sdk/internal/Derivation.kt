@@ -64,15 +64,14 @@ interface Derivation {
         networkId: Int
     ): Boolean
 
-    fun ka_agree(
+    fun getSymmetricKey(
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
         networkId: Int
     ): String
 
-    fun ka_derive_public(
+    fun generateSymmetricKey(
         saplingAddress: String,
-        ephemeralSecretKey: ByteArray,
         networkId: Int
     ): String
 

@@ -8,7 +8,6 @@ use std::ptr;
 use tracing::warn;
 
 use rand::rngs::OsRng;
-use rand::RngCore;
 
 use anyhow::anyhow;
 use jni::objects::{JByteArray, JObject, JObjectArray, JValue};
@@ -93,9 +92,9 @@ use zcash_primitives::{
 use zcash_proofs::prover::LocalTxProver;
 
 use zcash_note_encryption::{ Domain, EphemeralKeyBytes };
-use sapling::note_encryption::{ PreparedIncomingViewingKey, SaplingDomain, Zip212Enforcement};
+use sapling::note_encryption::{ PreparedIncomingViewingKey, SaplingDomain};
 use jubjub::Fr;
-use sapling::{ Note, Rseed, util };
+use sapling::{ Note, Rseed };
 use sapling::value::NoteValue;
 
 
@@ -316,7 +315,7 @@ fn encode_usk<'a>(
     )
 }
 
-fn encode_shared_secret<'a>(
+/*fn encode_shared_secret<'a>(
     env: &mut JNIEnv<'a>,
     shared_secret: <SaplingDomain as Domain>::SharedSecret
 ) -> jni::errors::Result<JObject<'a>> {
@@ -327,7 +326,7 @@ fn encode_shared_secret<'a>(
         "([B)V",
         &[(&bytes).into()],
     )
-}
+}*/
 
 
 fn encode_extsk<'a>(
@@ -773,7 +772,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_1agree_1dec<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_getSymmetricKeyReceiver<
     'local,
 >(
     mut env: JNIEnv<'local>,
@@ -783,7 +782,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
     network_id: jint,
 ) -> jstring {
     let res = catch_unwind(&mut env, |env| {
-        let _span = tracing::info_span!("RustDerivationTool.ka_agree").entered();
+        let _span = tracing::info_span!("RustDerivationTool.GetSymmetricKeyReceiver").entered();
         let network = parse_network(network_id as u32)?;
         let ufvk_string = utils::java_string_to_rust(env, &ufvk_string);
         let ufvk = match UnifiedFullViewingKey::decode(&network, &ufvk_string) {
@@ -798,12 +797,12 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
 
         let sapling_dfvk = ufvk.sapling().expect("Sapling key is present").clone();
         let sapling_ivk = PreparedIncomingViewingKey::new(&sapling_dfvk.to_ivk(Scope::External));
-        warn!("sapling_ivk: {:?}", sapling_ivk);
-//        let sapling_domain = SaplingDomain::new(Zip212Enforcement::Off);
+        //warn!("sapling_ivk: {:?}", sapling_ivk);
+
         let epk_array: [u8; 32] = env.convert_byte_array(ephemeral_pk_jbytes)?.try_into().unwrap();
-        warn!("epk_array: {:?}", epk_array);
+        //warn!("epk_array: {:?}", epk_array);
         let epk_bytes = EphemeralKeyBytes::from(epk_array);
-        warn!("epk_bytes: {:?}", epk_bytes);
+        //warn!("epk_bytes: {:?}", epk_bytes);
 
         let epk = match <SaplingDomain as Domain>::epk(&epk_bytes) {
             Some(epk) => epk,
@@ -815,10 +814,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
         };
 
         let prepared_epk = <SaplingDomain as Domain>::prepare_epk(epk);
-
         let shared_secret = <SaplingDomain as Domain>::ka_agree_dec(&sapling_ivk, &prepared_epk);
-
-        warn!("shared_secret: {:?}", shared_secret);
+        //warn!("shared_secret: {:?}", shared_secret);
 
         let symmetric_key = <SaplingDomain as Domain>::kdf(shared_secret, &epk_bytes).to_hex();
         warn!("symmetric_key: {:?}", symmetric_key);
@@ -832,24 +829,23 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka_1derive_1public_1from_1recipient<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_generateSymmetricKeySender<
     'local,
 >(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     sapling_address: JString<'local>,
-    ephemeral_sk_jbytes: JByteArray<'local>,
     network_id: jint,
 ) -> jstring {
     let res = catch_unwind(&mut env, |env| {
-        let _span = tracing::info_span!("RustDerivationTool.ka_derive_public_from_recipient").entered();
+        let _span = tracing::info_span!("RustDerivationTool.generateSymmetricKeySender").entered();
         let network = parse_network(network_id as u32)?;
         let addr = utils::java_string_to_rust(env, &sapling_address);
         let recipient = match Address::decode(&network, &addr) {
             Some(addr) => match addr {
                 Address::Sapling(addr) => addr,
                 // reject everything except saplingAddresses
-                _ => return Err(anyhow!("Incompatible Address used in ka_derive_public!"))
+                _ => return Err(anyhow!("Incompatible Address used in generateSymmetricKeySender!"))
             },
             None => return Err(anyhow!("Address is for the wrong network")),
         };
@@ -860,38 +856,21 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ka
         let rseed_bytes = Fr::from_bytes_wide(&buf);
         let rseed = Rseed::BeforeZip212(rseed_bytes);
 
+       //TODO: see if there's a clearer way to expose this function, that doesn't require empty note construction
        let note = Note::from_parts(recipient, NoteValue::ZERO, rseed);
-//       let mut rseed_bytes = [0; 32];
-//      rng.fill_bytes(&mut rseed_bytes);
-//      let rseed = Rseed::AfterZip212(rseed_bytes);
        let esk = note.generate_or_derive_esk(&mut rng);
 
-//        let esk = util::generate_random_rseed(Zip212Enforcement::Off, &mut rng);
-        //let esk = Fr::from_bytes_wide(&rseed);
-//        let esk = Fr::random(&mut rng);
-//Note::generate_or_derive_esk(&note, &mut rng);
-        //let rseed_bytes = &rseed.as_bytes();
-        warn!("esk {:?}, rseed{:?}", esk, rseed);
-
-//        let esk_array: [u8; 32] = env.convert_byte_array(ephemeral_sk_jbytes)?.try_into().unwrap();
-//        warn!("esk_array: {:?}", esk_array);
-//        let esk_bytes = EphemeralKeyBytes::from(esk_array);
-//        warn!("esk_bytes: {:?}", esk_bytes);
+       //warn!("esk {:?}, rseed{:?}", esk, rseed);
 
         let epk = <SaplingDomain as Domain>::ka_derive_public_from_recipient(&recipient, &esk);
         let epk_bytes = <SaplingDomain as Domain>::epk_bytes(&epk);
-
-        warn!("epk: {:?}, epk_bytes {:?}", epk, epk_bytes);
+        //warn!("epk: {:?}, epk_bytes {:?}", epk, epk_bytes);
 
         let pk_d = recipient.pk_d();
-
-        //let prepared_esk = <SaplingDomain as Domain>::esk(&esk_bytes);
         let shared_secret = <SaplingDomain as Domain>::ka_agree_enc(&esk, &pk_d);
-
-        warn!("shared_secret: {:?}", shared_secret);
-
+        //warn!("shared_secret: {:?}", shared_secret);
         let symmetric_key = <SaplingDomain as Domain>::kdf(shared_secret, &epk_bytes).to_hex();
-        warn!("symmetric_key: {:?}", symmetric_key);
+        //warn!("symmetric_key: {:?}", symmetric_key);
         let output = env
             .new_string(symmetric_key)
             .expect("Couldn't create Java string!");

@@ -84,15 +84,14 @@ fun Derivation.isValidShieldedAddress(
     network: ZcashNetwork
 ): Boolean = isValidShieldedAddress(address, network.id)
 
-fun Derivation.ka_agree(
+fun Derivation.getSymmetricKey(
     viewingKey: String,
     ephemeralPublicKey: ByteArray,
     network: ZcashNetwork
-): String = ka_agree(viewingKey, ephemeralPublicKey, network.id)
+): String = getSymmetricKey(viewingKey, ephemeralPublicKey, network.id)
 
-fun Derivation.ka_derive_public(
+fun Derivation.generateSymmetricKey(
     saplingAddress: String,
-    ephemeralSecretKey: ByteArray,
     network: ZcashNetwork
-): String = ka_derive_public(saplingAddress, ephemeralSecretKey, network.id)
+): String = generateSymmetricKey(saplingAddress, network.id)
 

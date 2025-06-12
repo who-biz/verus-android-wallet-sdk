@@ -73,17 +73,16 @@ class RustDerivationTool private constructor() : Derivation {
         networkId: Int
     ): String = deriveUnifiedAddressFromViewingKey(viewingKey, networkId = networkId)
 
-    override fun ka_agree(
+    override fun getSymmetricKey(
         viewingKey: String, 
         ephemeralPublicKey: ByteArray,
         networkId: Int
-    ): String =  ka_agree_dec(viewingKey, ephemeralPublicKey, networkId = networkId)
+    ): String =  getSymmetricKeyReceiver(viewingKey, ephemeralPublicKey, networkId = networkId)
 
-    override fun ka_derive_public(
+    override fun generateSymmetricKey(
         saplingAddress: String,
-        ephemeralSecretKey: ByteArray,
         networkId: Int
-    ): String =  ka_derive_public_from_recipient(saplingAddress, ephemeralSecretKey, networkId = networkId)
+    ): String =  generateSymmetricKeySender(saplingAddress, networkId = networkId)
 
     companion object {
         suspend fun new(): Derivation {
@@ -153,16 +152,15 @@ class RustDerivationTool private constructor() : Derivation {
         ): Boolean
 
         @JvmStatic
-        private external fun ka_agree_dec(
+        private external fun getSymmetricKeyReceiver(
             vk: String,
             epk: ByteArray,
             networkId: Int
         ): String
 
         @JvmStatic
-        private external fun ka_derive_public_from_recipient(
+        private external fun generateSymmetricKeySender(
             saplingAddress: String,
-            esk: ByteArray,
             networkId: Int
         ): String
     }

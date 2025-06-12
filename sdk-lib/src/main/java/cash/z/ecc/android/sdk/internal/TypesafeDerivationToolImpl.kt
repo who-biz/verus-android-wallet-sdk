@@ -69,15 +69,14 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         network: ZcashNetwork
     ): Boolean = derivation.isValidShieldedAddress(address, network)
 
-    override suspend fun ka_agree(
+    override suspend fun getSymmetricKey(
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
         network: ZcashNetwork
-    ): String = derivation.ka_agree(viewingKey, ephemeralPublicKey, network)
+    ): String = derivation.getSymmetricKey(viewingKey, ephemeralPublicKey, network)
 
-    override suspend fun ka_derive_public(
+    override suspend fun generateSymmetricKey(
         saplingAddress: String,
-        ephemeralSecretKey: ByteArray,
         network: ZcashNetwork
-    ): String = derivation.ka_derive_public(saplingAddress, ephemeralSecretKey, network)
+    ): String = derivation.generateSymmetricKey(saplingAddress, network)
 }

@@ -133,15 +133,14 @@ interface DerivationTool {
         network: ZcashNetwork
     ): Boolean
 
-    suspend fun ka_agree(
+    suspend fun getSymmetricKey(
         viewingKey: String,
         ephemeralPublicKey: ByteArray,
         network: ZcashNetwork
     ): String
 
-    suspend fun ka_derive_public(
+    suspend fun generateSymmetricKey(
         saplingAddress: String,
-        ephemeralSecretKey: ByteArray,
         network: ZcashNetwork
     ): String
 
