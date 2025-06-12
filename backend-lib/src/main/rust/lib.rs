@@ -887,7 +887,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSp
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSaplingAddress<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_isValidSaplingAddress<
     'local,
 >(
     mut env: JNIEnv<'local>,

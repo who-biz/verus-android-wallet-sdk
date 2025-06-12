@@ -126,6 +126,11 @@ interface DerivationTool {
         network: ZcashNetwork
     ): String
 
+    suspend fun isValidShieldedAddress(
+        address: String,
+        network: ZcashNetwork
+    ): Boolean
+
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS
 

@@ -418,7 +418,7 @@ class SdkSynchronizer private constructor(
     }
 
     suspend fun isValidAddress(address: String): Boolean {
-        return !validateAddress(address).isNotValid
+        return validateShieldedAddress(address)
     }
 
     //
@@ -713,6 +713,8 @@ class SdkSynchronizer private constructor(
     override suspend fun isValidTransparentAddr(address: String) = txManager.isValidTransparentAddress(address)
 
     override suspend fun isValidUnifiedAddr(address: String) = txManager.isValidUnifiedAddress(address)
+
+    override suspend fun validateShieldedAddress(address: String): Boolean = txManager.isValidShieldedAddress(address)
 
     override suspend fun validateAddress(address: String): AddressType =
         runCatching {

@@ -41,6 +41,11 @@ class RustDerivationTool private constructor() : Derivation {
         accountIndex: Int
     ): String = deriveShieldedAddressFromSeed(seed, accountIndex = accountIndex, networkId = networkId)
 
+    override fun isValidShieldedAddress(
+        address: String,
+        networkId: Int,
+    ): Boolean = isValidSaplingAddress(address, networkId = networkId)
+
     /**
      * Given a Unified Full Viewing Key string, return the associated Unified Address.
      *
@@ -127,5 +132,11 @@ class RustDerivationTool private constructor() : Derivation {
             key: String,
             networkId: Int
         ): String
+
+        @JvmStatic
+        private external fun isValidSaplingAddress(
+            address: String,
+            networkId: Int
+        ): Boolean
     }
 }

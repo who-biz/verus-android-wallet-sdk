@@ -58,6 +58,11 @@ interface Derivation {
         numberOfAccounts: Int
     ): Array<String>
 
+    fun isValidShieldedAddress(
+        address: String,
+        networkId: Int
+    ): Boolean
+
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = 1
     }

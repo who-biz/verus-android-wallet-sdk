@@ -354,6 +354,8 @@ interface Synchronizer {
      */
     suspend fun validateAddress(address: String): AddressType
 
+    suspend fun validateShieldedAddress(address: String): Boolean
+
     /**
      * Download all UTXOs for the given account addresses and store any new ones in the database.
      *
