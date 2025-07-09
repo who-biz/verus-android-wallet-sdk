@@ -62,6 +62,7 @@ interface Backend {
     @Throws(RuntimeException::class)
     suspend fun createAccount(
         transparentKey: ByteArray?,
+        extsk: String?,
         seed: ByteArray,
         treeState: ByteArray,
         recoverUntil: Long?

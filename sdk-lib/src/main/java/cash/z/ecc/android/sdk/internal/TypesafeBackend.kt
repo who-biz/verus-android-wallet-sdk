@@ -22,6 +22,7 @@ internal interface TypesafeBackend {
 
     suspend fun createAccountAndGetSpendingKey(
         transparentKey: ByteArray?,
+        extsk: String?,
         seed: ByteArray,
         treeState: TreeState,
         recoverUntil: BlockHeight?

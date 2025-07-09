@@ -5,7 +5,8 @@ use std::panic;
 use std::path::Path;
 use std::ptr;
 
-//use tracing::warn;
+use tracing::warn;
+use zcash_primitives::constants::vrsc::mainnet;
 
 use anyhow::anyhow;
 use jni::objects::{JByteArray, JObject, JObjectArray, JValue};
@@ -21,6 +22,7 @@ use tracing::{debug, error};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::reload;
 use zcash_address::{ToAddress, ZcashAddress};
+
 #[cfg(feature = "transparent-inputs")]
 use zcash_client_backend::{
     address::{Address, UnifiedAddress},
@@ -64,6 +66,8 @@ use zcash_client_backend::{
     zip321::{Payment, TransactionRequest},
     ShieldedProtocol,
 };
+
+use zcash_client_backend::encoding::decode_extended_spending_key;
 
 use zcash_client_sqlite::{
     chain::{init::init_blockmeta_db, BlockMeta},
@@ -358,6 +362,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
     _: JClass<'local>,
     db_data: JString<'local>,
     transparent_key: JByteArray<'local>,
+    extsk: JString<'local>,
     seed: JByteArray<'local>,
     treestate: JByteArray<'local>,
     recover_until: jlong,
@@ -371,6 +376,16 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
         //let tkey = env.convert_byte_array(transparent_key).unwrap_or(Vec::new());
         //warn!("Jni boundary, transparent_key: {:?}, length: {}", tkey, tkey.len());
         let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap_or(Vec::new()));
+
+//        let bytes: Vec<u8>;
+        let extsk_rust: String = env.get_string(&extsk)?.into();
+        if !extsk_rust.is_empty() {
+            let result = decode_extended_spending_key(mainnet::HRP_SAPLING_EXTENDED_SPENDING_KEY, &extsk_rust);
+            warn!("bech32 decode: result({:?})", result);
+        } else {
+            warn!("extsk JString was empty!!");
+        }
+
         let hd_seed = env.convert_byte_array(seed).unwrap();
         //warn!("Jni boundary, seed: {:?}, length: {}", hd_seed, hd_seed.len());
         let seed = SecretVec::new(hd_seed);
@@ -887,7 +902,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSp
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_isValidSaplingAddress<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSaplingAddress<
     'local,
 >(
     mut env: JNIEnv<'local>,

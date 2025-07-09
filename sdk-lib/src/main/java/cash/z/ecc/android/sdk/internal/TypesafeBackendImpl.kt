@@ -25,6 +25,7 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
 
     override suspend fun createAccountAndGetSpendingKey(
         transparentKey: ByteArray?,
+        extsk: String?,
         seed: ByteArray,
         treeState: TreeState,
         recoverUntil: BlockHeight?
@@ -32,6 +33,7 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
         return UnifiedSpendingKey(
             backend.createAccount(
                 transparentKey = transparentKey,
+                extsk = extsk,
                 seed = seed,
                 treeState = treeState.encoded,
                 recoverUntil = recoverUntil?.value

@@ -78,6 +78,7 @@ class RustBackend private constructor(
 
     override suspend fun createAccount(
         transparentKey: ByteArray?,
+        extsk: String?,
         seed: ByteArray,
         treeState: ByteArray,
         recoverUntil: Long?
@@ -86,6 +87,7 @@ class RustBackend private constructor(
             createAccount(
                 dataDbFile.absolutePath,
                 transparentKey,
+                extsk,
                 seed,
                 treeState,
                 recoverUntil ?: -1,
@@ -449,6 +451,7 @@ class RustBackend private constructor(
         private external fun createAccount(
             dbDataPath: String,
             transparentKey: ByteArray?,
+            extsk: String?,
             seed: ByteArray,
             treeState: ByteArray,
             recoverUntil: Long,

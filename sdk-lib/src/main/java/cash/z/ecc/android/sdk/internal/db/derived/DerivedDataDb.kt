@@ -48,6 +48,7 @@ internal class DerivedDataDb private constructor(
             zcashNetwork: ZcashNetwork,
             checkpoint: Checkpoint,
             transparentKey: ByteArray?,
+            extsk: String?,
             seed: ByteArray?,
             numberOfAccounts: Int,
             recoverUntil: BlockHeight?
@@ -77,6 +78,7 @@ internal class DerivedDataDb private constructor(
                     runCatching {
                         backend.createAccountAndGetSpendingKey(
                             transparentKey = transparentKey,
+                            extsk = extsk,
                             seed = checkedSeed,
                             treeState = checkpoint.treeState(),
                             recoverUntil = recoverUntil

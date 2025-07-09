@@ -580,7 +580,8 @@ interface Synchronizer {
             seed: ByteArray?,
             birthday: BlockHeight?,
             walletInitMode: WalletInitMode,
-            transparentKey: ByteArray?
+            transparentKey: ByteArray?,
+            extsk: String?
         ): CloseableSynchronizer {
             val applicationContext = context.applicationContext
 
@@ -643,6 +644,7 @@ interface Synchronizer {
                     zcashNetwork = zcashNetwork,
                     checkpoint = loadedCheckpoint,
                     transparentKey = transparentKey,
+                    extsk = extsk,
                     seed = seed,
                     numberOfAccounts = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS,
                     recoverUntil = chainTip
@@ -688,10 +690,11 @@ interface Synchronizer {
             seed: ByteArray?,
             birthday: BlockHeight?,
             walletInitMode: WalletInitMode,
-            transparentKey: ByteArray
+            transparentKey: ByteArray?,
+            extsk: String?
         ): CloseableSynchronizer =
             runBlocking {
-                new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode, transparentKey)
+                new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode, transparentKey, extsk)
             }
 
         /**
