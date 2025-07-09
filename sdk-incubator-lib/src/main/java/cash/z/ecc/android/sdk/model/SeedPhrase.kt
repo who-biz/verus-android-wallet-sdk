@@ -4,6 +4,7 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.util.Log
 
 // Consider using ImmutableList here
 data class SeedPhrase(val split: List<String>) {
@@ -20,12 +21,13 @@ data class SeedPhrase(val split: List<String>) {
     }
 
     // For security, intentionally override the toString method to reduce risk of accidentally logging secrets
-    override fun toString() = "SeedPhrase"
+    //override fun toString() = "SeedPhrase"
 
     fun joinToString() = split.joinToString(DEFAULT_DELIMITER)
 
     suspend fun toByteArray() = withContext(Dispatchers.IO) { 
         if (HEX_SEED_SIZE == split.size) {
+            Log.w("SeedPhrase", "Seed value: $split.first()" ); 
             split.first().decodeHex()            
         } else {
             Mnemonics.MnemonicCode(joinToString()).toSeed()
