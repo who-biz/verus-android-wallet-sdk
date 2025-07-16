@@ -75,6 +75,14 @@ interface Derivation {
         networkId: Int
     ): String
 
+    fun getEncryptionAddress(
+        seed: ByteArray,
+        fromId: ByteArray,
+        toId: ByteArray,
+        accountIndex: Int,
+        networkId: Int
+    ): String
+
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = 1
     }

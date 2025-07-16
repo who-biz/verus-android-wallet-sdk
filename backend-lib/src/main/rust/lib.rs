@@ -881,6 +881,45 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ge
 }
 
 #[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zGetEncryptionAddress<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    seed: JByteArray<'local>,
+    fromid: JByteArray<'local>,
+    toid: JByteArray<'local>,
+    account_index: jint,
+    network_id: jint,
+) -> jstring {
+    let res = panic::catch_unwind(|| {
+        let _span =
+            tracing::info_span!("RustDerivationTool.zGetEncryptionAddress").entered();
+        let network = parse_network(network_id as u32)?;
+        let seed = env.convert_byte_array(seed).unwrap();
+        let fromid = env.convert_byte_array(fromid).unwrap();
+        let toid = env.convert_byte_array(toid).unwrap();
+        let account_id = account_id_from_jint(account_index)?;
+
+        let encryption_address_seed = seed.into_iter().chain(fromid).chain(toid).collect::<Vec<u8>>();
+
+        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], &encryption_address_seed, account_id)
+            .map_err(|e| anyhow!("For encryption address, error generating unified spending key from seed: {:?}", e))
+            .map(|usk| usk.to_unified_full_viewing_key())?;
+
+        let (ua, _) = ufvk
+            .find_address(DiversifierIndex::new(), SAPLING_ADDRESS_REQUEST)
+            .expect("At least one Unified Address should be derivable");
+        let address_str = ua.sapling().expect("no sapling receiver in UAddr found!").encode(&network);
+        let output = env
+            .new_string(address_str)
+            .expect("Couldn't create Java string!");
+        Ok(output.into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+
+#[no_mangle]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_getCurrentAddress<'local>(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,

@@ -144,6 +144,14 @@ interface DerivationTool {
         network: ZcashNetwork
     ): String
 
+    suspend fun getEncryptionAddress(
+        seed: ByteArray,
+        fromId: ByteArray,
+        toId: ByteArray,
+        accountIndex: Int,
+        network: ZcashNetwork
+    ): String
+
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS
 

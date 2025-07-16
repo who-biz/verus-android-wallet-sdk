@@ -79,4 +79,12 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         saplingAddress: String,
         network: ZcashNetwork
     ): String = derivation.generateSymmetricKey(saplingAddress, network)
+
+    override suspend fun getEncryptionAddress(
+        seed: ByteArray,
+        fromId: ByteArray,
+        toId: ByteArray,
+        accountIndex: Int,
+        network: ZcashNetwork
+    ): String = derivation.getEncryptionAddress(seed, fromId, toId, accountIndex, network)
 }

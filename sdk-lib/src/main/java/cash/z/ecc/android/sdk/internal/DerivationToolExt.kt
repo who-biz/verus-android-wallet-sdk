@@ -95,3 +95,11 @@ fun Derivation.generateSymmetricKey(
     network: ZcashNetwork
 ): String = generateSymmetricKey(saplingAddress, network.id)
 
+fun Derivation.getEncryptionAddress(
+    seed: ByteArray,
+    fromId: ByteArray,
+    toId: ByteArray,
+    accountIndex: Int,
+    network: ZcashNetwork
+): String = getEncryptionAddress(seed, fromId, toId, accountIndex, network.id)
+

@@ -84,6 +84,14 @@ class RustDerivationTool private constructor() : Derivation {
         networkId: Int
     ): String =  generateSymmetricKeySender(saplingAddress, networkId = networkId)
 
+    override fun getEncryptionAddress(
+        seed: ByteArray,
+        fromId: ByteArray,
+        toId: ByteArray,
+        accountIndex: Int,
+        networkId: Int
+    ): String =  zGetEncryptionAddress(seed, fromId, toId, accountIndex, networkId = networkId)
+
     companion object {
         suspend fun new(): Derivation {
             RustBackend.loadLibrary()
@@ -161,6 +169,15 @@ class RustDerivationTool private constructor() : Derivation {
         @JvmStatic
         private external fun generateSymmetricKeySender(
             saplingAddress: String,
+            networkId: Int
+        ): String
+
+        @JvmStatic
+        private external fun zGetEncryptionAddress(
+            seed: ByteArray,
+            fromId: ByteArray,
+            toId: ByteArray,
+            accountIndex: Int,
             networkId: Int
         ): String
     }
