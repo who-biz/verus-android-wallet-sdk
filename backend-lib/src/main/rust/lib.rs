@@ -898,26 +898,46 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
             tracing::info_span!("RustDerivationTool.zGetEncryptionAddress").entered();
         let network = parse_network(network_id as u32)?;
         let seed = SecretVec::new(env.convert_byte_array(seed).unwrap());
-        let fromid = env.convert_byte_array(fromid).unwrap();
-        let toid = env.convert_byte_array(toid).unwrap();
+        let fromid_str = env.convert_byte_array(fromid).unwrap();
+        let toid_str = env.convert_byte_array(toid).unwrap();
         let account_id = account_id_from_jint(account_index)?;
 
         let usk = UnifiedSpendingKey::from_seed(&network, &[], seed.expose_secret(), account_id)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e)).expect("Unable to convert usk to sapling extsk");
         let base_spending_key = usk.sapling();
+        let bsk_hex = hex::encode(base_spending_key.to_bytes().to_vec());
 
-        warn!("base_spending_key({:?})", base_spending_key);
+        warn!("base_spending_key({:?})", bsk_hex);
 
-        let encryption_address_seed = base_spending_key.to_bytes().to_vec().into_iter().chain(fromid.to_vec()).chain(toid.to_vec()).collect::<Vec<u8>>();
+        
+        let fromid = hex::decode(fromid_str)
+            .map_err(|e| anyhow!("invalid hex in fromid: {:?}", e))?;
+        let toid = hex::decode(toid_str)
+            .map_err(|e| anyhow!("invalid hex in toid: {:?}", e))?;
+
+        let fromid_byteflipped: Vec<u8> = fromid.iter().rev().copied().collect();
+        let toid_byteflipped: Vec<u8> = toid.iter().rev().copied().collect();
+
+        let encryption_address_seed = base_spending_key.to_bytes().to_vec().into_iter().chain(fromid_byteflipped.into_iter()).chain(toid_byteflipped.into_iter()).collect::<Vec<u8>>();
+        let eaddr_seed_hex = hex::encode(encryption_address_seed.clone());
         let mut hasher = Sha256::new();
-        hasher.update(encryption_address_seed.clone());
+        hasher.update(encryption_address_seed);
         let hashed = hasher.finalize();
-        let hashed_hex = hex::encode(hashed);
+        let hashed_hex = hex::encode(hashed.clone());
 
-        warn!("encryption_address_seed({:?}), hashed_hex({:?})", encryption_address_seed, hashed_hex);
+        let hashed_flipped: Vec<u8> = hashed.iter().rev().copied().collect();
+        let hash_flipped_hex = hex::encode(hashed_flipped.clone());
+
+        warn!("encryption_address_seed({:?})", eaddr_seed_hex);
+        warn!("hashed_hex({:?}), hash_flipped_hex({:?})", hashed_hex, hash_flipped_hex);
  //       let encryption_address_seed = seed.into_iter().chain(fromid).chain(toid).collect::<Vec<u8>>();
 
-        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], &encryption_address_seed, account_id)
+        let encryption_seed = SecretVec::new(hashed_flipped.clone());
+        let encryption_seed_two = SecretVec::new(hashed_flipped);
+        let enc_usk = UnifiedSpendingKey::from_seed(&network, &[], encryption_seed.expose_secret(), account_id)
+            .map_err(|e| anyhow!("error generating unified spending key from encryption seed: {:?}", e)).unwrap();
+
+        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], encryption_seed_two.expose_secret(), account_id)
             .map_err(|e| anyhow!("For encryption address, error generating unified spending key from seed: {:?}", e))
             .map(|usk| usk.to_unified_full_viewing_key())?;
 
@@ -925,6 +945,10 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
             .find_address(DiversifierIndex::new(), SAPLING_ADDRESS_REQUEST)
             .expect("At least one Unified Address should be derivable");
         let address_str = ua.sapling().expect("no sapling receiver in UAddr found!").encode(&network);
+
+        let address = enc_usk.sapling().default_address().1.encode(&network);
+        warn!("sapling_default_address({:?})", address);
+//        let address_str = ua.sapling().expect("no sapling receiver in UAddr found!").encode(&network);
         let output = env
             .new_string(address_str)
             .expect("Couldn't create Java string!");
