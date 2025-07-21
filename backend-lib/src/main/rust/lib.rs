@@ -930,14 +930,12 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
 
         warn!("encryption_address_seed({:?})", eaddr_seed_hex);
         warn!("hashed_hex({:?}), hash_flipped_hex({:?})", hashed_hex, hash_flipped_hex);
- //       let encryption_address_seed = seed.into_iter().chain(fromid).chain(toid).collect::<Vec<u8>>();
 
-        let encryption_seed = SecretVec::new(hashed_flipped.clone());
-        let encryption_seed_two = SecretVec::new(hashed_flipped);
-        let enc_usk = UnifiedSpendingKey::from_seed(&network, &[], encryption_seed.expose_secret(), account_id)
-            .map_err(|e| anyhow!("error generating unified spending key from encryption seed: {:?}", e)).unwrap();
+        let encryption_seed = SecretVec::new(hashed.to_vec());
 
-        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], encryption_seed_two.expose_secret(), account_id)
+        let encryption_index = zip32::AccountId::try_from(0).map_err(|_| anyhow!("Invalid account ID")).unwrap();
+
+        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], encryption_seed.expose_secret(), encryption_index)
             .map_err(|e| anyhow!("For encryption address, error generating unified spending key from seed: {:?}", e))
             .map(|usk| usk.to_unified_full_viewing_key())?;
 
@@ -946,9 +944,6 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
             .expect("At least one Unified Address should be derivable");
         let address_str = ua.sapling().expect("no sapling receiver in UAddr found!").encode(&network);
 
-        let address = enc_usk.sapling().default_address().1.encode(&network);
-        warn!("sapling_default_address({:?})", address);
-//        let address_str = ua.sapling().expect("no sapling receiver in UAddr found!").encode(&network);
         let output = env
             .new_string(address_str)
             .expect("Couldn't create Java string!");
