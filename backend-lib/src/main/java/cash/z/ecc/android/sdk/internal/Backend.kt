@@ -54,7 +54,7 @@ interface Backend {
      * @throws RuntimeException as a common indicator of the operation failure
      */
     @Throws(RuntimeException::class)
-    suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?): Int
+    suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?): Int
 
     /**
      * @throws RuntimeException as a common indicator of the operation failure
@@ -62,8 +62,8 @@ interface Backend {
     @Throws(RuntimeException::class)
     suspend fun createAccount(
         transparentKey: ByteArray?,
-        extsk: String?,
-        seed: ByteArray,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: ByteArray,
         recoverUntil: Long?
     ): JniUnifiedSpendingKey
@@ -72,7 +72,7 @@ interface Backend {
      * @throws RuntimeException as a common indicator of the operation failure
      */
     @Throws(RuntimeException::class)
-    suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, seed: ByteArray): Boolean
+    suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, extsk: ByteArray, seed: ByteArray): Boolean
     //TODO: pretty sure we don't need WIF evaluated here, but leaving here for completeness of process
 
     fun isValidSaplingAddr(addr: String): Boolean

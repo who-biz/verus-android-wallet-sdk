@@ -18,17 +18,21 @@ sealed class WalletFixture {
 
     abstract val wifString: String
 
+    abstract val extskString: String
+
     abstract fun getBirthday(zcashNetwork: ZcashNetwork): BlockHeight
 
     abstract fun getAddresses(zcashNetwork: ZcashNetwork): Addresses
 
     suspend fun getUnifiedSpendingKey(
         wif: ByteArray = wifString.decodeBase58WithChecksum().copyOfRange(1,34), //TODO: don't use hardcoded ints
+//        extsk: String = extskString,
         seed: String = hexSeed,
         network: ZcashNetwork,
         account: Account = Account.DEFAULT
     ) = DerivationTool.getInstance().deriveUnifiedSpendingKey(
         wif,
+ //       extsk.decodeHex(),
         seed.decodeHex(),
         network,
         account
@@ -38,6 +42,8 @@ sealed class WalletFixture {
     object Ben : WalletFixture() {
 
         override val wifString = ""
+
+        override val extskString = ""
 
         override val hexSeed: String
             get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b4770a"
@@ -86,6 +92,9 @@ sealed class WalletFixture {
 
 	override val wifString: String
 	    get() = "UxUY1K87of2ntgchEprKosZVt97DXPv4iZP6oGkcxXdVFNtbncMT"
+
+	override val extskString: String
+	    get() = ""
 
         override val hexSeed: String
             get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b4770a"

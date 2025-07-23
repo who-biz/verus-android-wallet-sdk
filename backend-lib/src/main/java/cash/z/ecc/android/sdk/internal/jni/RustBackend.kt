@@ -66,11 +66,12 @@ class RustBackend private constructor(
             )
         }
 
-    override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?) =
+    override suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?) =
         withContext(SdkDispatchers.DATABASE_IO) {
             initDataDb(
                 dataDbFile.absolutePath,
                 transparentKey,
+                extsk,
                 seed,
                 networkId = networkId
             )
@@ -78,8 +79,8 @@ class RustBackend private constructor(
 
     override suspend fun createAccount(
         transparentKey: ByteArray?,
-        extsk: String?,
-        seed: ByteArray,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: ByteArray,
         recoverUntil: Long?
     ): JniUnifiedSpendingKey {
@@ -96,11 +97,12 @@ class RustBackend private constructor(
         }
     }
 
-    override suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, seed: ByteArray): Boolean =
+    override suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, extsk: ByteArray, seed: ByteArray): Boolean =
         withContext(SdkDispatchers.DATABASE_IO) {
             isSeedRelevantToAnyDerivedAccounts(
                 dataDbFile.absolutePath,
                 transparentKey,
+                extsk,
                 seed,
                 networkId = networkId
             )
@@ -443,6 +445,7 @@ class RustBackend private constructor(
         private external fun initDataDb(
             dbDataPath: String,
             transparentKey: ByteArray?,
+            extsk: ByteArray?,
             seed: ByteArray?,
             networkId: Int
         ): Int
@@ -451,8 +454,8 @@ class RustBackend private constructor(
         private external fun createAccount(
             dbDataPath: String,
             transparentKey: ByteArray?,
-            extsk: String?,
-            seed: ByteArray,
+            extsk: ByteArray?,
+            seed: ByteArray?,
             treeState: ByteArray,
             recoverUntil: Long,
             networkId: Int
@@ -462,6 +465,7 @@ class RustBackend private constructor(
         private external fun isSeedRelevantToAnyDerivedAccounts(
             dbDataPath: String,
             transparentKey: ByteArray,
+            extsk: ByteArray,
             seed: ByteArray,
             networkId: Int
         ): Boolean

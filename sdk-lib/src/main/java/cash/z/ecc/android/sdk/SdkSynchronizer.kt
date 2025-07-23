@@ -541,7 +541,7 @@ class SdkSynchronizer private constructor(
     // Not ready to be a public API; internal for testing only
     internal suspend fun createAccount(
         transparentKey: ByteArray,
-        extsk: String,
+        extsk: ByteArray,
         seed: ByteArray,
         treeState: TreeState,
         recoverUntil: BlockHeight?
@@ -904,7 +904,7 @@ internal object DefaultSynchronizerFactory {
         numberOfAccounts: Int,
         recoverUntil: BlockHeight?,
         transparentKey: ByteArray?,
-        extsk: String?
+        extsk: ByteArray?
     ): DerivedDataRepository =
         DbDerivedDataRepository(
             DerivedDataDb.new(

@@ -25,8 +25,8 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
 
     override suspend fun createAccountAndGetSpendingKey(
         transparentKey: ByteArray?,
-        extsk: String?,
-        seed: ByteArray,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: TreeState,
         recoverUntil: BlockHeight?
     ): UnifiedSpendingKey {
@@ -161,8 +161,8 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
             outputIndex = outputIndex
         )
 
-    override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?) {
-        val ret = backend.initDataDb(transparentKey, seed)
+    override suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?) {
+        val ret = backend.initDataDb(transparentKey, extsk, seed)
         when (ret) {
             2 -> throw InitializeException.SeedNotRelevant
             1 -> throw InitializeException.SeedRequired

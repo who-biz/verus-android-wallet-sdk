@@ -581,7 +581,7 @@ interface Synchronizer {
             birthday: BlockHeight?,
             walletInitMode: WalletInitMode,
             transparentKey: ByteArray?,
-            extsk: String?
+            extsk: ByteArray?
         ): CloseableSynchronizer {
             val applicationContext = context.applicationContext
 
@@ -691,7 +691,7 @@ interface Synchronizer {
             birthday: BlockHeight?,
             walletInitMode: WalletInitMode,
             transparentKey: ByteArray?,
-            extsk: String?
+            extsk: ByteArray?
         ): CloseableSynchronizer =
             runBlocking {
                 new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode, transparentKey, extsk)

@@ -30,7 +30,8 @@ data class PersistableWallet(
     //val seedPhrase: seedPhrase,
     val hexSeed: String,
     val walletInitMode: WalletInitMode,
-    val wif: String?
+    val wif: String?,
+    val extsk: String?
 ) {
     init {
         walletInitModeHolder = walletInitMode
@@ -56,6 +57,9 @@ data class PersistableWallet(
             put(KEY_HEX_SEED, hexSeed)
             wif?.let {
                 put(KEY_WIF, wif)
+            }
+            extsk?.let {
+                put(KEY_EXTSK, extsk)
             }
         }
 
@@ -85,6 +89,7 @@ data class PersistableWallet(
 //        internal const val KEY_SEED_PHRASE = "seed_phrase"
         internal const val KEY_HEX_SEED = "hex_seed"
         internal const val KEY_WIF = "wif"
+        internal const val KEY_EXTSK = "extsk"
 
         // Note: [walletInitMode] is excluded from the serialization to avoid persisting the wallet initialization mode
         // with the persistable wallet.
@@ -100,6 +105,7 @@ data class PersistableWallet(
             val endpoint: LightWalletEndpoint
 
             val wif = getWif(jsonObject)
+            val extsk = getExtsk(jsonObject)
 
             when (val version = getVersion(jsonObject)) {
                 VERSION_1 -> {
@@ -119,7 +125,8 @@ data class PersistableWallet(
                 birthday = birthday,
                 hexSeed = hexSeed,
                 walletInitMode = walletInitModeHolder,
-                wif = wif
+                wif = wif,
+                extsk = extsk
             )
         }
 
@@ -138,6 +145,14 @@ data class PersistableWallet(
         internal fun getWif(jsonObject: JSONObject): String? {
             return if (jsonObject.has(KEY_WIF)) {
                 jsonObject.getString(KEY_WIF)
+            } else {
+                null
+            }
+        }
+
+        internal fun getExtsk(jsonObject: JSONObject): String? {
+            return if (jsonObject.has(KEY_EXTSK)) {
+                jsonObject.getString(KEY_EXTSK)
             } else {
                 null
             }
@@ -191,6 +206,7 @@ data class PersistableWallet(
             val hexSeed = newRawHDSeed()
 
             val wif = null
+            val extsk = null
 
             return PersistableWallet(
                 zcashNetwork,
@@ -198,7 +214,8 @@ data class PersistableWallet(
                 birthday,
                 hexSeed,
                 walletInitMode,
-                wif
+                wif,
+                extsk
             )
         }
 
@@ -214,7 +231,8 @@ data class PersistableWallet(
             endpoint: LightWalletEndpoint?,
             birthday: BlockHeight?,
             seed: String,
-            wif: String?
+            wif: String?,
+            extsk: String?
         ) = JSONObject().apply {
             put(KEY_VERSION, version)
             put(KEY_NETWORK_ID, network.id)
@@ -230,6 +248,9 @@ data class PersistableWallet(
             put(KEY_HEX_SEED, seed)
             wif?.let {
                 put(KEY_WIF, wif)
+           }
+            extsk?.let {
+                put(KEY_EXTSK, extsk)
            }
         }
     }

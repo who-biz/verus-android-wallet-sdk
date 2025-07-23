@@ -22,8 +22,8 @@ internal interface TypesafeBackend {
 
     suspend fun createAccountAndGetSpendingKey(
         transparentKey: ByteArray?,
-        extsk: String?,
-        seed: ByteArray,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: TreeState,
         recoverUntil: BlockHeight?
     ): UnifiedSpendingKey
@@ -83,7 +83,7 @@ internal interface TypesafeBackend {
     ): String?
 
     @Throws(InitializeException::class)
-    suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?)
+    suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?)
 
     /**
      * @throws RuntimeException as a common indicator of the operation failure

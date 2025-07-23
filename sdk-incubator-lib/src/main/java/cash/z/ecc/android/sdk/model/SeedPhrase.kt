@@ -21,7 +21,7 @@ data class SeedPhrase(val split: List<String>) {
     }
 
     // For security, intentionally override the toString method to reduce risk of accidentally logging secrets
-    //override fun toString() = "SeedPhrase"
+    override fun toString() = "SeedPhrase"
 
     fun joinToString() = split.joinToString(DEFAULT_DELIMITER)
 
