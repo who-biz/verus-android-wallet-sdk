@@ -18,10 +18,11 @@ class RustDerivationTool private constructor() : Derivation {
 
     override fun deriveUnifiedSpendingKey(
         transparentKey: ByteArray,
+        extendedSecretKey: ByteArray,
         seed: ByteArray,
         networkId: Int,
         accountIndex: Int
-    ): JniUnifiedSpendingKey = deriveSpendingKey(transparentKey, seed, accountIndex, networkId = networkId)
+    ): JniUnifiedSpendingKey = deriveSpendingKey(transparentKey, extendedSecretKey, seed, accountIndex, networkId = networkId)
 
     override fun deriveSaplingSpendingKey(
         seed: ByteArray,
@@ -82,6 +83,7 @@ class RustDerivationTool private constructor() : Derivation {
         @JvmStatic
         private external fun deriveSpendingKey(
             transparentKey: ByteArray,
+            extendedSecretKey: ByteArray,
             seed: ByteArray,
             account: Int,
             networkId: Int

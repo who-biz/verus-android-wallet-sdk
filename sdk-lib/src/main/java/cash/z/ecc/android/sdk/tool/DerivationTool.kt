@@ -59,6 +59,7 @@ interface DerivationTool {
      */
     suspend fun deriveUnifiedSpendingKey(
         transparentKey: ByteArray,
+        extendedSecretKey: ByteArray,
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account

@@ -26,13 +26,13 @@ sealed class WalletFixture {
 
     suspend fun getUnifiedSpendingKey(
         wif: ByteArray = wifString.decodeBase58WithChecksum().copyOfRange(1,34), //TODO: don't use hardcoded ints
-//        extsk: String = extskString,
+        extsk: String = extskString,
         seed: String = hexSeed,
         network: ZcashNetwork,
         account: Account = Account.DEFAULT
     ) = DerivationTool.getInstance().deriveUnifiedSpendingKey(
         wif,
- //       extsk.decodeHex(),
+        extsk.decodeHex(),
         seed.decodeHex(),
         network,
         account
