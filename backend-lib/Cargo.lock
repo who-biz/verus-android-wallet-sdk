@@ -460,7 +460,7 @@ dependencies = [
 [[package]]
 name = "equihash"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -485,7 +485,7 @@ dependencies = [
 [[package]]
 name = "f4jumble"
 version = "0.1.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "blake2b_simd",
 ]
@@ -1205,9 +1205,9 @@ dependencies = [
 
 [[package]]
 name = "prettyplease"
-version = "0.2.35"
+version = "0.2.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "061c1221631e079b26479d25bbf2275bfe5917ae8419cd7e34f13bfc2aa7539a"
+checksum = "ff24dfcda44452b9816fff4cd4227e1bb73ff5a2f1bc1105aa92fb8565ce44d2"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -1489,8 +1489,7 @@ dependencies = [
 [[package]]
 name = "sapling-crypto"
 version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02f4270033afcb0c74c5c7d59c73cfd1040367f67f224fe7ed9a919ae618f1b7"
+source = "git+https://github.com/who-biz/sapling-crypto?branch=spendkey-import#48e5fd84c599606cf96dbb28d89a5573effb099e"
 dependencies = [
  "aes",
  "bellman",
@@ -2324,7 +2323,7 @@ dependencies = [
 [[package]]
 name = "zcash_address"
 version = "0.3.2"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "bech32",
  "bs58",
@@ -2337,7 +2336,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_backend"
 version = "0.12.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "android_logger",
  "base64",
@@ -2378,7 +2377,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_sqlite"
 version = "0.10.3"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "android_logger",
  "bs58",
@@ -2413,7 +2412,7 @@ dependencies = [
 [[package]]
 name = "zcash_encoding"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "byteorder",
  "nonempty",
@@ -2422,7 +2421,7 @@ dependencies = [
 [[package]]
 name = "zcash_keys"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "bech32",
  "blake2b_simd",
@@ -2461,7 +2460,7 @@ dependencies = [
 [[package]]
 name = "zcash_primitives"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "aes",
  "bip0039",
@@ -2496,7 +2495,7 @@ dependencies = [
 [[package]]
 name = "zcash_proofs"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "bellman",
  "blake2b_simd",
@@ -2518,7 +2517,7 @@ dependencies = [
 [[package]]
 name = "zcash_protocol"
 version = "0.1.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#a2708eb5b50521c56520b9118e794e5da7c541b0"
+source = "git+https://github.com/who-biz/librustzcash?branch=spendkey-import#81a6656ca95e06ed8ed24a2f41be136ae9dc18de"
 dependencies = [
  "document-features",
  "memuse",

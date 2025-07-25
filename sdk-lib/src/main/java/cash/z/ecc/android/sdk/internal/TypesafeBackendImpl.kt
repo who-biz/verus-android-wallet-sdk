@@ -1,6 +1,7 @@
 package cash.z.ecc.android.sdk.internal
 
 import cash.z.ecc.android.sdk.exception.InitializeException
+import cash.z.ecc.android.sdk.exception.CompactBlockProcessorException
 import cash.z.ecc.android.sdk.internal.model.JniBlockMeta
 import cash.z.ecc.android.sdk.internal.model.JniSubtreeRoot
 import cash.z.ecc.android.sdk.internal.model.ScanRange
@@ -172,6 +173,17 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
         }
     }
 
+/*    override suspend fun deleteDb(
+        clearCache: Boolean,
+        clearDataDb: Boolean
+    ): Boolean {
+        val ret = backend.clear(clearCache, clearDataDb)
+        if (ret == false) {
+            throw CompactBlockProcessorException.FailedDeleteException
+        }
+        return ret
+    }
+*/
     override suspend fun putSubtreeRoots(
         saplingStartIndex: UInt,
         saplingRoots: List<SubtreeRoot>,

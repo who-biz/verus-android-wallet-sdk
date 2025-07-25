@@ -56,6 +56,9 @@ interface Backend {
     @Throws(RuntimeException::class)
     suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?): Int
 
+    /*@Throws(RuntimeException::class)
+    suspend fun deleteDb(clearCache: Boolean, clearDataDb: Boolean): Boolean
+    */
     /**
      * @throws RuntimeException as a common indicator of the operation failure
      */

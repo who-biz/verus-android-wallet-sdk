@@ -85,6 +85,9 @@ internal interface TypesafeBackend {
     @Throws(InitializeException::class)
     suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?)
 
+/*  @Throws(RuntimeException::class)
+    suspend fun deleteDb(clearCache: Boolean, clearDataDb: Boolean)
+*/
     /**
      * @throws RuntimeException as a common indicator of the operation failure
      */

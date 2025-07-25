@@ -265,18 +265,20 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initDataD
         let mut db_data = wallet_db(env, network, db_data)
             .map_err(|e| anyhow!("Error while opening data DB: {}", e))?;
 
-        if (seed.is_null() && extsk.is_null()) {
-            // throw error
-        }
-
-        if (!seed.is_null() && !extsk.is_null()) {
-            // throw error
-        }
-
         let seed = (!seed.is_null()).then(|| SecretVec::new(env.convert_byte_array(seed).unwrap()));
-
         let extsk = (!extsk.is_null()).then(|| SecretVec::new(env.convert_byte_array(extsk).unwrap()));
+/*
+        let seed_empty = seed.unwrap_or(SecretVec::new(Vec::<u8>::new())).expose_secret().is_empty();
+        let extsk_empty = extsk.unwrap_or(SecretVec::new(Vec::<u8>::new())).expose_secret().is_empty();
 
+        if seed_empty && extsk_empty {
+            return Err(anyhow!("Error: neither seed nor extsk were provided for initializing DB. Choose one!"));
+        }
+        if !seed_empty && !extsk_empty {
+           // warn!("seed = {:?}, extsk = {:?}", seed, extsk);
+            return Err(anyhow!("Error: cannot initialize database with extsk and seed. Choose one!"));
+        }
+*/
         let transparent_key = (!transparent_key.is_null()).then(|| SecretVec::new(env.convert_byte_array(transparent_key).unwrap()));
 
         match init_wallet_db(&mut db_data, transparent_key, extsk, seed) {
@@ -926,7 +928,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSp
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSaplingAddress<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_isValidSaplingAddress<
     'local,
 >(
     mut env: JNIEnv<'local>,
