@@ -5,8 +5,7 @@ use std::panic;
 use std::path::Path;
 use std::ptr;
 
-use tracing::warn;
-use zcash_primitives::constants::vrsc::mainnet;
+//use tracing::warn;
 
 use anyhow::anyhow;
 use jni::objects::{JByteArray, JObject, JObjectArray, JValue};
@@ -66,8 +65,6 @@ use zcash_client_backend::{
     zip321::{Payment, TransactionRequest},
     ShieldedProtocol,
 };
-
-use zcash_client_backend::encoding::decode_extended_spending_key;
 
 use zcash_client_sqlite::{
     chain::{init::init_blockmeta_db, BlockMeta},
