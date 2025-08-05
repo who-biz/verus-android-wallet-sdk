@@ -6,6 +6,7 @@ import cash.z.ecc.android.sdk.internal.TypesafeDerivationToolImpl
 import cash.z.ecc.android.sdk.internal.jni.RustDerivationTool
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
+import cash.z.ecc.android.sdk.model.SaplingViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.ZcashNetwork
@@ -27,12 +28,13 @@ interface DerivationTool {
     ): List<UnifiedFullViewingKey>
 
 
-/*    suspend fun deriveViewingKey(
+    suspend fun deriveSaplingViewingKey(
+        extsk: ByteArray,
         seed: ByteArray,
         network: ZcashNetwork,
-        numberOfAccounts: Int
-    ): ByteArray
-*/
+        account: Account
+    ): SaplingViewingKey
+
     /**
      * Given a unified spending key, return the associated unified full viewing key.
      *

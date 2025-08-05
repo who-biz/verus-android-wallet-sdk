@@ -49,6 +49,13 @@ interface Derivation {
         networkId: Int
     ): String
 
+    fun deriveSaplingViewingKey(
+        extsk: ByteArray,
+        seed: ByteArray,
+        networkId: Int,
+        accountIndex: Int
+    ): String
+
     /**
      * @param numberOfAccounts Use [DEFAULT_NUMBER_OF_ACCOUNTS] to derive a single key.
      * @return an array of unified full viewing keys, one for each account.

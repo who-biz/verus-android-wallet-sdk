@@ -69,6 +69,8 @@ use zcash_client_backend::{
 
 use zcash_client_backend::encoding::decode_extended_spending_key;
 
+use sapling::note_encryption::{ PreparedIncomingViewingKey };
+
 use zcash_client_sqlite::{
     chain::{init::init_blockmeta_db, BlockMeta},
     wallet::init::{init_wallet_db, WalletMigrationError},
@@ -578,43 +580,40 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
     _: JClass<'local>,
     extsk: JByteArray<'local>,
     seed: JByteArray<'local>,
-    accounts: jint,
+    account: jint,
     network_id: jint,
-) -> jobjectArray {
+) -> jstring {
     let res = catch_unwind(&mut env, |env| {
         let _span = tracing::info_span!("RustDerivationTool.deriveViewingKey")
             .entered();
         let network = parse_network(network_id as u32)?;
         let extsk = env.convert_byte_array(extsk)?;
         let seed = env.convert_byte_array(seed)?;
-        let accounts = if accounts > 0 {
-            accounts as u32
-        } else {
-            return Err(anyhow!("accounts argument must be greater than zero"));
-        };
 
-        let extfvks: Vec<_> = (0..accounts)
-            .map(|account| {
-                let account_id = zip32::AccountId::try_from(account)
-                    .map_err(|_| anyhow!("Invalid account ID"))?;
-                UnifiedSpendingKey::from_seed(&network, &[], &extsk, &seed, account_id)
-                    .map_err(|e| {
-                        anyhow!("error generating unified spending key from seed: {:?}", e)
-                    })
-                    .map(|usk| usk.to_unified_full_viewing_key().sapling()
-                        .expect("Something went wrong when converting ufvk to extfvk").to_bytes())
-            })
-            .collect::<Result<_, _>>()?;
+        let account = account_id_from_jint(account)?;
+
+        let sapling_dfvk = UnifiedSpendingKey::from_seed(&network, &[], &extsk, &seed, account)
+            .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))
+            .map(|usk| usk.to_unified_full_viewing_key().sapling().expect("Sapling key is present"))?;
+
+        let sapling_ivk = sapling_dfvk.to_ivk(Scope::External).to_bytes();
+
+        warn!("sapling_ivk({:?})", sapling_ivk);
+
         //warn!("extfvks: {:?}", extfvks);
 
-        Ok(utils::rust_vec_to_java(
+        let output = env.new_string(hex::encode(sapling_ivk)).expect("Couldn't create Java string!");
+        Ok(output.into_raw())
+
+/*        Ok(utils::rust_vec_to_java(
             env,
-            extfvks,
+            extfvk,
             "java/lang/String",
-            |env, extfvk| env.new_string(std::str::from_utf8(&extfvk).unwrap()), // TODO: maybe we should use something different here than from_utf8
+            |env, extfvk| env.new_string(std::str::from_utf8(extfvk).unwrap()), // TODO: maybe we should use something different here than from_utf8
             |env| env.new_string(""),
         )?
             .into_raw())
+*/
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }

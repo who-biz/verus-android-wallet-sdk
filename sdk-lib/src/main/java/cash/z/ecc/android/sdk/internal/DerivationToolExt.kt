@@ -4,6 +4,7 @@ import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 //import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
+import cash.z.ecc.android.sdk.model.SaplingViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.ZcashNetwork
@@ -45,13 +46,14 @@ fun Derivation.deriveSaplingSpendingKey(
     account: Account
 ): ShieldedSpendingKey = ShieldedSpendingKey(deriveSaplingSpendingKey(seed, network.id, account.value))
 
-/*
-fun Derivation.deriveViewingKey(
+
+fun Derivation.deriveSaplingViewingKey(
+    extsk: ByteArray,
     seed: ByteArray,
     network: ZcashNetwork,
     account: Account
-): ByteArray = deriveViewingKey(seed, network.id, account.value)
-*/
+): SaplingViewingKey = SaplingViewingKey(deriveSaplingViewingKey(extsk, seed, network.id, account.value))
+
 
 fun Derivation.deriveUnifiedFullViewingKey(
     usk: UnifiedSpendingKey,
