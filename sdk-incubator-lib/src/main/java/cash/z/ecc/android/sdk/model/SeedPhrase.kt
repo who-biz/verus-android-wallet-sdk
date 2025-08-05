@@ -27,7 +27,6 @@ data class SeedPhrase(val split: List<String>) {
 
     suspend fun toByteArray() = withContext(Dispatchers.IO) { 
         if (HEX_SEED_SIZE == split.size) {
-            Log.w("SeedPhrase", "Seed value: $split.first()" ); 
             split.first().decodeHex()            
         } else {
             Mnemonics.MnemonicCode(joinToString()).toSeed()
