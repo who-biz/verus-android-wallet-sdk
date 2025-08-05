@@ -68,7 +68,7 @@ zcash_client_backend = { git = "https://github.com/who-biz/librustzcash", branch
 zcash_client_sqlite = { git = "https://github.com/who-biz/librustzcash", branch = "spendkey-import" }
 zcash_primitives = { git = "https://github.com/who-biz/librustzcash", branch = "spendkey-import" }
 zcash_proofs = { git = "https://github.com/who-biz/librustzcash", branch = "spendkey-import" }
-sapling-crypto = { git = "https://github.com/who-biz/sapling-crypto", branch = "spendkey-import" }
+#sapling-crypto = { git = "https://github.com/who-biz/sapling-crypto", branch = "spendkey-import" }
 
 [lib]
 name = "zcashwalletsdk"
