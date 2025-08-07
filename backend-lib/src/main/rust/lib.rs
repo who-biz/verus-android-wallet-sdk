@@ -1806,7 +1806,8 @@ fn zip317_helper<DbT>(
     use_zip317_fees: jboolean,
 ) -> GreedyInputSelector<DbT, SingleOutputChangeStrategy> {
     let fee_rule = if use_zip317_fees == JNI_TRUE {
-        StandardFeeRule::Zip317
+        StandardFeeRule::PreZip313
+   //     StandardFeeRule::Zip317
     } else {
         #[allow(deprecated)]
         StandardFeeRule::PreZip313
