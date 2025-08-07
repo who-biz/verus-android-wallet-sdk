@@ -20,6 +20,8 @@ object PersistableWalletFixture {
 
     val WIF = ""
 
+    val EXTSK = ""
+
     val decodedWif = WIF.decodeBase58WithChecksum()
 
     val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
@@ -34,8 +36,9 @@ object PersistableWalletFixture {
         birthday: BlockHeight = BIRTHDAY,
         seedPhrase: SeedPhrase = SEED_PHRASE,
         walletInitMode: WalletInitMode = WALLET_INIT_MODE,
-        wif: String? = WIF
-    ) = PersistableWallet(network, endpoint, birthday, seedPhrase, walletInitMode, wif)
+        wif: String? = WIF,
+        extsk: String? = EXTSK
+    ) = PersistableWallet(network, endpoint, birthday, seedPhrase, walletInitMode, wif, extsk)
 
     fun persistVersionOne() =
         PersistableWallet.toCustomJson(
@@ -44,6 +47,7 @@ object PersistableWalletFixture {
             endpoint = null,
             birthday = BIRTHDAY,
             seed = SEED_PHRASE,
-            wif = WIF
+            wif = WIF,
+            extsk = EXTSK
         )
 }

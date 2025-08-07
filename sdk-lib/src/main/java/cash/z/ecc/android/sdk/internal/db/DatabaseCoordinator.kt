@@ -178,11 +178,19 @@ internal class DatabaseCoordinator private constructor(context: Context) {
         alias: String
     ): Boolean {
         deleteFileMutex.withLock {
+            val dataDb = dataDbFile(network, alias)
+
+            Twig.info { "DataDbFile: ${dataDb}" }
+
             val dataDeleted = deleteDatabase(dataDbFile(network, alias))
+
+            val blockDbRoot = fsBlockDbRoot(network, alias)
+
+            Twig.info { "blockDbRoot: $blockDbRoot" }
 
             val cacheDeleted = fsBlockDbRoot(network, alias).deleteRecursivelySuspend()
 
-            Twig.info { "Delete databases result: ${dataDeleted || cacheDeleted}" }
+            Twig.info { "Delete databases result: dataDeleted(${dataDeleted}), cacheDeleted(${cacheDeleted})" }
 
             return dataDeleted || cacheDeleted
         }

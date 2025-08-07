@@ -32,10 +32,11 @@ fun Derivation.deriveShieldedAddress(
 
 fun Derivation.deriveUnifiedSpendingKey(
     transparentKey: ByteArray,
+    extendedSecretKey: ByteArray,
     seed: ByteArray,
     network: ZcashNetwork,
     account: Account
-): UnifiedSpendingKey = UnifiedSpendingKey(deriveUnifiedSpendingKey(transparentKey, seed, network.id, account.value))
+): UnifiedSpendingKey = UnifiedSpendingKey(deriveUnifiedSpendingKey(transparentKey, extendedSecretKey, seed, network.id, account.value))
 
 
 fun Derivation.deriveSaplingSpendingKey(
