@@ -4,6 +4,7 @@ import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toSeed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.util.Log
 
 // Consider using ImmutableList here
 data class SeedPhrase(val split: List<String>) {

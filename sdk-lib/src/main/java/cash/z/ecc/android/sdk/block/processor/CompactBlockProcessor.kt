@@ -1047,7 +1047,7 @@ class CompactBlockProcessor internal constructor(
         /**
          * UTXOs fetching default attempts at retrying.
          */
-        internal const val UTXO_FETCH_RETRIES = 3
+        internal const val UTXO_FETCH_RETRIES = 1
 
         /**
          * Latest block height fetching default attempts at retrying.
@@ -1057,7 +1057,7 @@ class CompactBlockProcessor internal constructor(
         /**
          * Get subtree roots default attempts at retrying.
          */
-        internal const val GET_SUBTREE_ROOTS_RETRIES = 3
+        internal const val GET_SUBTREE_ROOTS_RETRIES = 1
 
         /**
          * The theoretical maximum number of blocks in a reorg, due to other bottlenecks in the protocol design.

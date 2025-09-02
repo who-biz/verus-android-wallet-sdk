@@ -66,19 +66,28 @@ class RustBackend private constructor(
             )
         }
 
-    override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?) =
+    override suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?) =
         withContext(SdkDispatchers.DATABASE_IO) {
             initDataDb(
                 dataDbFile.absolutePath,
                 transparentKey,
+                extsk,
                 seed,
                 networkId = networkId
             )
         }
 
+/*    override suspend fun deleteDb(
+       clearCache: Boolean,
+       clearDataDb: Boolean
+    ): Boolean {
+             return this.clear(clearCache, clearDataDb)
+    }
+*/
     override suspend fun createAccount(
         transparentKey: ByteArray?,
-        seed: ByteArray,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: ByteArray,
         recoverUntil: Long?
     ): JniUnifiedSpendingKey {
@@ -86,6 +95,7 @@ class RustBackend private constructor(
             createAccount(
                 dataDbFile.absolutePath,
                 transparentKey,
+                extsk,
                 seed,
                 treeState,
                 recoverUntil ?: -1,
@@ -94,11 +104,12 @@ class RustBackend private constructor(
         }
     }
 
-    override suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, seed: ByteArray): Boolean =
+    override suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, extsk: ByteArray, seed: ByteArray): Boolean =
         withContext(SdkDispatchers.DATABASE_IO) {
             isSeedRelevantToAnyDerivedAccounts(
                 dataDbFile.absolutePath,
                 transparentKey,
+                extsk,
                 seed,
                 networkId = networkId
             )
@@ -441,15 +452,23 @@ class RustBackend private constructor(
         private external fun initDataDb(
             dbDataPath: String,
             transparentKey: ByteArray?,
+            extsk: ByteArray?,
             seed: ByteArray?,
             networkId: Int
         ): Int
 
+/*        @JvmStatic
+        private external fun deleteDb(
+             clearCache: Boolean,
+             clearDataDb: Boolean
+        ): Boolean
+*/
         @JvmStatic
         private external fun createAccount(
             dbDataPath: String,
             transparentKey: ByteArray?,
-            seed: ByteArray,
+            extsk: ByteArray?,
+            seed: ByteArray?,
             treeState: ByteArray,
             recoverUntil: Long,
             networkId: Int
@@ -459,6 +478,7 @@ class RustBackend private constructor(
         private external fun isSeedRelevantToAnyDerivedAccounts(
             dbDataPath: String,
             transparentKey: ByteArray,
+            extsk: ByteArray,
             seed: ByteArray,
             networkId: Int
         ): Boolean

@@ -1,6 +1,7 @@
 package cash.z.ecc.android.sdk.internal
 
 import cash.z.ecc.android.sdk.exception.InitializeException
+import cash.z.ecc.android.sdk.exception.CompactBlockProcessorException
 import cash.z.ecc.android.sdk.internal.model.JniBlockMeta
 import cash.z.ecc.android.sdk.internal.model.JniSubtreeRoot
 import cash.z.ecc.android.sdk.internal.model.ScanRange
@@ -25,13 +26,15 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
 
     override suspend fun createAccountAndGetSpendingKey(
         transparentKey: ByteArray?,
-        seed: ByteArray,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: TreeState,
         recoverUntil: BlockHeight?
     ): UnifiedSpendingKey {
         return UnifiedSpendingKey(
             backend.createAccount(
                 transparentKey = transparentKey,
+                extsk = extsk,
                 seed = seed,
                 treeState = treeState.encoded,
                 recoverUntil = recoverUntil?.value
@@ -159,8 +162,8 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
             outputIndex = outputIndex
         )
 
-    override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?) {
-        val ret = backend.initDataDb(transparentKey, seed)
+    override suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?) {
+        val ret = backend.initDataDb(transparentKey, extsk, seed)
         when (ret) {
             2 -> throw InitializeException.SeedNotRelevant
             1 -> throw InitializeException.SeedRequired
@@ -170,6 +173,17 @@ internal class TypesafeBackendImpl(private val backend: Backend) : TypesafeBacke
         }
     }
 
+/*    override suspend fun deleteDb(
+        clearCache: Boolean,
+        clearDataDb: Boolean
+    ): Boolean {
+        val ret = backend.clear(clearCache, clearDataDb)
+        if (ret == false) {
+            throw CompactBlockProcessorException.FailedDeleteException
+        }
+        return ret
+    }
+*/
     override suspend fun putSubtreeRoots(
         saplingStartIndex: UInt,
         saplingRoots: List<SubtreeRoot>,

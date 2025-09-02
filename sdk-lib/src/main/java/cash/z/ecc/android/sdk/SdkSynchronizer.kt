@@ -541,6 +541,7 @@ class SdkSynchronizer private constructor(
     // Not ready to be a public API; internal for testing only
     internal suspend fun createAccount(
         transparentKey: ByteArray,
+        extsk: ByteArray,
         seed: ByteArray,
         treeState: TreeState,
         recoverUntil: BlockHeight?
@@ -548,6 +549,7 @@ class SdkSynchronizer private constructor(
         return runCatching {
             backend.createAccountAndGetSpendingKey(
                 transparentKey = transparentKey,
+                extsk = extsk,
                 seed = seed,
                 treeState = treeState,
                 recoverUntil = recoverUntil
@@ -901,7 +903,8 @@ internal object DefaultSynchronizerFactory {
         seed: ByteArray?,
         numberOfAccounts: Int,
         recoverUntil: BlockHeight?,
-        transparentKey: ByteArray?
+        transparentKey: ByteArray?,
+        extsk: ByteArray?
     ): DerivedDataRepository =
         DbDerivedDataRepository(
             DerivedDataDb.new(
@@ -911,6 +914,7 @@ internal object DefaultSynchronizerFactory {
                 zcashNetwork,
                 checkpoint,
                 transparentKey,
+                extsk,
                 seed,
                 numberOfAccounts,
                 recoverUntil
