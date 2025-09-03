@@ -857,7 +857,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ge
         //warn!("shared_secret: {:?}", shared_secret);
 
         let symmetric_key = <SaplingDomain as Domain>::kdf(shared_secret, &epk_bytes).to_hex();
-        warn!("symmetric_key: {:?}", symmetric_key);
+        //warn!("symmetric_key: {:?}", symmetric_key);
         let output = env
             .new_string(symmetric_key)
             .expect("Couldn't create Java string!");
@@ -940,12 +940,12 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         let toid_str = env.convert_byte_array(toid).unwrap();
         let account_id = account_id_from_jint(account_index)?;
 
-        let usk = UnifiedSpendingKey::from_seed(&network, &[], seed.expose_secret(), account_id)
+        let usk = UnifiedSpendingKey::from_seed(&network, &[], &[], seed.expose_secret(), account_id)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e)).expect("Unable to convert usk to sapling extsk");
         let base_spending_key = usk.sapling();
-        let bsk_hex = hex::encode(base_spending_key.to_bytes().to_vec());
 
-        warn!("base_spending_key({:?})", bsk_hex);
+        //let bsk_hex = hex::encode(base_spending_key.to_bytes().to_vec());
+        //warn!("base_spending_key({:?})", bsk_hex);
 
         
         let fromid = hex::decode(fromid_str)
@@ -957,23 +957,24 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         let toid_byteflipped: Vec<u8> = toid.iter().rev().copied().collect();
 
         let encryption_address_seed = base_spending_key.to_bytes().to_vec().into_iter().chain(fromid_byteflipped.into_iter()).chain(toid_byteflipped.into_iter()).collect::<Vec<u8>>();
-        let eaddr_seed_hex = hex::encode(encryption_address_seed.clone());
+
         let mut hasher = Sha256::new();
         hasher.update(encryption_address_seed);
         let hashed = hasher.finalize();
-        let hashed_hex = hex::encode(hashed.clone());
 
         let hashed_flipped: Vec<u8> = hashed.iter().rev().copied().collect();
-        let hash_flipped_hex = hex::encode(hashed_flipped.clone());
 
-        warn!("encryption_address_seed({:?})", eaddr_seed_hex);
-        warn!("hashed_hex({:?}), hash_flipped_hex({:?})", hashed_hex, hash_flipped_hex);
+        //let eaddr_seed_hex = hex::encode(encryption_address_seed.clone());
+        //let hashed_hex = hex::encode(hashed.clone());
+        //let hash_flipped_hex = hex::encode(hashed_flipped.clone());
+        //warn!("encryption_address_seed({:?})", eaddr_seed_hex);
+        //warn!("hashed_hex({:?}), hash_flipped_hex({:?})", hashed_hex, hash_flipped_hex);
 
         let encryption_seed = SecretVec::new(hashed.to_vec());
 
         let encryption_index = zip32::AccountId::try_from(0).map_err(|_| anyhow!("Invalid account ID")).unwrap();
 
-        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], encryption_seed.expose_secret(), encryption_index)
+        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], &[], encryption_seed.expose_secret(), encryption_index)
             .map_err(|e| anyhow!("For encryption address, error generating unified spending key from seed: {:?}", e))
             .map(|usk| usk.to_unified_full_viewing_key())?;
 
@@ -1143,12 +1144,12 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_is
         let network = parse_network(network_id as u32)?;
         let addr = utils::java_string_to_rust(env, &addr);
 
-        warn!("isValidAddress: address({:?}", addr);
+        //warn!("isValidAddress: address({:?}", addr);
 
         match Address::decode(&network, &addr) {
             Some(addr) => match addr {
                 Address::Sapling(_) => {
-                    warn!("address::sapling condition hit!");
+                    //warn!("address::sapling condition hit!");
                     Ok(JNI_TRUE)
                 },
                 Address::Transparent(_) | Address::Unified(_) => Ok(JNI_FALSE),
