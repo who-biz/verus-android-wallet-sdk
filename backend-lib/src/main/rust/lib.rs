@@ -23,6 +23,16 @@ use tracing::{debug, error};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::reload;
 use zcash_address::{ToAddress, ZcashAddress};
+use verus_zfunc::{
+        z_getencryptionaddress,
+        encrypt_message,
+        decrypt_message,
+        RpcParams,
+        ChannelKeys,
+        EncryptedPayload,
+        DecryptParams
+ };
+use chacha20poly1305::{ChaCha20Poly1305, KeyInit, AeadInPlace, Key};
 
 #[cfg(feature = "transparent-inputs")]
 use zcash_client_backend::{
@@ -453,6 +463,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
+
 
 /// Checks whether the given seed is relevant to any of the derived accounts in the wallet.
 #[no_mangle]
@@ -918,77 +929,164 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ge
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zGetEncryptionAddress<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JObject<'local>,
+    seed: JString<'local>,
+    spending_key: JString<'local>,
+    hd_index: jint,
+    encryption_index: jint,
+    from_id: JString<'local>,
+    to_id: JString<'local>,
+    return_secret: jboolean,
+     ) -> jobject {
+     let res = catch_unwind(&mut env, |env| {
+        // --- START OF CHANGES ---
+
+        // Convert Java types to Rust types, correctly handling nulls for all optional fields.
+        let seed_opt = if seed.is_null() {
+            None
+        } else {
+            Some(env.get_string(&seed)?.into())
+        };
+
+        let sk_opt = if spending_key.is_null() {
+            None
+        } else {
+            Some(env.get_string(&spending_key)?.into())
+        };
+
+        // Handle nullable strings for from_id and to_id to match the updated RpcParams struct
+        let from_id_opt = if from_id.is_null() {
+            None
+        } else {
+            Some(env.get_string(&from_id)?.into())
+        };
+
+        let to_id_opt = if to_id.is_null() {
+            None
+        } else {
+            Some(env.get_string(&to_id)?.into())
+        };
+
+        // Assemble the parameters struct for your Rust function
+        let params = RpcParams {
+            seed: seed_opt,
+            spending_key: sk_opt,
+            hd_index: hd_index as u32,
+            encryption_index: encryption_index as u32,
+            from_id: from_id_opt,
+            to_id: to_id_opt,
+            return_secret: return_secret == JNI_TRUE,
+        };
+
+        // --- END OF CHANGES ---
+
+        // Call core Rust logic
+        let channel_keys = z_getencryptionaddress(params)
+           .map_err(|e| anyhow!("z_getencryptionaddress failed: {}", e))?;
+
+        // Convert the Rust `ChannelKeys` result into a new Java `ChannelKeys` object
+        let address_java = env.new_string(&channel_keys.address)?;
+        let fvk_java = env.new_string(&channel_keys.fvk)?;
+
+        // Handle the optional spending_key
+        let sk_java = match channel_keys.spending_key {
+            Some(sk) => env.new_string(sk)?.into(),
+            None => JObject::null(),
+        };
+
+        let result_obj = env.new_object(
+            "cash/z/ecc/android/sdk/model/ChannelKeys", // Path to Kotlin data class
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", // Constructor signature
+            &[
+                JValue::Object(&address_java),
+                JValue::Object(&fvk_java),
+                JValue::Object(&sk_java),
+            ],
+        )?;
+
+        Ok(result_obj.into_raw())
+     });
+
+     unwrap_exc_or(&mut env, res, std::ptr::null_mut())
+}
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zGetEncryptionAddress<
-    'local,
->(
-    mut env: JNIEnv<'local>,
-    _: JClass<'local>,
-    seed: JByteArray<'local>,
-    fromid: JByteArray<'local>,
-    toid: JByteArray<'local>,
-    account_index: jint,
-    network_id: jint,
-) -> jstring {
-    let res = panic::catch_unwind(|| {
-        let _span =
-            tracing::info_span!("RustDerivationTool.zGetEncryptionAddress").entered();
-        let network = parse_network(network_id as u32)?;
-        let seed = SecretVec::new(env.convert_byte_array(seed).unwrap());
-        let fromid_str = env.convert_byte_array(fromid).unwrap();
-        let toid_str = env.convert_byte_array(toid).unwrap();
-        let account_id = account_id_from_jint(account_index)?;
+#[allow(non_snake_case)]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_encryptMessage<'local>(
+        mut env: JNIEnv<'local>,
+        _class: JObject<'local>,
+        address_string: JString<'local>,
+        message: JString<'local>,
+        return_ssk: jboolean,
+    ) -> jobject {
+    let res = catch_unwind(&mut env, |env| {
+        // 1. Convert Java types to Rust types
+        let rust_addr: String = env.get_string(&address_string)?.into();
+        let rust_msg: String = env.get_string(&message)?.into();
+        let rust_return_ssk = return_ssk == JNI_TRUE;
 
-        let usk = UnifiedSpendingKey::from_seed(&network, &[], &[], seed.expose_secret(), account_id)
-            .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e)).expect("Unable to convert usk to sapling extsk");
-        let base_spending_key = usk.sapling();
+        // 2. Call the centralized library function
+        let encrypted_payload = encrypt_message(rust_addr, rust_msg, rust_return_ssk)
+            .map_err(|e| anyhow!("encrypt_message failed: {}", e))?;
 
-        //let bsk_hex = hex::encode(base_spending_key.to_bytes().to_vec());
-        //warn!("base_spending_key({:?})", bsk_hex);
+        // 3. Convert the Rust result into a new Java `EncryptedPayload` object
+        let epk_java = env.new_string(&encrypted_payload.ephemeral_public_key)?;
+        let ciphertext_java = env.new_string(&encrypted_payload.ciphertext)?;
 
-        
-        let fromid = hex::decode(fromid_str)
-            .map_err(|e| anyhow!("invalid hex in fromid: {:?}", e))?;
-        let toid = hex::decode(toid_str)
-            .map_err(|e| anyhow!("invalid hex in toid: {:?}", e))?;
+        let ssk_java = match encrypted_payload.symmetric_key {
+            Some(ssk) => env.new_string(ssk)?.into(),
+            None => JObject::null(),
+        };
 
-        let fromid_byteflipped: Vec<u8> = fromid.iter().rev().copied().collect();
-        let toid_byteflipped: Vec<u8> = toid.iter().rev().copied().collect();
+        let result_obj = env.new_object(
+            "cash/z/ecc/android/sdk/model/EncryptedPayload",
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+            &[
+                JValue::Object(&epk_java),
+                JValue::Object(&ciphertext_java),
+                JValue::Object(&ssk_java),
+            ],
+        )?;
 
-        let encryption_address_seed = base_spending_key.to_bytes().to_vec().into_iter().chain(fromid_byteflipped.into_iter()).chain(toid_byteflipped.into_iter()).collect::<Vec<u8>>();
+        Ok(result_obj.into_raw())
+    });
 
-        let mut hasher = Sha256::new();
-        hasher.update(encryption_address_seed);
-        let hashed = hasher.finalize();
+    unwrap_exc_or(&mut env, res, std::ptr::null_mut())
+}
 
-        let hashed_flipped: Vec<u8> = hashed.iter().rev().copied().collect();
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_decryptMessage<'local>(
+        mut env: JNIEnv<'local>,
+        _class: JObject<'local>,
+        fvk_hex: JString<'local>,
+        ephemeral_public_key_hex: JString<'local>,
+        ciphertext_hex: JString<'local>,
+        symmetric_key_hex: JString<'local>,
+    ) -> jstring {
+    let res = catch_unwind(&mut env, |env| {
+        // 1. Convert all Java types to Rust types
+        let params = DecryptParams {
+            fvk_hex: if fvk_hex.is_null() { None } else { Some(env.get_string(&fvk_hex)?.into()) },
+            ephemeral_public_key_hex: if ephemeral_public_key_hex.is_null() { None } else { Some(env.get_string(&ephemeral_public_key_hex)?.into()) },
+            ciphertext_hex: env.get_string(&ciphertext_hex)?.into(),
+            symmetric_key_hex: if symmetric_key_hex.is_null() { None } else { Some(env.get_string(&symmetric_key_hex)?.into()) },
+        };
 
-        //let eaddr_seed_hex = hex::encode(encryption_address_seed.clone());
-        //let hashed_hex = hex::encode(hashed.clone());
-        //let hash_flipped_hex = hex::encode(hashed_flipped.clone());
-        //warn!("encryption_address_seed({:?})", eaddr_seed_hex);
-        //warn!("hashed_hex({:?}), hash_flipped_hex({:?})", hashed_hex, hash_flipped_hex);
+        // 2. Call the centralized library function
+        let decrypted_message = decrypt_message(params)
+            .map_err(|e| anyhow!("decrypt_message failed: {}", e))?;
 
-        let encryption_seed = SecretVec::new(hashed.to_vec());
-
-        let encryption_index = zip32::AccountId::try_from(0).map_err(|_| anyhow!("Invalid account ID")).unwrap();
-
-        let ufvk = UnifiedSpendingKey::from_seed(&network, &[], &[], encryption_seed.expose_secret(), encryption_index)
-            .map_err(|e| anyhow!("For encryption address, error generating unified spending key from seed: {:?}", e))
-            .map(|usk| usk.to_unified_full_viewing_key())?;
-
-        let (ua, _) = ufvk
-            .find_address(DiversifierIndex::new(), SAPLING_ADDRESS_REQUEST)
-            .expect("At least one Unified Address should be derivable");
-        let address_str = ua.sapling().expect("no sapling receiver in UAddr found!").encode(&network);
-
-        let output = env
-            .new_string(address_str)
-            .expect("Couldn't create Java string!");
+        // 3. Convert the Rust String result back to a Java String
+        let output = env.new_string(decrypted_message)?;
         Ok(output.into_raw())
     });
-    unwrap_exc_or(&mut env, res, ptr::null_mut())
+
+    unwrap_exc_or(&mut env, res, std::ptr::null_mut())
 }
 
 #[no_mangle]

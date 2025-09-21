@@ -9,6 +9,8 @@ import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.SharedSecret
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.ChannelKeys
+import cash.z.ecc.android.sdk.model.EncryptedPayload
 
 fun Derivation.deriveUnifiedAddress(
     seed: ByteArray,
@@ -104,3 +106,26 @@ fun Derivation.getEncryptionAddress(
     network: ZcashNetwork
 ): String = getEncryptionAddress(seed, fromId, toId, accountIndex, network.id)
 
+fun Derivation.getVerusEncryptionAddress(
+    seed: ByteArray?,
+    spendingKey: String?,
+    fromId: String?,
+    toId: String?,
+    hdIndex: Int,
+    encryptionIndex: Int,
+    returnSecret: Boolean
+): ChannelKeys {
+    // This is the new home for our conversion logic
+    val seedHex = seed?.let { cash.z.ecc.android.sdk.internal.ext.Hex.toHexString(it) }
+
+    // Now, we call the underlying internal interface method that expects the hex string
+    return getVerusEncryptionAddress(
+        seed = seedHex,
+        spendingKey = spendingKey,
+        hdIndex = hdIndex,
+        encryptionIndex = encryptionIndex,
+        fromId = fromId,
+        toId = toId,
+        returnSecret = returnSecret
+    )
+}
