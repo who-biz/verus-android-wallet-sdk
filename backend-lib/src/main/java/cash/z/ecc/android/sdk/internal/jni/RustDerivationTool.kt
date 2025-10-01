@@ -3,7 +3,9 @@ package cash.z.ecc.android.sdk.internal.jni
 import cash.z.ecc.android.sdk.internal.Derivation
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
-import cash.z.ecc.android.sdk.internal.model.JniSharedSecret
+
+import cash.z.ecc.android.sdk.model.ChannelKeys
+import cash.z.ecc.android.sdk.model.EncryptedPayload
 
 class RustDerivationTool private constructor() : Derivation {
     override fun deriveUnifiedFullViewingKeys(
@@ -91,7 +93,32 @@ class RustDerivationTool private constructor() : Derivation {
         toId: ByteArray,
         accountIndex: Int,
         networkId: Int
-    ): String =  zGetEncryptionAddress(seed, fromId, toId, accountIndex, networkId = networkId)
+    ): String {
+        TODO("Legacy getEncryptionAddress is not supported. Use getVerusEncryptionAddress instead.")
+    }
+
+    override fun getVerusEncryptionAddress(
+        seed: String?,
+        spendingKey: String?,
+        hdIndex: Int,
+        encryptionIndex: Int,
+        fromId: String?,
+        toId: String?,
+        returnSecret: Boolean
+    ): ChannelKeys = zGetEncryptionAddress(seed, spendingKey, hdIndex, encryptionIndex, fromId, toId, returnSecret)
+
+    override fun encryptVerusMessage(
+        addressString: String,
+        message: String,
+        returnSsk: Boolean
+    ): EncryptedPayload = encryptMessage(addressString, message, returnSsk)
+
+    override fun decryptVerusMessage(
+        dfvkHex: String?,
+        ephemeralPublicKeyHex: String?,
+        ciphertextHex: String,
+        symmetricKeyHex: String?
+    ): String = decryptMessage(dfvkHex, ephemeralPublicKeyHex, ciphertextHex, symmetricKeyHex)
 
     companion object {
         suspend fun new(): Derivation {
@@ -176,11 +203,28 @@ class RustDerivationTool private constructor() : Derivation {
 
         @JvmStatic
         private external fun zGetEncryptionAddress(
-            seed: ByteArray,
-            fromId: ByteArray,
-            toId: ByteArray,
-            accountIndex: Int,
-            networkId: Int
+            seed: String?,
+            spendingKey: String?,
+            hdIndex: Int,
+            encryptionIndex: Int,
+            fromId: String?,
+            toId: String?,
+            returnSecret: Boolean
+        ): ChannelKeys
+
+        @JvmStatic
+        private external fun encryptMessage(
+            addressString: String,
+            message: String,
+            returnSsk: Boolean
+        ): EncryptedPayload
+
+        @JvmStatic
+        private external fun decryptMessage(
+            dfvkHex: String?,
+            ephemeralPublicKeyHex: String?,
+            ciphertextHex: String,
+            symmetricKeyHex: String?
         ): String
     }
 }

@@ -8,6 +8,9 @@ import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.SharedSecret
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.tool.DerivationTool
+import cash.z.ecc.android.sdk.internal.ext.Hex
+import cash.z.ecc.android.sdk.model.ChannelKeys
+import cash.z.ecc.android.sdk.model.EncryptedPayload
 
 internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : DerivationTool {
     override suspend fun deriveUnifiedFullViewingKeys(
@@ -88,4 +91,46 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         accountIndex: Int,
         network: ZcashNetwork
     ): String = derivation.getEncryptionAddress(seed, fromId, toId, accountIndex, network)
+
+    override suspend fun getVerusEncryptionAddress(
+        seed: ByteArray?,
+        spendingKey: String?,
+        fromId: String?,
+        toId: String?,
+        hdIndex: Int,
+        encryptionIndex: Int,
+        returnSecret: Boolean
+    ): ChannelKeys {
+        val seedHex = seed?.let { Hex.toHexString(it) }
+        // We must call the NEW function "getVerusEncryptionAddress" on the derivation object,
+        // not the old function "getEncryptionAddress".
+        return derivation.getVerusEncryptionAddress(
+            seed = seedHex,
+            spendingKey = spendingKey,
+            hdIndex = hdIndex,
+            encryptionIndex = encryptionIndex,
+            fromId = fromId,
+            toId = toId,
+            returnSecret = returnSecret
+        )
+    }
+
+    override suspend fun encryptVerusMessage(
+        address: String,
+        message: String,
+        returnSsk: Boolean
+    ): EncryptedPayload {
+        // These parameters don't need conversion, so we just pass them through.
+        return derivation.encryptVerusMessage(address, message, returnSsk)
+    }
+
+    override suspend fun decryptVerusMessage(
+        fvkHex: String?,
+        epkHex: String?,
+        ciphertextHex: String,
+        sskHex: String?
+    ): String {
+        // These parameters also don't need conversion, so we just pass them through.
+        return derivation.decryptVerusMessage(fvkHex, epkHex, ciphertextHex, sskHex)
+    }
 }

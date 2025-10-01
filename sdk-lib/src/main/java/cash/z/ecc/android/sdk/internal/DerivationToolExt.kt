@@ -9,6 +9,9 @@ import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.SharedSecret
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.ChannelKeys
+import cash.z.ecc.android.sdk.model.EncryptedPayload
+import cash.z.ecc.android.sdk.model.DecryptParams
 
 fun Derivation.deriveUnifiedAddress(
     seed: ByteArray,
@@ -104,3 +107,44 @@ fun Derivation.getEncryptionAddress(
     network: ZcashNetwork
 ): String = getEncryptionAddress(seed, fromId, toId, accountIndex, network.id)
 
+fun Derivation.getVerusEncryptionAddress(
+    seed: ByteArray?,
+    spendingKey: String?,
+    fromId: String?,
+    toId: String?,
+    hdIndex: Int,
+    encryptionIndex: Int,
+    returnSecret: Boolean
+): ChannelKeys {
+    val seedHex = seed?.let { cash.z.ecc.android.sdk.internal.ext.Hex.toHexString(it) }
+
+    return getVerusEncryptionAddress(
+        seed = seedHex,
+        spendingKey = spendingKey,
+        hdIndex = hdIndex,
+        encryptionIndex = encryptionIndex,
+        fromId = fromId,
+        toId = toId,
+        returnSecret = returnSecret
+    )
+}
+
+
+fun Derivation.encryptMessage(
+    address: String,
+    message: String,
+    returnSsk: Boolean
+): EncryptedPayload {
+    return encryptVerusMessage(address, message, returnSsk)
+}
+
+fun Derivation.decryptMessage(
+    params: DecryptParams
+): String {
+    return decryptVerusMessage(
+        dfvkHex = params.dfvkHex,
+        ephemeralPublicKeyHex = params.ephemeralPublicKeyHex,
+        ciphertextHex = params.ciphertextHex,
+        symmetricKeyHex = params.symmetricKeyHex
+    )
+}
