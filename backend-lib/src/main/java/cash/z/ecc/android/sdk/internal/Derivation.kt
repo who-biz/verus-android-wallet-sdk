@@ -103,7 +103,7 @@ interface Derivation {
     ): EncryptedPayload
 
     fun decryptVerusMessage(
-        fvkHex: String?,
+        dfvkHex: String?,
         ephemeralPublicKeyHex: String?,
         ciphertextHex: String,
         symmetricKeyHex: String?

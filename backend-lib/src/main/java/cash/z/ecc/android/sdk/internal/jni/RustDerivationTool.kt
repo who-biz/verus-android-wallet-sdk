@@ -114,11 +114,11 @@ class RustDerivationTool private constructor() : Derivation {
     ): EncryptedPayload = encryptMessage(addressString, message, returnSsk)
 
     override fun decryptVerusMessage(
-        fvkHex: String?,
+        dfvkHex: String?,
         ephemeralPublicKeyHex: String?,
         ciphertextHex: String,
         symmetricKeyHex: String?
-    ): String = decryptMessage(fvkHex, ephemeralPublicKeyHex, ciphertextHex, symmetricKeyHex)
+    ): String = decryptMessage(dfvkHex, ephemeralPublicKeyHex, ciphertextHex, symmetricKeyHex)
 
     companion object {
         suspend fun new(): Derivation {
@@ -221,7 +221,7 @@ class RustDerivationTool private constructor() : Derivation {
 
         @JvmStatic
         private external fun decryptMessage(
-            fvkHex: String?,
+            dfvkHex: String?,
             ephemeralPublicKeyHex: String?,
             ciphertextHex: String,
             symmetricKeyHex: String?

@@ -28,7 +28,6 @@ use verus_zfunc::{
         encrypt_message,
         decrypt_message,
         RpcParams,
-        ChannelKeys,
         EncryptedPayload,
         DecryptParams
  };
@@ -941,79 +940,65 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
     from_id: JString<'local>,
     to_id: JString<'local>,
     return_secret: jboolean,
-     ) -> jobject {
-     let res = catch_unwind(&mut env, |env| {
-        // --- START OF CHANGES ---
-
-        // Convert Java types to Rust types, correctly handling nulls for all optional fields.
-        let seed_opt = if seed.is_null() {
-            None
-        } else {
-            Some(env.get_string(&seed)?.into())
-        };
-
-        let sk_opt = if spending_key.is_null() {
-            None
-        } else {
-            Some(env.get_string(&spending_key)?.into())
-        };
-
-        // Handle nullable strings for from_id and to_id to match the updated RpcParams struct
-        let from_id_opt = if from_id.is_null() {
-            None
-        } else {
-            Some(env.get_string(&from_id)?.into())
-        };
-
-        let to_id_opt = if to_id.is_null() {
-            None
-        } else {
-            Some(env.get_string(&to_id)?.into())
-        };
-
-        // Assemble the parameters struct for your Rust function
+) -> jobject {
+    // we wrap our logic in a catch_unwind block so that if the rust code panics
+    // it doesn't crash the entire android app. we can catch it and return null instead
+    let res = catch_unwind(&mut env, |env| {
+        // we need to translate all the incoming java types into types that rust
+        // understands. this means handling potential nulls and converting java strings
         let params = RpcParams {
-            seed: seed_opt,
-            spending_key: sk_opt,
+            seed: if seed.is_null() { None } else { Some(env.get_string(&seed)?.into()) },
+            spending_key: if spending_key.is_null() { None } else { Some(env.get_string(&spending_key)?.into()) },
             hd_index: hd_index as u32,
             encryption_index: encryption_index as u32,
-            from_id: from_id_opt,
-            to_id: to_id_opt,
+            from_id: if from_id.is_null() { None } else { Some(env.get_string(&from_id)?.into()) },
+            to_id: if to_id.is_null() { None } else { Some(env.get_string(&to_id)?.into()) },
             return_secret: return_secret == JNI_TRUE,
         };
 
-        // --- END OF CHANGES ---
-
-        // Call core Rust logic
+        // now we can call our pure rust function to do all the heavy lifting.
         let channel_keys = z_getencryptionaddress(params)
-           .map_err(|e| anyhow!("z_getencryptionaddress failed: {}", e))?;
+            .map_err(|e| anyhow!("z_getencryptionaddress failed: {}", e))?;
 
-        // Convert the Rust `ChannelKeys` result into a new Java `ChannelKeys` object
+        // with the result back from our rust logic, we have to translate it back
+        // into a java object that the android sdk can understand.
         let address_java = env.new_string(&channel_keys.address)?;
         let fvk_java = env.new_string(&channel_keys.fvk)?;
+        let fvk_hex_java = env.new_string(&channel_keys.fvk_hex)?;
+        let dfvk_hex_java = env.new_string(&channel_keys.dfvk_hex)?;
 
-        // Handle the optional spending_key
+        let ivk_java = match channel_keys.ivk {
+            Some(ivk) => env.new_string(ivk)?.into(),
+            None => JObject::null(),
+        };
+
         let sk_java = match channel_keys.spending_key {
             Some(sk) => env.new_string(sk)?.into(),
             None => JObject::null(),
         };
 
+        // here we're building the new java object. the path and the constructor signature
+        // string must exactly match the definition in the kotlin/java code
         let result_obj = env.new_object(
-            "cash/z/ecc/android/sdk/model/ChannelKeys", // Path to Kotlin data class
-            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", // Constructor signature
+            "cash/z/ecc/android/sdk/model/ChannelKeys", // path to the kotlin/java data class
+            // the constructor signature: (String, String, String, String, String, String) -> void
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
             &[
                 JValue::Object(&address_java),
                 JValue::Object(&fvk_java),
+                JValue::Object(&fvk_hex_java),
+                JValue::Object(&dfvk_hex_java),
+                JValue::Object(&ivk_java),
                 JValue::Object(&sk_java),
             ],
         )?;
 
+        // return the raw pointer to the newly created java object.
         Ok(result_obj.into_raw())
-     });
+    });
 
-     unwrap_exc_or(&mut env, res, std::ptr::null_mut())
+    unwrap_exc_or(&mut env, res, std::ptr::null_mut())
 }
-
 #[no_mangle]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_encryptMessage<'local>(
@@ -1024,16 +1009,16 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_en
         return_ssk: jboolean,
     ) -> jobject {
     let res = catch_unwind(&mut env, |env| {
-        // 1. Convert Java types to Rust types
+        // convert Java types to Rust types
         let rust_addr: String = env.get_string(&address_string)?.into();
         let rust_msg: String = env.get_string(&message)?.into();
         let rust_return_ssk = return_ssk == JNI_TRUE;
 
-        // 2. Call the centralized library function
+        // call the centralized library function
         let encrypted_payload = encrypt_message(rust_addr, rust_msg, rust_return_ssk)
             .map_err(|e| anyhow!("encrypt_message failed: {}", e))?;
 
-        // 3. Convert the Rust result into a new Java `EncryptedPayload` object
+        // convert the Rust result into a new Java `EncryptedPayload` object
         let epk_java = env.new_string(&encrypted_payload.ephemeral_public_key)?;
         let ciphertext_java = env.new_string(&encrypted_payload.ciphertext)?;
 
@@ -1069,7 +1054,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         symmetric_key_hex: JString<'local>,
     ) -> jstring {
     let res = catch_unwind(&mut env, |env| {
-        // 1. Convert all Java types to Rust types
+        // convert all Java types to Rust types.
         let params = DecryptParams {
             fvk_hex: if fvk_hex.is_null() { None } else { Some(env.get_string(&fvk_hex)?.into()) },
             ephemeral_public_key_hex: if ephemeral_public_key_hex.is_null() { None } else { Some(env.get_string(&ephemeral_public_key_hex)?.into()) },
@@ -1077,11 +1062,11 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
             symmetric_key_hex: if symmetric_key_hex.is_null() { None } else { Some(env.get_string(&symmetric_key_hex)?.into()) },
         };
 
-        // 2. Call the centralized library function
+        // call the centralized library function
         let decrypted_message = decrypt_message(params)
             .map_err(|e| anyhow!("decrypt_message failed: {}", e))?;
 
-        // 3. Convert the Rust String result back to a Java String
+        // convert the Rust String result back to a Java String
         let output = env.new_string(decrypted_message)?;
         Ok(output.into_raw())
     });
