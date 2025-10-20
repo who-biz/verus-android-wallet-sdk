@@ -108,6 +108,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.lifecycle.common)
 
+
     // For direct database access
     // TODO [#703]: Eliminate this dependency
     // https://github.com/zcash/zcash-android-wallet-sdk/issues/703
@@ -121,7 +122,7 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
-
+    api(project(":model-lib"))
     // Tests
     testImplementation(libs.kotlin.reflect)
     testImplementation(libs.kotlin.test)

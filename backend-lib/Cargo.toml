@@ -34,6 +34,8 @@ zcash_primitives = "0.15"
 zcash_proofs = "0.15"
 zcash_note_encryption = "0.4.1"
 jubjub = "0.10"
+verus_zfunc = { version = "0.1.0", default-features = false }
+
 
 # Initialization
 rayon = "1.7"
@@ -51,7 +53,8 @@ tracing-subscriber = "0.3"
 # Conditional access to newer NDK features
 dlopen2 = "0.7"
 libc = "0.2"
-
+chacha20poly1305 = "0.10.1"
+getrandom = "0.2.16"
 # Uncomment this to use orchard-specific functions
 [features]
 orchard = []
@@ -75,6 +78,9 @@ zcash_proofs = { git = "https://github.com/who-biz/librustzcash", branch = "ka_a
 sapling-crypto = { git = "https://github.com/who-biz/sapling-crypto", branch = "ka_agree" }
 zcash_note_encryption = { git = "https://github.com/who-biz/zcash_note_encryption", branch = "ka_agree" }
 orchard = { git = "https://github.com/who-biz/orchard", branch = "ka_agree" }
+verus_zfunc = { git = "https://github.com/iamahmedshahh/librustzcash", branch = "ka_agree" }
+
+
 
 [lib]
 name = "zcashwalletsdk"
