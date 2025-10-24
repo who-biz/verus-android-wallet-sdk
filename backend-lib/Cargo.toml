@@ -78,7 +78,7 @@ zcash_proofs = { git = "https://github.com/who-biz/librustzcash", branch = "ka_a
 sapling-crypto = { git = "https://github.com/who-biz/sapling-crypto", branch = "ka_agree" }
 zcash_note_encryption = { git = "https://github.com/who-biz/zcash_note_encryption", branch = "ka_agree" }
 orchard = { git = "https://github.com/who-biz/orchard", branch = "ka_agree" }
-verus_zfunc = { git = "https://github.com/iamahmedshahh/librustzcash", branch = "ka_agree" }
+verus_zfunc = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
 
 
 

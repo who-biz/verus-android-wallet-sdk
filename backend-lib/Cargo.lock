@@ -478,16 +478,7 @@ dependencies = [
 [[package]]
 name = "equihash"
 version = "0.2.0"
-source = "git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree#3bddaae08dca98ec90afff5debde45229fba12db"
-dependencies = [
- "blake2b_simd",
- "byteorder",
-]
-
-[[package]]
-name = "equihash"
-version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -506,21 +497,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "778e2ac28f6c47af28e4907f13ffd1e1ddbd400980a9abd7c8df189bf578a5ad"
 dependencies = [
  "libc",
- "windows-sys 0.60.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
 name = "f4jumble"
 version = "0.1.0"
-source = "git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree#3bddaae08dca98ec90afff5debde45229fba12db"
-dependencies = [
- "blake2b_simd",
-]
-
-[[package]]
-name = "f4jumble"
-version = "0.1.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "blake2b_simd",
 ]
@@ -1524,7 +1507,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.4.15",
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -1537,7 +1520,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.9.4",
- "windows-sys 0.60.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -1558,7 +1541,7 @@ dependencies = [
 [[package]]
 name = "sapling-crypto"
 version = "0.1.3"
-source = "git+https://github.com/who-biz/sapling-crypto?branch=ka_agree#51aee99ea4791b7aad3d42d188fd2150876c72ca"
+source = "git+https://github.com/who-biz/sapling-crypto?branch=ka_agree#4452a3162aad02d6d69b1c7525a98a921307f870"
 dependencies = [
  "aes",
  "bellman",
@@ -1783,7 +1766,7 @@ dependencies = [
  "getrandom 0.3.3",
  "once_cell",
  "rustix 1.0.8",
- "windows-sys 0.60.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2010,7 +1993,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 [[package]]
 name = "verus_zfunc"
 version = "0.1.0"
-source = "git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree#3bddaae08dca98ec90afff5debde45229fba12db"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "anyhow",
  "bech32",
@@ -2026,9 +2009,9 @@ dependencies = [
  "sapling-crypto",
  "secrecy",
  "sha2",
- "zcash_keys 0.2.0 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
+ "zcash_keys",
  "zcash_note_encryption",
- "zcash_primitives 0.15.0 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
+ "zcash_primitives",
 ]
 
 [[package]]
@@ -2158,7 +2141,7 @@ version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0978bf7171b3d90bac376700cb56d606feb40f251a475a5d6634613564460b22"
 dependencies = [
- "windows-sys 0.60.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2445,44 +2428,31 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "verus_zfunc",
- "zcash_address 0.3.2 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_address",
  "zcash_client_backend",
  "zcash_client_sqlite",
  "zcash_note_encryption",
- "zcash_primitives 0.15.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_primitives",
  "zcash_proofs",
 ]
 
 [[package]]
 name = "zcash_address"
 version = "0.3.2"
-source = "git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree#3bddaae08dca98ec90afff5debde45229fba12db"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "bech32",
  "bs58",
- "f4jumble 0.1.0 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
+ "f4jumble",
  "tracing",
- "zcash_encoding 0.2.0 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
- "zcash_protocol 0.1.1 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
-]
-
-[[package]]
-name = "zcash_address"
-version = "0.3.2"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
-dependencies = [
- "bech32",
- "bs58",
- "f4jumble 0.1.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "tracing",
- "zcash_encoding 0.2.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_protocol 0.1.1 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_encoding",
+ "zcash_protocol",
 ]
 
 [[package]]
 name = "zcash_client_backend"
 version = "0.12.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "android_logger",
  "base64",
@@ -2511,19 +2481,19 @@ dependencies = [
  "tonic-build",
  "tracing",
  "which",
- "zcash_address 0.3.2 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_encoding 0.2.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_keys 0.2.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_address",
+ "zcash_encoding",
+ "zcash_keys",
  "zcash_note_encryption",
- "zcash_primitives 0.15.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_protocol 0.1.1 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_primitives",
+ "zcash_protocol",
  "zip32",
 ]
 
 [[package]]
 name = "zcash_client_sqlite"
 version = "0.10.3"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "android_logger",
  "bs58",
@@ -2546,28 +2516,19 @@ dependencies = [
  "time",
  "tracing",
  "uuid",
- "zcash_address 0.3.2 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_address",
  "zcash_client_backend",
- "zcash_encoding 0.2.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_keys 0.2.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_primitives 0.15.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_protocol 0.1.1 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_encoding",
+ "zcash_keys",
+ "zcash_primitives",
+ "zcash_protocol",
  "zip32",
 ]
 
 [[package]]
 name = "zcash_encoding"
 version = "0.2.0"
-source = "git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree#3bddaae08dca98ec90afff5debde45229fba12db"
-dependencies = [
- "byteorder",
- "nonempty",
-]
-
-[[package]]
-name = "zcash_encoding"
-version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "byteorder",
  "nonempty",
@@ -2576,32 +2537,7 @@ dependencies = [
 [[package]]
 name = "zcash_keys"
 version = "0.2.0"
-source = "git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree#3bddaae08dca98ec90afff5debde45229fba12db"
-dependencies = [
- "bech32",
- "blake2b_simd",
- "bls12_381",
- "bs58",
- "document-features",
- "group",
- "memuse",
- "nonempty",
- "rand_core",
- "sapling-crypto",
- "secrecy",
- "subtle",
- "tracing",
- "zcash_address 0.3.2 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
- "zcash_encoding 0.2.0 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
- "zcash_primitives 0.15.0 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
- "zcash_protocol 0.1.1 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
- "zip32",
-]
-
-[[package]]
-name = "zcash_keys"
-version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "bech32",
  "blake2b_simd",
@@ -2617,10 +2553,10 @@ dependencies = [
  "secrecy",
  "subtle",
  "tracing",
- "zcash_address 0.3.2 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_encoding 0.2.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_primitives 0.15.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_protocol 0.1.1 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_address",
+ "zcash_encoding",
+ "zcash_primitives",
+ "zcash_protocol",
  "zip32",
 ]
 
@@ -2639,14 +2575,14 @@ dependencies = [
 [[package]]
 name = "zcash_primitives"
 version = "0.15.0"
-source = "git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree#3bddaae08dca98ec90afff5debde45229fba12db"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "aes",
  "bip0039",
  "blake2b_simd",
  "byteorder",
  "document-features",
- "equihash 0.2.0 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
+ "equihash",
  "ff",
  "fpe",
  "group",
@@ -2663,45 +2599,10 @@ dependencies = [
  "sha2",
  "subtle",
  "tracing",
- "zcash_address 0.3.2 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
- "zcash_encoding 0.2.0 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
+ "zcash_address",
+ "zcash_encoding",
  "zcash_note_encryption",
- "zcash_protocol 0.1.1 (git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree)",
- "zcash_spec",
- "zip32",
-]
-
-[[package]]
-name = "zcash_primitives"
-version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
-dependencies = [
- "aes",
- "bip0039",
- "blake2b_simd",
- "byteorder",
- "document-features",
- "equihash 0.2.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "ff",
- "fpe",
- "group",
- "hex",
- "incrementalmerkletree",
- "jubjub",
- "memuse",
- "nonempty",
- "orchard",
- "rand",
- "rand_core",
- "redjubjub",
- "sapling-crypto",
- "sha2",
- "subtle",
- "tracing",
- "zcash_address 0.3.2 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_encoding 0.2.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
- "zcash_note_encryption",
- "zcash_protocol 0.1.1 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_protocol",
  "zcash_spec",
  "zip32",
 ]
@@ -2709,7 +2610,7 @@ dependencies = [
 [[package]]
 name = "zcash_proofs"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "bellman",
  "blake2b_simd",
@@ -2725,22 +2626,13 @@ dependencies = [
  "sapling-crypto",
  "tracing",
  "xdg",
- "zcash_primitives 0.15.0 (git+https://github.com/who-biz/librustzcash?branch=ka_agree)",
+ "zcash_primitives",
 ]
 
 [[package]]
 name = "zcash_protocol"
 version = "0.1.1"
-source = "git+https://github.com/iamahmedshahh/librustzcash?branch=ka_agree#3bddaae08dca98ec90afff5debde45229fba12db"
-dependencies = [
- "document-features",
- "memuse",
-]
-
-[[package]]
-name = "zcash_protocol"
-version = "0.1.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#6ad5e6ca247e24c7a34c7245383bd7a56d6b2a5e"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree#b73f7e093814632c76ef3dfd3e2048e292d3835d"
 dependencies = [
  "document-features",
  "memuse",
