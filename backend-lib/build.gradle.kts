@@ -138,8 +138,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
-    api(project(":model-lib"))
-
     // Tests
     testImplementation(libs.kotlin.test)
 
