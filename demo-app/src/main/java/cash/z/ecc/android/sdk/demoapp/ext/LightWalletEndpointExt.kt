@@ -22,7 +22,7 @@ private const val DEFAULT_PORT = 443
 internal val LightWalletEndpoint.Companion.Mainnet
     get() =
         LightWalletEndpoint(
-            "lwdlegacy.blur.cash",
+            "lightwalletd.whobiz.dev",
             DEFAULT_PORT,
             isSecure = true
         )

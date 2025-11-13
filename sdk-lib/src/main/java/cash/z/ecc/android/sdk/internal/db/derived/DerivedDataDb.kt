@@ -69,8 +69,6 @@ internal class DerivedDataDb private constructor(
 
             // If a seed is provided, fill in the accounts.
  
-           // TODO: handle extsk here?
-
             seed?.let { checkedSeed ->
                 // toInt() should be safe because we expect very few accounts
                 val missingAccounts = numberOfAccounts - dataDb.accountTable.count().toInt()

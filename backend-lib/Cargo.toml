@@ -60,11 +60,11 @@ transparent-inputs = []
 
 ## Uncomment this to test librustzcash changes locally
 #[patch.crates-io]
-#zcash_address = { path = '<pathtolibrustzcashroot>/zcash_address' }
-#zcash_client_backend = { path = '<pathtolibrustzcashroot>/zcash_client_backend' }
-#zcash_client_sqlite = { path = '<pathtolibrustzcashroot>/zcash_client_sqlite' }
-#zcash_primitives = { path = '<pathtolibrustzcashroot>/zcash_primitives' }
-#zcash_proofs = { path = '<pathtolibrustzcashroot>/zcash_proofs' }
+#zcash_address = { path = '../../clones/librustzcash/components/zcash_address' }
+#zcash_client_backend = { path = '../../clones/librustzcash/zcash_client_backend' }
+#zcash_client_sqlite = { path = '../../clones/librustzcash/zcash_client_sqlite' }
+#zcash_primitives = { path = '../../clones/librustzcash/zcash_primitives' }
+#zcash_proofs = { path = '../../clones/librustzcash/zcash_proofs' }
 
 ## Uncomment this to test someone else's librustzcash changes in a branch
 [patch.crates-io]

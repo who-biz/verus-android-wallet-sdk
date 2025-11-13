@@ -91,13 +91,16 @@ sealed class WalletFixture {
     object Alice : WalletFixture() {
 
 	override val wifString: String
-	    get() = "UxUY1K87of2ntgchEprKosZVt97DXPv4iZP6oGkcxXdVFNtbncMT"
+	    get() = ""
+        // MUST ENTER A WIF HERE, or things may not work in demo app
 
 	override val extskString: String
 	    get() = ""
 
         override val hexSeed: String
-            get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b4770a"
+            get() = ""
+        //MUST ENTER A HEX SEED HERE, or demo app may not work
+        // we use HEX SEED and a WIF for this demo scenario
 
         /*override val seedPhrase: String
             get() =

@@ -77,13 +77,6 @@ class RustBackend private constructor(
             )
         }
 
-/*    override suspend fun deleteDb(
-       clearCache: Boolean,
-       clearDataDb: Boolean
-    ): Boolean {
-             return this.clear(clearCache, clearDataDb)
-    }
-*/
     override suspend fun createAccount(
         transparentKey: ByteArray?,
         extsk: ByteArray?,
@@ -457,12 +450,6 @@ class RustBackend private constructor(
             networkId: Int
         ): Int
 
-/*        @JvmStatic
-        private external fun deleteDb(
-             clearCache: Boolean,
-             clearDataDb: Boolean
-        ): Boolean
-*/
         @JvmStatic
         private external fun createAccount(
             dbDataPath: String,

@@ -5,8 +5,6 @@ use std::panic;
 use std::path::Path;
 use std::ptr;
 
-//use tracing::warn;
-
 use rand::rngs::OsRng;
 
 use anyhow::anyhow;
@@ -285,18 +283,6 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initDataD
 
         let seed = (!seed.is_null()).then(|| SecretVec::new(env.convert_byte_array(seed).unwrap()));
         let extsk = (!extsk.is_null()).then(|| SecretVec::new(env.convert_byte_array(extsk).unwrap()));
-/*
-        let seed_empty = seed.unwrap_or(SecretVec::new(Vec::<u8>::new())).expose_secret().is_empty();
-        let extsk_empty = extsk.unwrap_or(SecretVec::new(Vec::<u8>::new())).expose_secret().is_empty();
-
-        if seed_empty && extsk_empty {
-            return Err(anyhow!("Error: neither seed nor extsk were provided for initializing DB. Choose one!"));
-        }
-        if !seed_empty && !extsk_empty {
-           // warn!("seed = {:?}, extsk = {:?}", seed, extsk);
-            return Err(anyhow!("Error: cannot initialize database with extsk and seed. Choose one!"));
-        }
-*/
         let transparent_key = (!transparent_key.is_null()).then(|| SecretVec::new(env.convert_byte_array(transparent_key).unwrap()));
 
         match init_wallet_db(&mut db_data, transparent_key, extsk, seed) {
@@ -305,8 +291,6 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initDataD
                 if matches!(
                     e.source().and_then(|e| e.downcast_ref()),
                     Some(&WalletMigrationError::SeedRequired)
-                    //TODO: change these migration errors so that we can accept WIF, seed, HD seed, etc
-                    // so we still have meaningful error messages
                 ) =>
             {
                 Ok(1)
@@ -417,22 +401,10 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
     let res = catch_unwind(&mut env, |env| {
         let network = parse_network(network_id as u32)?;
         let mut db_data = wallet_db(env, network, db_data)?;
-        //let tkey = env.convert_byte_array(transparent_key).unwrap_or(Vec::new());
-        //warn!("Jni boundary, transparent_key: {:?}, length: {}", tkey, tkey.len());
         let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap_or(Vec::new()));
         let extsk = SecretVec::new(env.convert_byte_array(extsk).unwrap_or(Vec::new()));
 
-//        let bytes: Vec<u8>;
-   //     let extsk_rust: String = env.get_string(&extsk)?.into();
-     //   if !extsk_rust.is_empty() {
-     //       let result = decode_extended_spending_key(mainnet::HRP_SAPLING_EXTENDED_SPENDING_KEY, &extsk_rust);
-     //       warn!("bech32 decode: result({:?})", result);
-     //   } else {
-     //       warn!("extsk JString was empty!!");
-     //   }
-
         let hd_seed = env.convert_byte_array(seed).unwrap();
-        //warn!("Jni boundary, seed: {:?}, length: {}", hd_seed, hd_seed.len());
         let seed = SecretVec::new(hd_seed);
         let treestate = TreeState::decode(&env.convert_byte_array(treestate).unwrap()[..])
             .map_err(|e| anyhow!("Invalid TreeState: {}", e))?;
@@ -521,7 +493,6 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let usk = UnifiedSpendingKey::from_seed(&network, transparent_key.expose_secret(), extsk.expose_secret(), seed.expose_secret(), account)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))?;
 
-        //warn!("Seed({:?}), usk({:?})", seed.expose_secret(), usk);
         Ok(encode_usk(env, account, usk)?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
@@ -637,7 +608,6 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
                         .expect("Something went wrong when converting ufvk to extfvk").to_bytes())
             })
             .collect::<Result<_, _>>()?;
-        //warn!("extfvks: {:?}", extfvks);
 
         Ok(utils::rust_vec_to_java(
             env,
