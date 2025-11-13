@@ -2,6 +2,9 @@ package cash.z.ecc.android.sdk.internal
 
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
+import cash.z.ecc.android.sdk.internal.model.JniSharedSecret
+import cash.z.ecc.android.sdk.model.ChannelKeys
+import cash.z.ecc.android.sdk.model.EncryptedPayload
 
 interface Derivation {
     fun deriveUnifiedAddress(
@@ -63,6 +66,48 @@ interface Derivation {
         address: String,
         networkId: Int
     ): Boolean
+
+    fun getSymmetricKey(
+        viewingKey: String,
+        ephemeralPublicKey: ByteArray,
+        networkId: Int
+    ): String
+
+    fun generateSymmetricKey(
+        saplingAddress: String,
+        networkId: Int
+    ): String
+
+    fun getEncryptionAddress(
+        seed: ByteArray,
+        fromId: ByteArray,
+        toId: ByteArray,
+        accountIndex: Int,
+        networkId: Int
+    ): String
+
+    fun getVerusEncryptionAddress(
+        seed: String?,
+        spendingKey: String?,
+        hdIndex: Int,
+        encryptionIndex: Int,
+        fromId: String?,
+        toId: String?,
+        returnSecret: Boolean
+    ): ChannelKeys
+
+    fun encryptVerusMessage(
+        addressString: String,
+        message: String,
+        returnSsk: Boolean
+    ): EncryptedPayload
+
+    fun decryptVerusMessage(
+        dfvkHex: String?,
+        ephemeralPublicKeyHex: String?,
+        ciphertextHex: String,
+        symmetricKeyHex: String?
+    ): String
 
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = 1
