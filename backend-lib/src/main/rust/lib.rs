@@ -444,20 +444,16 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isSeedRel
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
     db_data: JString<'local>,
-    transparent_key: JByteArray<'local>,
-    extsk: JByteArray<'local>,
     seed: JByteArray<'local>,
     network_id: jint,
 ) -> jboolean {
     let res = catch_unwind(&mut env, |env| {
         let network = parse_network(network_id as u32)?;
         let db_data = wallet_db(env, network, db_data)?;
-        let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap());
-        let extsk = SecretVec::new(env.convert_byte_array(extsk).unwrap());
         let seed = SecretVec::new(env.convert_byte_array(seed).unwrap());
 
         // Replicate the logic from `initWalletDb`.
-        Ok(match db_data.seed_relevance_to_derived_accounts(&transparent_key, &extsk, &seed)? {
+        Ok(match db_data.seed_relevance_to_derived_accounts(&seed)? {
             SeedRelevance::Relevant { .. } | SeedRelevance::NoAccounts => JNI_TRUE,
             SeedRelevance::NotRelevant | SeedRelevance::NoDerivedAccounts => JNI_FALSE,
         })

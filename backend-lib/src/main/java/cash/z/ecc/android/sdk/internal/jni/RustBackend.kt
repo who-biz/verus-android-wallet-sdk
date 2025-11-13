@@ -97,12 +97,10 @@ class RustBackend private constructor(
         }
     }
 
-    override suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, extsk: ByteArray, seed: ByteArray): Boolean =
+    override suspend fun isSeedRelevantToAnyDerivedAccounts(seed: ByteArray): Boolean =
         withContext(SdkDispatchers.DATABASE_IO) {
             isSeedRelevantToAnyDerivedAccounts(
                 dataDbFile.absolutePath,
-                transparentKey,
-                extsk,
                 seed,
                 networkId = networkId
             )
@@ -464,8 +462,6 @@ class RustBackend private constructor(
         @JvmStatic
         private external fun isSeedRelevantToAnyDerivedAccounts(
             dbDataPath: String,
-            transparentKey: ByteArray,
-            extsk: ByteArray,
             seed: ByteArray,
             networkId: Int
         ): Boolean
