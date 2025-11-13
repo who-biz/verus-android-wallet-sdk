@@ -72,7 +72,7 @@ interface Backend {
      * @throws RuntimeException as a common indicator of the operation failure
      */
     @Throws(RuntimeException::class)
-    suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, extsk: ByteArray, seed: ByteArray): Boolean
+    suspend fun isSeedRelevantToAnyDerivedAccounts(seed: ByteArray): Boolean
 
     fun isValidSaplingAddr(addr: String): Boolean
 
