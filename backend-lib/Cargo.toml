@@ -16,11 +16,13 @@ hdwallet-bitcoin = "0.4"
 hex = "0.4"
 orchard = "0.8"
 prost = "0.12"
+rand = "0.8"
 rusqlite = "0.29"
-sapling = { package = "sapling-crypto", version = "0.1", default-features = false }
+sapling = { package = "sapling-crypto", version = "0.1.3", default-features = false }
 schemer = "0.2"
 secp256k1 = "0.26"
 secrecy = "0.8"
+sha2 = "0.10.9"
 zcash_address = "0.3"
 #zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs", "unstable"] }
 #zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs", "unstable", "linearscanning"] }
@@ -28,6 +30,10 @@ zcash_client_backend = { version = "0.12.1", features = ["unstable"] }
 zcash_client_sqlite = { version = "0.10.3", features = ["unstable", "linearscanning"] }
 zcash_primitives = "0.15"
 zcash_proofs = "0.15"
+zcash_note_encryption = "0.4.1"
+jubjub = "0.10"
+verus_zfunc = { version = "0.1.0", default-features = false }
+
 
 # Initialization
 rayon = "1.7"
@@ -45,7 +51,8 @@ tracing-subscriber = "0.3"
 # Conditional access to newer NDK features
 dlopen2 = "0.7"
 libc = "0.2"
-
+chacha20poly1305 = "0.10.1"
+getrandom = "0.2.16"
 # Uncomment this to use orchard-specific functions
 [features]
 orchard = []
@@ -61,12 +68,17 @@ transparent-inputs = []
 
 ## Uncomment this to test someone else's librustzcash changes in a branch
 [patch.crates-io]
-zcash_address = { git = "https://github.com/who-biz/librustzcash", branch = "dev-backend-upgrade" }
-zcash_client_backend = { git = "https://github.com/who-biz/librustzcash", branch = "dev-backend-upgrade" }
-zcash_client_sqlite = { git = "https://github.com/who-biz/librustzcash", branch = "dev-backend-upgrade" }
-zcash_primitives = { git = "https://github.com/who-biz/librustzcash", branch = "dev-backend-upgrade" }
-zcash_proofs = { git = "https://github.com/who-biz/librustzcash", branch = "dev-backend-upgrade" }
-#sapling-crypto = { git = "https://github.com/who-biz/sapling-crypto", branch = "dev-backend-upgrade" }
+zcash_address = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
+zcash_client_backend = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
+zcash_client_sqlite = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
+zcash_primitives = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
+zcash_proofs = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
+sapling-crypto = { git = "https://github.com/who-biz/sapling-crypto", branch = "ka_agree" }
+zcash_note_encryption = { git = "https://github.com/who-biz/zcash_note_encryption", branch = "ka_agree" }
+orchard = { git = "https://github.com/who-biz/orchard", branch = "ka_agree" }
+verus_zfunc = { git = "https://github.com/who-biz/librustzcash", branch = "ka_agree" }
+
+
 
 [lib]
 name = "zcashwalletsdk"

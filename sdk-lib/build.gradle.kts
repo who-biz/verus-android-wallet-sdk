@@ -108,6 +108,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.lifecycle.common)
 
+
     // For direct database access
     // TODO [#703]: Eliminate this dependency
     // https://github.com/zcash/zcash-android-wallet-sdk/issues/703

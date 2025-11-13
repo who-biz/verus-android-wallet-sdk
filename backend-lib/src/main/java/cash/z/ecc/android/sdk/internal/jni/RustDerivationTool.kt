@@ -4,6 +4,9 @@ import cash.z.ecc.android.sdk.internal.Derivation
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
 
+import cash.z.ecc.android.sdk.model.ChannelKeys
+import cash.z.ecc.android.sdk.model.EncryptedPayload
+
 class RustDerivationTool private constructor() : Derivation {
     override fun deriveUnifiedFullViewingKeys(
         seed: ByteArray,
@@ -73,6 +76,50 @@ class RustDerivationTool private constructor() : Derivation {
         networkId: Int
     ): String = deriveUnifiedAddressFromViewingKey(viewingKey, networkId = networkId)
 
+    override fun getSymmetricKey(
+        viewingKey: String, 
+        ephemeralPublicKey: ByteArray,
+        networkId: Int
+    ): String =  getSymmetricKeyReceiver(viewingKey, ephemeralPublicKey, networkId = networkId)
+
+    override fun generateSymmetricKey(
+        saplingAddress: String,
+        networkId: Int
+    ): String =  generateSymmetricKeySender(saplingAddress, networkId = networkId)
+
+    override fun getEncryptionAddress(
+        seed: ByteArray,
+        fromId: ByteArray,
+        toId: ByteArray,
+        accountIndex: Int,
+        networkId: Int
+    ): String {
+        TODO("Legacy getEncryptionAddress is not supported. Use getVerusEncryptionAddress instead.")
+    }
+
+    override fun getVerusEncryptionAddress(
+        seed: String?,
+        spendingKey: String?,
+        hdIndex: Int,
+        encryptionIndex: Int,
+        fromId: String?,
+        toId: String?,
+        returnSecret: Boolean
+    ): ChannelKeys = zGetEncryptionAddress(seed, spendingKey, hdIndex, encryptionIndex, fromId, toId, returnSecret)
+
+    override fun encryptVerusMessage(
+        addressString: String,
+        message: String,
+        returnSsk: Boolean
+    ): EncryptedPayload = encryptMessage(addressString, message, returnSsk)
+
+    override fun decryptVerusMessage(
+        dfvkHex: String?,
+        ephemeralPublicKeyHex: String?,
+        ciphertextHex: String,
+        symmetricKeyHex: String?
+    ): String = decryptMessage(dfvkHex, ephemeralPublicKeyHex, ciphertextHex, symmetricKeyHex)
+
     companion object {
         suspend fun new(): Derivation {
             RustBackend.loadLibrary()
@@ -140,5 +187,44 @@ class RustDerivationTool private constructor() : Derivation {
             address: String,
             networkId: Int
         ): Boolean
+
+        @JvmStatic
+        private external fun getSymmetricKeyReceiver(
+            vk: String,
+            epk: ByteArray,
+            networkId: Int
+        ): String
+
+        @JvmStatic
+        private external fun generateSymmetricKeySender(
+            saplingAddress: String,
+            networkId: Int
+        ): String
+
+        @JvmStatic
+        private external fun zGetEncryptionAddress(
+            seed: String?,
+            spendingKey: String?,
+            hdIndex: Int,
+            encryptionIndex: Int,
+            fromId: String?,
+            toId: String?,
+            returnSecret: Boolean
+        ): ChannelKeys
+
+        @JvmStatic
+        private external fun encryptMessage(
+            addressString: String,
+            message: String,
+            returnSsk: Boolean
+        ): EncryptedPayload
+
+        @JvmStatic
+        private external fun decryptMessage(
+            dfvkHex: String?,
+            ephemeralPublicKeyHex: String?,
+            ciphertextHex: String,
+            symmetricKeyHex: String?
+        ): String
     }
 }
