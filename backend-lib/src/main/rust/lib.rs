@@ -310,6 +310,7 @@ fn encode_extsk<'a>(
 ) -> jni::errors::Result<JObject<'a>> {
     let encoded = SecretVec::new(extsk.to_bytes().to_vec());
     let bytes = env.byte_array_from_slice(encoded.expose_secret())?;
+    //TODO: (Biz) see if we can find a way to not reference this by explicit path
     env.new_object(
         "cash/z/ecc/android/sdk/internal/model/JniShieldedSpendingKey",
         "(I[B)V",
@@ -1446,47 +1447,27 @@ fn encode_account_balance<'a>(
     let sapling_value_pending =
         Amount::from(balance.sapling_balance().value_pending_spendability());
 
-    //#[cfg(feature = "orchard")]
-    //{
-        let orchard_verified_balance = Amount::from(balance.orchard_balance().spendable_value());
-        let orchard_change_pending =
-            Amount::from(balance.orchard_balance().change_pending_confirmation());
-        let orchard_value_pending =
-            Amount::from(balance.orchard_balance().value_pending_spendability());
-    //}
+    let orchard_verified_balance = Amount::from(balance.orchard_balance().spendable_value());
+    let orchard_change_pending =
+        Amount::from(balance.orchard_balance().change_pending_confirmation());
+    let orchard_value_pending =
+        Amount::from(balance.orchard_balance().value_pending_spendability());
     let unshielded = Amount::from(balance.unshielded());
 
-    //#[cfg(feature = "orchard")]
-    //{
-        env.new_object(
-            JNI_ACCOUNT_BALANCE,
-            "(IJJJJJJJ)V",
-            &[
-                JValue::Int(u32::from(*account) as i32),
-                JValue::Long(sapling_verified_balance.into()),
-                JValue::Long(sapling_change_pending.into()),
-                JValue::Long(sapling_value_pending.into()),
-                JValue::Long(orchard_verified_balance.into()),
-                JValue::Long(orchard_change_pending.into()),
-                JValue::Long(orchard_value_pending.into()),
-                JValue::Long(unshielded.into()),
-            ],
-        )
-    //}
-    /*#[cfg(not(feature = "orchard"))]
-    {
-            env.new_object(
-                JNI_ACCOUNT_BALANCE,
-                "(IJJJJJJJ)V",
-                &[
-                    JValue::Int(u32::from(*account) as i32),
-                    JValue::Long(sapling_verified_balance.into()),
-                    JValue::Long(sapling_change_pending.into()),
-                    JValue::Long(sapling_value_pending.into()),
-                    JValue::Long(unshielded.into()),
-                ],
-            )
-    }*/
+    env.new_object(
+        JNI_ACCOUNT_BALANCE,
+        "(IJJJJJJJ)V",
+        &[
+            JValue::Int(u32::from(*account) as i32),
+            JValue::Long(sapling_verified_balance.into()),
+            JValue::Long(sapling_change_pending.into()),
+            JValue::Long(sapling_value_pending.into()),
+            JValue::Long(orchard_verified_balance.into()),
+            JValue::Long(orchard_change_pending.into()),
+            JValue::Long(orchard_value_pending.into()),
+            JValue::Long(unshielded.into()),
+        ],
+    )
 }
 
 /// Returns a `JniWalletSummary` object, provided that `progress_numerator` is
@@ -1855,7 +1836,6 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_proposeTr
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
-
 
 #[no_mangle]
 #[cfg(feature = "transparent-inputs")]

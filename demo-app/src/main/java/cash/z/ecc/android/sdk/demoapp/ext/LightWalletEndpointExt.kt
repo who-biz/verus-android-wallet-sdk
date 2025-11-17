@@ -22,6 +22,7 @@ private const val DEFAULT_PORT = 443
 internal val LightWalletEndpoint.Companion.Mainnet
     get() =
         LightWalletEndpoint(
+            // below URL is strictly for demo app usage
             "lightwalletd.whobiz.dev",
             DEFAULT_PORT,
             isSecure = true

@@ -6,7 +6,6 @@ import cash.z.ecc.android.sdk.SdkSynchronizer
 import cash.z.ecc.android.sdk.Synchronizer
 import cash.z.ecc.android.sdk.WalletInitMode
 import cash.z.ecc.android.sdk.fixture.LightWalletEndpointFixture
-import cash.z.ecc.android.sdk.fixture.WalletFixture
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -77,8 +76,7 @@ class DataDbScannerUtil {
                         birthdayHeight
                     ),
                 // Using existing wallet init mode as simplification for the test
-                walletInitMode = WalletInitMode.ExistingWallet,
-                transparentKey = WalletFixture.decodedTrimmedWif
+                walletInitMode = WalletInitMode.ExistingWallet
             )
 
         println("sync!")

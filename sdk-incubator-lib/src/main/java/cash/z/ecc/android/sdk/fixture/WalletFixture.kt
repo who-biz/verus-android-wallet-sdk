@@ -41,12 +41,14 @@ sealed class WalletFixture {
     @Suppress("MaxLineLength")
     object Ben : WalletFixture() {
 
+        // Base58-encoded WIF goes here
         override val wifString = ""
 
-        override val extskString = ""
+        override val extskString = "" 
 
         override val hexSeed: String
-            get() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b4770a"
+        // 32 or 64 character hex seed should go here
+            get() = ""
 
         // These birthdays were the latest checkpoint at the time this was implemented
         // Moving these forward will improve testing time, while leaving old transactions behind

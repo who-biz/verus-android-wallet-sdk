@@ -107,17 +107,16 @@ internal class FakeRustBackend(
     override suspend fun decryptAndStoreTransaction(tx: ByteArray) =
         error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
-    override suspend fun initDataDb(transparentKey: ByteArray?, seed: ByteArray?): Int =
+    override suspend fun initDataDb(seed: ByteArray?): Int =
         error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
     override suspend fun createAccount(
-        transparentKey: ByteArray?,
         seed: ByteArray,
         treeState: ByteArray,
         recoverUntil: Long?
     ): JniUnifiedSpendingKey = error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
-    override suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, seed: ByteArray): Boolean =
+    override suspend fun isSeedRelevantToAnyDerivedAccounts(seed: ByteArray): Boolean =
         error("Intentionally not implemented in mocked FakeRustBackend implementation.")
 
     override fun isValidSaplingAddr(addr: String): Boolean =

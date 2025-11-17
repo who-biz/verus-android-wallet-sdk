@@ -48,7 +48,8 @@ class RustDerivationTool private constructor() : Derivation {
     ): Boolean = isValidSaplingAddress(address, networkId = networkId)
 
     /**
-     * Given a Unified Full Viewing Key string, return the associated Unified Address.
+     * Given a Unified Full Viewing Key string, return the associated Sapling Address.
+     * Does not currently have orchard support, but easily extended.
      *
      * @param viewingKey the viewing key to use for deriving the address. The viewing key is tied to
      * a specific account so no account index is required.
