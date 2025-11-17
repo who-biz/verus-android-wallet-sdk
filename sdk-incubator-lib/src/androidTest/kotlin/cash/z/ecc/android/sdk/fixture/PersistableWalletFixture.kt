@@ -18,14 +18,6 @@ object PersistableWalletFixture {
     @Suppress("MagicNumber")
     val BIRTHDAY = BlockHeight.new(ZcashNetwork.Mainnet, 1500000L)
 
-    val WIF = ""
-
-    val EXTSK = ""
-
-    val decodedWif = WIF.decodeBase58WithChecksum()
-
-    val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
-
     val SEED_PHRASE = SeedPhraseFixture.new()
 
     val WALLET_INIT_MODE = WalletInitMode.ExistingWallet
@@ -35,10 +27,8 @@ object PersistableWalletFixture {
         endpoint: LightWalletEndpoint = ENDPOINT,
         birthday: BlockHeight = BIRTHDAY,
         seedPhrase: SeedPhrase = SEED_PHRASE,
-        walletInitMode: WalletInitMode = WALLET_INIT_MODE,
-        wif: String? = WIF,
-        extsk: String? = EXTSK
-    ) = PersistableWallet(network, endpoint, birthday, seedPhrase, walletInitMode, wif, extsk)
+        walletInitMode: WalletInitMode = WALLET_INIT_MODE
+    ) = PersistableWallet(network, endpoint, birthday, seedPhrase, walletInitMode)
 
     fun persistVersionOne() =
         PersistableWallet.toCustomJson(
@@ -46,8 +36,6 @@ object PersistableWalletFixture {
             network = NETWORK,
             endpoint = null,
             birthday = BIRTHDAY,
-            seed = SEED_PHRASE,
-            wif = WIF,
-            extsk = EXTSK
+            seed = SEED_PHRASE
         )
 }
