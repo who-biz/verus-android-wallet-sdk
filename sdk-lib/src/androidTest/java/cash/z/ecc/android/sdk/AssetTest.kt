@@ -74,11 +74,11 @@ class AssetTest {
             assertTrue(jsonObject.has("height"))
             assertTrue(jsonObject.has("hash"))
             assertTrue(jsonObject.has("time"))
-            assertTrue(jsonObject.has("saplingTree"))
+            assertTrue(jsonObject.has("tree"))
 
             val expectedNetworkName =
                 when (network) {
-                    ZcashNetwork.Mainnet -> "main"
+                    ZcashNetwork.Mainnet -> "VRSC"
                     ZcashNetwork.Testnet -> "test"
                     else -> IllegalArgumentException("Unsupported network $network")
                 }

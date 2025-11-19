@@ -66,23 +66,29 @@ class RustBackend private constructor(
             )
         }
 
-    override suspend fun initDataDb(seed: ByteArray?) =
+    override suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?) =
         withContext(SdkDispatchers.DATABASE_IO) {
             initDataDb(
                 dataDbFile.absolutePath,
+                transparentKey,
+                extsk,
                 seed,
                 networkId = networkId
             )
         }
 
     override suspend fun createAccount(
-        seed: ByteArray,
+        transparentKey: ByteArray?,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: ByteArray,
         recoverUntil: Long?
     ): JniUnifiedSpendingKey {
         return withContext(SdkDispatchers.DATABASE_IO) {
             createAccount(
                 dataDbFile.absolutePath,
+                transparentKey,
+                extsk,
                 seed,
                 treeState,
                 recoverUntil ?: -1,
@@ -436,6 +442,8 @@ class RustBackend private constructor(
         @JvmStatic
         private external fun initDataDb(
             dbDataPath: String,
+            transparentKey: ByteArray?,
+            extsk: ByteArray?,
             seed: ByteArray?,
             networkId: Int
         ): Int
@@ -443,7 +451,9 @@ class RustBackend private constructor(
         @JvmStatic
         private external fun createAccount(
             dbDataPath: String,
-            seed: ByteArray,
+            transparentKey: ByteArray?,
+            extsk: ByteArray?,
+            seed: ByteArray?,
             treeState: ByteArray,
             recoverUntil: Long,
             networkId: Int
@@ -476,10 +486,15 @@ class RustBackend private constructor(
             networkId: Int
         ): Array<String>
 
-        fun validateUnifiedSpendingKey(bytes: ByteArray) = isValidSpendingKey(bytes)
+        fun validateUnifiedSpendingKey(bytes: ByteArray) = isValidUnifiedSpendingKey(bytes)
+
+        fun validateShieldedSpendingKey(bytes: ByteArray) = isValidSaplingSpendingKey(bytes)
 
         @JvmStatic
-        private external fun isValidSpendingKey(bytes: ByteArray): Boolean
+        private external fun isValidUnifiedSpendingKey(bytes: ByteArray): Boolean
+
+        @JvmStatic
+        private external fun isValidSaplingSpendingKey(bytes: ByteArray): Boolean
 
         @JvmStatic
         private external fun isValidSaplingAddress(

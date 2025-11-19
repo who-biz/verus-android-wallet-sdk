@@ -54,14 +54,16 @@ interface Backend {
      * @throws RuntimeException as a common indicator of the operation failure
      */
     @Throws(RuntimeException::class)
-    suspend fun initDataDb(seed: ByteArray?): Int
+    suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?): Int
 
     /**
      * @throws RuntimeException as a common indicator of the operation failure
      */
     @Throws(RuntimeException::class)
     suspend fun createAccount(
-        seed: ByteArray,
+        transparentKey: ByteArray?,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: ByteArray,
         recoverUntil: Long?
     ): JniUnifiedSpendingKey

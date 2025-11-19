@@ -20,7 +20,7 @@ internal val Checkpoint.Companion.KEY_HASH
 internal val Checkpoint.Companion.KEY_EPOCH_SECONDS
     get() = "time"
 internal val Checkpoint.Companion.KEY_SAPLING_TREE
-    get() = "saplingTree"
+    get() = "tree"
 internal val Checkpoint.Companion.KEY_ORCHARD_TREE
     get() = "orchardTree"
 
