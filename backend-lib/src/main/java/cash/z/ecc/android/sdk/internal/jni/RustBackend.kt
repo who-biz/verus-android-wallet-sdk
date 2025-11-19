@@ -486,10 +486,15 @@ class RustBackend private constructor(
             networkId: Int
         ): Array<String>
 
-        fun validateUnifiedSpendingKey(bytes: ByteArray) = isValidSpendingKey(bytes)
+        fun validateUnifiedSpendingKey(bytes: ByteArray) = isValidUnifiedSpendingKey(bytes)
+
+        fun validateShieldedSpendingKey(bytes: ByteArray) = isValidSaplingSpendingKey(bytes)
 
         @JvmStatic
-        private external fun isValidSpendingKey(bytes: ByteArray): Boolean
+        private external fun isValidUnifiedSpendingKey(bytes: ByteArray): Boolean
+
+        @JvmStatic
+        private external fun isValidSaplingSpendingKey(bytes: ByteArray): Boolean
 
         @JvmStatic
         private external fun isValidSaplingAddress(

@@ -14,6 +14,7 @@ use jni::{
 };
 use prost::Message;
 use sapling::zip32::ExtendedSpendingKey;
+use sapling::keys;
 use secrecy::{ExposeSecret, SecretVec};
 use tracing::{debug, error};
 use tracing_subscriber::prelude::*;
@@ -57,7 +58,7 @@ use zcash_client_backend::{
     },
     encoding::AddressCodec,
     fees::{standard::SingleOutputChangeStrategy, DustOutputPolicy},
-    keys::{DecodingError, Era, UnifiedAddressRequest, UnifiedFullViewingKey, UnifiedSpendingKey},
+    keys::{DecodingError, DerivationError, Era, UnifiedAddressRequest, UnifiedFullViewingKey, UnifiedSpendingKey},
     proto::{proposal::Proposal, service::TreeState},
     wallet::{NoteId, OvkPolicy, WalletTransparentOutput},
     zip321::{Payment, TransactionRequest},
@@ -332,6 +333,17 @@ fn decode_usk(env: &JNIEnv, usk: JByteArray) -> anyhow::Result<UnifiedSpendingKe
             "An error occurred decoding the provided unified spending key: {:?}",
             e
         ),
+    })
+}
+
+fn decode_extsk(env: &JNIEnv, extsk: JByteArray) -> anyhow::Result<ExtendedSpendingKey> {
+    let extsk_bytes = SecretVec::new(env.convert_byte_array(extsk).unwrap());
+
+    // The remainder of the function is safe.
+    ExtendedSpendingKey::from_bytes(extsk_bytes.expose_secret()).map_err(|e| match e {
+        _decoding_error => anyhow!(
+            "Spending key failed to derive when decoding ExtendedSpendingKey for Sapling"
+        )
     })
 }
 
@@ -876,7 +888,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_getSaplin
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSpendingKey<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidUnifiedSpendingKey<
     'local,
 >(
     mut env: JNIEnv<'local>,
@@ -884,8 +896,24 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSp
     usk: JByteArray<'local>,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let _span = tracing::info_span!("RustBackend.isValidSpendingKey").entered();
+        let _span = tracing::info_span!("RustBackend.isValidUnifiedSpendingKey").entered();
         let _usk = decode_usk(&env, usk)?;
+        Ok(JNI_TRUE)
+    });
+    unwrap_exc_or(&mut env, res, JNI_FALSE)
+}
+
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSaplingSpendingKey<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    extsk: JByteArray<'local>,
+) -> jboolean {
+    let res = panic::catch_unwind(|| {
+        let _span = tracing::info_span!("RustBackend.isValidSaplingSpendingKey").entered();
+        let _extsk = decode_extsk(&env, extsk)?;
         Ok(JNI_TRUE)
     });
     unwrap_exc_or(&mut env, res, JNI_FALSE)
