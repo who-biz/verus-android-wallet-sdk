@@ -291,18 +291,24 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initDataD
 
 fn encode_usk<'a>(
     env: &mut JNIEnv<'a>,
-    account: zip32::AccountId,
+    account: Option<zip32::AccountId>,
     usk: UnifiedSpendingKey,
 ) -> jni::errors::Result<JObject<'a>> {
     let encoded = SecretVec::new(usk.to_bytes(Era::Orchard));
     let bytes = env.byte_array_from_slice(encoded.expose_secret())?;
+
+    // Use a sentinel for “no account index” (Imported accounts, etc.)
+    let account_i32: i32 = match account {
+        Some(a) => u32::from(a) as i32,
+        None => -1,
+    };
+
     env.new_object(
         "cash/z/ecc/android/sdk/internal/model/JniUnifiedSpendingKey",
         "(I[B)V",
-        &[JValue::Int(u32::from(account) as i32), (&bytes).into()],
+        &[JValue::Int(account_i32), (&bytes).into()],
     )
 }
-
 
 fn encode_extsk<'a>(
     env: &mut JNIEnv<'a>,
@@ -405,8 +411,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
 
         let account = db_data.get_account(account_id)?.expect("just created");
         let account_index = match account.source() {
-            AccountSource::Derived { account_index, .. } => account_index,
-            AccountSource::Imported => unreachable!("just created"),
+            AccountSource::Derived { account_index, .. } => Some(account_index),
+            AccountSource::Imported { .. } => None,
         };
 
         Ok(encode_usk(env, account_index, usk)?.into_raw())
@@ -462,12 +468,20 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap_or(Vec::new()));
         let extsk = SecretVec::new(env.convert_byte_array(extsk).unwrap_or(Vec::new()));
         let seed = SecretVec::new(env.convert_byte_array(seed).unwrap_or(Vec::new()));
-        let account = account_id_from_jint(account)?;
+        let seed_present = !seed.expose_secret().is_empty();
 
-        let usk = UnifiedSpendingKey::from_seed(&network, transparent_key.expose_secret(), extsk.expose_secret(), seed.expose_secret(), account)
+        let account_id = if seed_present {
+            Some(account_id_from_jint(account)?)
+        } else {
+            None
+        };
+
+        let account_for_derivation = account_id.unwrap_or(zip32::AccountId::ZERO);
+
+        let usk = UnifiedSpendingKey::from_seed(&network, transparent_key.expose_secret(), extsk.expose_secret(), seed.expose_secret(), account_for_derivation)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))?;
 
-        Ok(encode_usk(env, account, usk)?.into_raw())
+        Ok(encode_usk(env, account_id, usk)?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
@@ -1466,7 +1480,7 @@ const JNI_ACCOUNT_BALANCE: &str = "cash/z/ecc/android/sdk/internal/model/JniAcco
 
 fn encode_account_balance<'a>(
     env: &mut JNIEnv<'a>,
-    account: &zip32::AccountId,
+    account: Option<&zip32::AccountId>,
     balance: &AccountBalance,
 ) -> jni::errors::Result<JObject<'a>> {
     let sapling_verified_balance = Amount::from(balance.sapling_balance().spendable_value());
@@ -1482,11 +1496,16 @@ fn encode_account_balance<'a>(
         Amount::from(balance.orchard_balance().value_pending_spendability());
     let unshielded = Amount::from(balance.unshielded());
 
+    let account_i32: i32 = match account {
+        Some(a) => u32::from(*a) as i32,
+        None => -1,
+    };
+
     env.new_object(
         JNI_ACCOUNT_BALANCE,
         "(IJJJJJJJ)V",
         &[
-            JValue::Int(u32::from(*account) as i32),
+            JValue::Int(account_i32),
             JValue::Long(sapling_verified_balance.into()),
             JValue::Long(sapling_change_pending.into()),
             JValue::Long(sapling_value_pending.into()),
@@ -1520,15 +1539,15 @@ fn encode_wallet_summary<'a, P: Parameters>(
                     .expect("the account exists in the wallet")
                     .source()
                 {
-                    AccountSource::Derived { account_index, .. } => account_index,
-                    AccountSource::Imported => unreachable!("Imported accounts are unimplemented"),
+                    AccountSource::Derived { account_index, .. } => Some(account_index),
+                    AccountSource::Imported { .. } => None, 
                 };
                 Ok::<_, anyhow::Error>((account_index, balance))
             })
             .collect::<Result<_, _>>()?,
         JNI_ACCOUNT_BALANCE,
-        |env, (account_index, balance)| encode_account_balance(env, &account_index, balance),
-        |env| encode_account_balance(env, &zip32::AccountId::ZERO, &AccountBalance::ZERO),
+        |env, (account_index, balance)| encode_account_balance(env, account_index.as_ref(), balance),
+        |env| encode_account_balance(env, None, &AccountBalance::ZERO),
     )?;
 
     let (progress_numerator, progress_denominator) = summary
