@@ -7,7 +7,7 @@ package cash.z.ecc.android.sdk.model
  */
 data class Account(val value: Int) {
     init {
-        require(value >= 0) { "Account index must be >= 0 but actually is $value" }
+        require(value >= -1) { "Account index must be >= 0 if valid, or >= -1 if a placeholder for AccountSource::Imported. Attempted account index was $value" }
     }
 
     companion object {

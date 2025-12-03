@@ -72,6 +72,13 @@ interface Synchronizer {
     val networkHeight: StateFlow<BlockHeight?>
 
     /**
+     * The latest height observed on the network, which does not necessarily correspond to the
+     * latest downloaded height or scanned height. Although this is present in [processorInfo], it
+     * is such a frequently used value that it is convenient to have the real-time value by itself.
+     */
+    //val lastScannedHeight: StateFlow<BlockHeight?>
+
+    /**
      * A stream of balance values for the orchard pool.
      */
     val orchardBalances: StateFlow<WalletBalance?>
@@ -347,6 +354,8 @@ interface Synchronizer {
      */
     suspend fun validateAddress(address: String): AddressType
 
+    suspend fun validateShieldedAddress(address: String): Boolean
+
     /**
      * Download all UTXOs for the given account addresses and store any new ones in the database.
      *
@@ -480,6 +489,11 @@ interface Synchronizer {
      */
     enum class Status {
         /**
+         * Indicates the initial state of Synchronizer
+         */
+        INITIALIZING,
+
+        /**
          * Indicates that [stop] has been called on this Synchronizer and it will no longer be used.
          */
         STOPPED,
@@ -565,7 +579,9 @@ interface Synchronizer {
             lightWalletEndpoint: LightWalletEndpoint,
             seed: ByteArray?,
             birthday: BlockHeight?,
-            walletInitMode: WalletInitMode
+            walletInitMode: WalletInitMode,
+            transparentKey: ByteArray?,
+            extsk: ByteArray?
         ): CloseableSynchronizer {
             val applicationContext = context.applicationContext
 
@@ -627,9 +643,11 @@ interface Synchronizer {
                     databaseFile = coordinator.dataDbFile(zcashNetwork, alias),
                     zcashNetwork = zcashNetwork,
                     checkpoint = loadedCheckpoint,
+                    transparentKey = transparentKey,
+                    extsk = extsk,
                     seed = seed,
                     numberOfAccounts = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS,
-                    recoverUntil = chainTip,
+                    recoverUntil = chainTip
                 )
 
             val encoder = DefaultSynchronizerFactory.defaultEncoder(backend, saplingParamTool, repository)
@@ -671,10 +689,12 @@ interface Synchronizer {
             lightWalletEndpoint: LightWalletEndpoint,
             seed: ByteArray?,
             birthday: BlockHeight?,
-            walletInitMode: WalletInitMode
+            walletInitMode: WalletInitMode,
+            transparentKey: ByteArray?,
+            extsk: ByteArray?
         ): CloseableSynchronizer =
             runBlocking {
-                new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode)
+                new(context, zcashNetwork, alias, lightWalletEndpoint, seed, birthday, walletInitMode, transparentKey, extsk)
             }
 
         /**

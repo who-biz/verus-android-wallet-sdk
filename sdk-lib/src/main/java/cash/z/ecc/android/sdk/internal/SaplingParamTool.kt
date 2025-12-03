@@ -71,7 +71,7 @@ internal class SaplingParamTool(val properties: SaplingParamToolProperties) {
         /**
          * The Url that is used by default in zcashd
          */
-        private const val CLOUD_PARAM_DIR_URL = "https://z.cash/downloads/"
+        private const val CLOUD_PARAM_DIR_URL = "https://verus.io/zcparams"
 
         private val checkFilesMutex = Mutex()
 

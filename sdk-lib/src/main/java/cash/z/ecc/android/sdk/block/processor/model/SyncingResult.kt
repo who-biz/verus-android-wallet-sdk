@@ -13,9 +13,9 @@ import cash.z.ecc.android.sdk.model.BlockHeight
 internal sealed class SyncingResult {
     override fun toString(): String = this::class.java.simpleName
 
-    object AllSuccess : SyncingResult()
+    data object AllSuccess : SyncingResult()
 
-    object RestartSynchronization : SyncingResult()
+    data object RestartSynchronization : SyncingResult()
 
     data class DownloadSuccess(
         val fromState: TreeState,
@@ -38,7 +38,8 @@ internal sealed class SyncingResult {
     data class DownloadFailed(
         override val failedAtHeight: BlockHeight,
         override val exception: CompactBlockProcessorException
-    ) : Failure, SyncingResult()
+    ) : SyncingResult(),
+        Failure
 
     data class ScanSuccess(
         val summary: ScanSummary
@@ -47,28 +48,32 @@ internal sealed class SyncingResult {
     data class ScanFailed(
         override val failedAtHeight: BlockHeight,
         override val exception: CompactBlockProcessorException
-    ) : Failure, SyncingResult()
+    ) : SyncingResult(),
+        Failure
 
-    object DeleteSuccess : SyncingResult()
+    data object DeleteSuccess : SyncingResult()
 
     data class DeleteFailed(
         override val failedAtHeight: BlockHeight?,
         override val exception: CompactBlockProcessorException
-    ) : Failure, SyncingResult()
+    ) : SyncingResult(),
+        Failure
 
-    object EnhanceSuccess : SyncingResult()
+    data object EnhanceSuccess : SyncingResult()
 
     data class EnhanceFailed(
-        override val failedAtHeight: BlockHeight,
+        override val failedAtHeight: BlockHeight? = null,
         override val exception: CompactBlockProcessorException
-    ) : Failure, SyncingResult()
+    ) : SyncingResult(),
+        Failure
 
-    object UpdateBirthday : SyncingResult()
+    data object UpdateBirthday : SyncingResult()
 
     data class ContinuityError(
         override val failedAtHeight: BlockHeight,
         override val exception: CompactBlockProcessorException
-    ) : Failure, SyncingResult() {
+    ) : SyncingResult(),
+        Failure {
         override fun toBlockProcessingResult(): CompactBlockProcessor.BlockProcessingResult =
             CompactBlockProcessor.BlockProcessingResult.ContinuityError(
                 this.failedAtHeight,

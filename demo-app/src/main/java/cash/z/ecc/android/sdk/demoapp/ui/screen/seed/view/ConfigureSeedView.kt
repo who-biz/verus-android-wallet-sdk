@@ -20,7 +20,6 @@ import cash.z.ecc.android.sdk.demoapp.R
 import cash.z.ecc.android.sdk.demoapp.ext.defaultForNetwork
 import cash.z.ecc.android.sdk.fixture.WalletFixture
 import cash.z.ecc.android.sdk.model.PersistableWallet
-import cash.z.ecc.android.sdk.model.SeedPhrase
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import co.electriccoin.lightwallet.client.model.LightWalletEndpoint
 
@@ -85,8 +84,9 @@ private fun ConfigureSeedMainContent(
                         network = zcashNetwork,
                         endpoint = LightWalletEndpoint.defaultForNetwork(zcashNetwork),
                         birthday = WalletFixture.Alice.getBirthday(zcashNetwork),
-                        seedPhrase = SeedPhrase.new(WalletFixture.Alice.seedPhrase),
-                        walletInitMode = WalletInitMode.RestoreWallet
+                        hexSeed = WalletFixture.Alice.hexSeed,
+                        walletInitMode = WalletInitMode.RestoreWallet,
+                        wif = WalletFixture.Alice.wifString
                     )
                 onExistingWallet(newWallet)
             }
@@ -100,8 +100,9 @@ private fun ConfigureSeedMainContent(
                         network = zcashNetwork,
                         endpoint = LightWalletEndpoint.defaultForNetwork(zcashNetwork),
                         birthday = WalletFixture.Ben.getBirthday(zcashNetwork),
-                        seedPhrase = SeedPhrase.new(WalletFixture.Ben.seedPhrase),
-                        walletInitMode = WalletInitMode.RestoreWallet
+                        hexSeed = WalletFixture.Ben.hexSeed,
+                        walletInitMode = WalletInitMode.RestoreWallet,
+                        wif = null
                     )
                 onExistingWallet(newWallet)
             }
