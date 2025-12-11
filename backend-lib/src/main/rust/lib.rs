@@ -163,6 +163,7 @@ fn account_id_from_jni<'local, P: Parameters>(
                         )
                     ).map(|account| match account.source() {
                         AccountSource::Derived { account_index, .. } if account_index == requested_account_index => Some(account),
+                        AccountSource::Imported { .. }  => Some(account),
                         _ => None
                     })
                 )
@@ -300,7 +301,7 @@ fn encode_usk<'a>(
     // Use a sentinel for “no account index” (Imported accounts, etc.)
     let account_i32: i32 = match account {
         Some(a) => u32::from(a) as i32,
-        None => -1,
+        None => 0,
     };
 
     env.new_object(
@@ -1498,7 +1499,7 @@ fn encode_account_balance<'a>(
 
     let account_i32: i32 = match account {
         Some(a) => u32::from(*a) as i32,
-        None => -1,
+        None => 0,
     };
 
     env.new_object(
