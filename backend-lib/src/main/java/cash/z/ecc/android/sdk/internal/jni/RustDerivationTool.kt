@@ -2,6 +2,7 @@ package cash.z.ecc.android.sdk.internal.jni
 
 import cash.z.ecc.android.sdk.internal.Derivation
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
+import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
 
 class RustDerivationTool private constructor() : Derivation {
     override fun deriveUnifiedFullViewingKeys(
@@ -16,16 +17,49 @@ class RustDerivationTool private constructor() : Derivation {
     ): String = deriveUnifiedFullViewingKey(usk.bytes, networkId = networkId)
 
     override fun deriveUnifiedSpendingKey(
+        transparentKey: ByteArray,
+        extendedSecretKey: ByteArray,
         seed: ByteArray,
         networkId: Int,
         accountIndex: Int
-    ): JniUnifiedSpendingKey = deriveSpendingKey(seed, accountIndex, networkId = networkId)
+    ): JniUnifiedSpendingKey = deriveSpendingKey(transparentKey, extendedSecretKey, seed, accountIndex, networkId = networkId)
+
+    override fun deriveSaplingSpendingKey(
+        seed: ByteArray,
+        networkId: Int,
+        accountIndex: Int
+    ): JniShieldedSpendingKey = deriveShieldedSpendingKey(seed, accountIndex, networkId = networkId)
 
     override fun deriveUnifiedAddress(
         seed: ByteArray,
         networkId: Int,
         accountIndex: Int
     ): String = deriveUnifiedAddressFromSeed(seed, accountIndex = accountIndex, networkId = networkId)
+
+    override fun deriveShieldedAddress(
+        seed: ByteArray,
+        networkId: Int,
+        accountIndex: Int
+    ): String = deriveShieldedAddressFromSeed(seed, accountIndex = accountIndex, networkId = networkId)
+
+    override fun isValidShieldedAddress(
+        address: String,
+        networkId: Int,
+    ): Boolean = isValidSaplingAddress(address, networkId = networkId)
+
+    /**
+     * Given a Unified Full Viewing Key string, return the associated Sapling Address.
+     * Does not currently have orchard support, but easily extended.
+     *
+     * @param viewingKey the viewing key to use for deriving the address. The viewing key is tied to
+     * a specific account so no account index is required.
+     *
+     * @return the address that corresponds to the viewing key.
+     */
+    override fun deriveShieldedAddress(
+        viewingKey: String,
+        networkId: Int
+    ): String = deriveShieldedAddressFromViewingKey(viewingKey, networkId = networkId)
 
     /**
      * Given a Unified Full Viewing Key string, return the associated Unified Address.
@@ -49,10 +83,19 @@ class RustDerivationTool private constructor() : Derivation {
 
         @JvmStatic
         private external fun deriveSpendingKey(
+            transparentKey: ByteArray,
+            extendedSecretKey: ByteArray,
             seed: ByteArray,
             account: Int,
             networkId: Int
         ): JniUnifiedSpendingKey
+
+        @JvmStatic
+        private external fun deriveShieldedSpendingKey(
+            seed: ByteArray,
+            account: Int,
+            networkId: Int
+        ): JniShieldedSpendingKey
 
         @JvmStatic
         private external fun deriveUnifiedFullViewingKeysFromSeed(
@@ -75,9 +118,28 @@ class RustDerivationTool private constructor() : Derivation {
         ): String
 
         @JvmStatic
+        private external fun deriveShieldedAddressFromSeed(
+            seed: ByteArray,
+            accountIndex: Int,
+            networkId: Int
+        ): String
+
+        @JvmStatic
         private external fun deriveUnifiedAddressFromViewingKey(
             key: String,
             networkId: Int
         ): String
+
+        @JvmStatic
+        private external fun deriveShieldedAddressFromViewingKey(
+            key: String,
+            networkId: Int
+        ): String
+
+        @JvmStatic
+        private external fun isValidSaplingAddress(
+            address: String,
+            networkId: Int
+        ): Boolean
     }
 }

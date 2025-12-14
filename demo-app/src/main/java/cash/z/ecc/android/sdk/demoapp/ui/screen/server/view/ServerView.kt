@@ -61,28 +61,28 @@ private fun ComposablePreview() {
     }
 }
 
-private const val NH_HOST_NA = "na.lightwalletd.com" // NON-NLS
-private const val NH_HOST_SA = "sa.lightwalletd.com" // NON-NLS
-private const val NH_HOST_EU = "eu.lightwalletd.com" // NON-NLS
-private const val NH_HOST_AI = "ai.lightwalletd.com" // NON-NLS
-private const val NH_PORT = 443
+private const val NH_HOST_NA = "lightwallet.verus.services" // NON-NLS
+//private const val NH_HOST_SA = "sa.lightwalletd.com" // NON-NLS
+//private const val NH_HOST_EU = "eu.lightwalletd.com" // NON-NLS
+//private const val NH_HOST_AI = "ai.lightwalletd.com" // NON-NLS
+private const val NH_PORT = 8120
 
-private const val YW_HOST_1 = "lwd1.zcash-infra.com" // NON-NLS
-private const val YW_HOST_2 = "lwd2.zcash-infra.com" // NON-NLS
-private const val YW_HOST_3 = "lwd3.zcash-infra.com" // NON-NLS
-private const val YW_HOST_4 = "lwd4.zcash-infra.com" // NON-NLS
-private const val YW_HOST_5 = "lwd5.zcash-infra.com" // NON-NLS
-private const val YW_HOST_6 = "lwd6.zcash-infra.com" // NON-NLS
-private const val YW_HOST_7 = "lwd7.zcash-infra.com" // NON-NLS
-private const val YW_HOST_8 = "lwd8.zcash-infra.com" // NON-NLS
-private const val YW_PORT = 9067
+//private const val YW_HOST_1 = "lightwallet.verus.services" // NON-NLS
+//private const val YW_HOST_2 = "lwd2.zcash-infra.com" // NON-NLS
+//private const val YW_HOST_3 = "lwd3.zcash-infra.com" // NON-NLS
+//private const val YW_HOST_4 = "lwd4.zcash-infra.com" // NON-NLS
+//private const val YW_HOST_5 = "lwd5.zcash-infra.com" // NON-NLS
+//private const val YW_HOST_6 = "lwd6.zcash-infra.com" // NON-NLS
+//private const val YW_HOST_7 = "lwd7.zcash-infra.com" // NON-NLS
+//private const val YW_HOST_8 = "lwd8.zcash-infra.com" // NON-NLS
+//private const val YW_PORT = 8120
 
-private const val ZR_HOST = "zec.rocks" // NON-NLS
-private const val ZR_HOST_NA = "na.zec.rocks" // NON-NLS
-private const val ZR_HOST_SA = "sa.zec.rocks" // NON-NLS
-private const val ZR_HOST_EU = "eu.zec.rocks" // NON-NLS
-private const val ZR_HOST_AP = "ap.zec.rocks" // NON-NLS
-private const val ZR_PORT = 443
+//private const val ZR_HOST = "zec.rocks" // NON-NLS
+//private const val ZR_HOST_NA = "na.zec.rocks" // NON-NLS
+//private const val ZR_HOST_SA = "sa.zec.rocks" // NON-NLS
+//private const val ZR_HOST_EU = "eu.zec.rocks" // NON-NLS
+//private const val ZR_HOST_AP = "ap.zec.rocks" // NON-NLS
+//private const val ZR_PORT = 443
 
 @Composable
 fun Server(
@@ -154,24 +154,6 @@ fun ServerSwitch(
             // Then alternative servers
             if (buildInNetwork == ZcashNetwork.Mainnet) {
                 add(LightWalletEndpoint(NH_HOST_NA, NH_PORT, true))
-                add(LightWalletEndpoint(NH_HOST_SA, NH_PORT, true))
-                add(LightWalletEndpoint(NH_HOST_EU, NH_PORT, true))
-                add(LightWalletEndpoint(NH_HOST_AI, NH_PORT, true))
-
-                add(LightWalletEndpoint(YW_HOST_1, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_2, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_3, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_4, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_5, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_6, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_7, YW_PORT, true))
-                add(LightWalletEndpoint(YW_HOST_8, YW_PORT, true))
-
-                add(LightWalletEndpoint(ZR_HOST, ZR_PORT, true))
-                add(LightWalletEndpoint(ZR_HOST_NA, ZR_PORT, true))
-                add(LightWalletEndpoint(ZR_HOST_SA, ZR_PORT, true))
-                add(LightWalletEndpoint(ZR_HOST_EU, ZR_PORT, true))
-                add(LightWalletEndpoint(ZR_HOST_AP, ZR_PORT, true))
             }
 
             // Custom server

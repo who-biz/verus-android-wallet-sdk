@@ -7,6 +7,7 @@ import cash.z.ecc.android.sdk.internal.jni.RustDerivationTool
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
+import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 
 interface DerivationTool {
@@ -25,6 +26,13 @@ interface DerivationTool {
         numberOfAccounts: Int
     ): List<UnifiedFullViewingKey>
 
+
+/*    suspend fun deriveViewingKey(
+        seed: ByteArray,
+        network: ZcashNetwork,
+        numberOfAccounts: Int
+    ): ByteArray
+*/
     /**
      * Given a unified spending key, return the associated unified full viewing key.
      *
@@ -50,10 +58,20 @@ interface DerivationTool {
      * @return the unified spending key for the account.
      */
     suspend fun deriveUnifiedSpendingKey(
+        transparentKey: ByteArray,
+        extendedSecretKey: ByteArray,
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account
     ): UnifiedSpendingKey
+
+
+    suspend fun deriveSaplingSpendingKey(
+        seed: ByteArray,
+        network: ZcashNetwork,
+        account: Account
+    ): ShieldedSpendingKey
+
 
     /**
      * Given a seed and account index, return the associated Unified Address.
@@ -64,6 +82,20 @@ interface DerivationTool {
      * @return the address that corresponds to the seed and account index.
      */
     suspend fun deriveUnifiedAddress(
+        seed: ByteArray,
+        network: ZcashNetwork,
+        account: Account
+    ): String
+
+    /**
+     * Given a seed and account index, return the associated Shielded Address.
+     *
+     * @param seed the seed from which to derive the address.
+     * @param account the index of the account to use for deriving the address.
+     *
+     * @return the address that corresponds to the seed and account index.
+     */
+    suspend fun deriveShieldedAddress(
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account
@@ -81,6 +113,24 @@ interface DerivationTool {
         viewingKey: String,
         network: ZcashNetwork
     ): String
+
+    /**
+     * Given a Unified Full Viewing Key string, return the associated Unified Address.
+     *
+     * @param viewingKey the viewing key to use for deriving the address. The viewing key is tied to
+     * a specific account so no account index is required.
+     *
+     * @return the address that corresponds to the viewing key.
+     */
+    suspend fun deriveShieldedAddress(
+        viewingKey: String,
+        network: ZcashNetwork
+    ): String
+
+    suspend fun isValidShieldedAddress(
+        address: String,
+        network: ZcashNetwork
+    ): Boolean
 
     companion object {
         const val DEFAULT_NUMBER_OF_ACCOUNTS = Derivation.DEFAULT_NUMBER_OF_ACCOUNTS

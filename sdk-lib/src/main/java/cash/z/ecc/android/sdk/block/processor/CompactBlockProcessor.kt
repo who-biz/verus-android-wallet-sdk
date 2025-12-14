@@ -40,6 +40,7 @@ import cash.z.ecc.android.sdk.internal.model.BlockBatch
 import cash.z.ecc.android.sdk.internal.model.DbTransactionOverview
 import cash.z.ecc.android.sdk.internal.model.JniBlockMeta
 import cash.z.ecc.android.sdk.internal.model.ScanRange
+import cash.z.ecc.android.sdk.internal.model.ScanProgress
 import cash.z.ecc.android.sdk.internal.model.SubtreeRoot
 import cash.z.ecc.android.sdk.internal.model.SuggestScanRangePriority
 import cash.z.ecc.android.sdk.internal.model.TreeState
@@ -149,10 +150,11 @@ class CompactBlockProcessor internal constructor(
             )
         )
 
-    private val _state: MutableStateFlow<State> = MutableStateFlow(State.Initialized)
+    private val _state: MutableStateFlow<State> = MutableStateFlow(State.Initializing)
     private val _progress = MutableStateFlow(PercentDecimal.ZERO_PERCENT)
-    private val _processorInfo = MutableStateFlow(ProcessorInfo(null, null, null))
+    private val _processorInfo = MutableStateFlow(ProcessorInfo(null, null, null, null))
     private val _networkHeight = MutableStateFlow<BlockHeight?>(null)
+    private val _lastScannedHeight = MutableStateFlow<BlockHeight?>(null)
 
     // pools
     internal val saplingBalances = MutableStateFlow<WalletBalance?>(null)
@@ -193,6 +195,12 @@ class CompactBlockProcessor internal constructor(
      * updated but this allows consumers to have the information pushed instead of polling.
      */
     val networkHeight = _networkHeight.asStateFlow()
+
+    /**
+     * The flow of network height. This value is updated at the same time that [processorInfo] is
+     * updated but this allows consumers to have the information pushed instead of polling.
+     */
+    //val lastScannedHeight = _lastScannedHeight.asStateFlow()
 
     /**
      * The first block this wallet cares about anything prior can be ignored. If a wallet has no
@@ -425,8 +433,9 @@ class CompactBlockProcessor internal constructor(
         lastValidHeight: BlockHeight,
         firstUnenhancedHeight: BlockHeight?
     ): BlockProcessingResult {
+
         Twig.info {
-            "Beginning to process new blocks with Spend-before-Sync approach with lower bound: $lastValidHeight)..."
+            "Beginning to process new blocks Spend-before-Sync (or Linear, toggled with rust features) at height: $lastValidHeight)..."
         }
         val traceScope = TraceScope("CompactBlockProcessor.processNewBlocksInSbSOrder")
 
@@ -474,6 +483,11 @@ class CompactBlockProcessor internal constructor(
             ).collect { batchSyncProgress ->
                 // Update sync progress and wallet balance
                 refreshWalletSummary()
+
+                // set only processorScannedHeight here
+                batchSyncProgress.range?.endInclusive?.let { endHeight ->
+                    setProcessorScannedHeight(endHeight)
+                }
 
                 when (batchSyncProgress.resultState) {
                     SyncingResult.UpdateBirthday -> {
@@ -570,6 +584,11 @@ class CompactBlockProcessor internal constructor(
             ).map { batchSyncProgress ->
                 // Update sync progress and wallet balance
                 refreshWalletSummary()
+
+                // set only processorScannedHeight here
+                batchSyncProgress.range?.endInclusive?.let { endHeight ->
+                    setProcessorScannedHeight(endHeight)
+                }
 
                 when (batchSyncProgress.resultState) {
                     SyncingResult.UpdateBirthday -> {
@@ -780,9 +799,15 @@ class CompactBlockProcessor internal constructor(
 
         object RestartSynchronization : BlockProcessingResult()
 
-        data class SyncFailure(val failedAtHeight: BlockHeight?, val error: Throwable) : BlockProcessingResult()
+        data class SyncFailure(
+            val failedAtHeight: BlockHeight?,
+            val error: Throwable
+        ) : BlockProcessingResult()
 
-        data class ContinuityError(val failedAtHeight: BlockHeight?, val error: Throwable) : BlockProcessingResult()
+        data class ContinuityError(
+            val failedAtHeight: BlockHeight?,
+            val error: Throwable
+        ) : BlockProcessingResult()
     }
 
     /**
@@ -820,10 +845,13 @@ class CompactBlockProcessor internal constructor(
                 null
             }
 
+        val lastScannedHeight = if (ranges.isEmpty()) networkBlockHeight else ranges[0].range.start
+
         setProcessorInfo(
             networkBlockHeight = networkBlockHeight,
             overallSyncRange = syncRange,
-            firstUnenhancedHeight = firstUnenhancedHeight
+            firstUnenhancedHeight = firstUnenhancedHeight,
+            lastScannedHeight = lastScannedHeight
         )
 
         return true
@@ -1027,7 +1055,7 @@ class CompactBlockProcessor internal constructor(
         /**
          * UTXOs fetching default attempts at retrying.
          */
-        internal const val UTXO_FETCH_RETRIES = 3
+        internal const val UTXO_FETCH_RETRIES = 1
 
         /**
          * Latest block height fetching default attempts at retrying.
@@ -1037,7 +1065,7 @@ class CompactBlockProcessor internal constructor(
         /**
          * Get subtree roots default attempts at retrying.
          */
-        internal const val GET_SUBTREE_ROOTS_RETRIES = 3
+        internal const val GET_SUBTREE_ROOTS_RETRIES = 1
 
         /**
          * The theoretical maximum number of blocks in a reorg, due to other bottlenecks in the protocol design.
@@ -1744,6 +1772,7 @@ class CompactBlockProcessor internal constructor(
 
         @VisibleForTesting
         internal suspend fun scanBatchOfBlocks(
+//            processor: CompactBlockProcessor,
             batch: BlockBatch,
             fromState: TreeState,
             backend: TypesafeBackend
@@ -2064,15 +2093,47 @@ class CompactBlockProcessor internal constructor(
         networkBlockHeight: BlockHeight? = _processorInfo.value.networkBlockHeight,
         overallSyncRange: ClosedRange<BlockHeight>? = _processorInfo.value.overallSyncRange,
         firstUnenhancedHeight: BlockHeight? = _processorInfo.value.firstUnenhancedHeight,
+        lastScannedHeight: BlockHeight? = _processorInfo.value.lastScannedHeight,
     ) {
         _networkHeight.value = networkBlockHeight
         _processorInfo.value =
             ProcessorInfo(
                 networkBlockHeight = networkBlockHeight,
                 overallSyncRange = overallSyncRange,
-                firstUnenhancedHeight = firstUnenhancedHeight
+                firstUnenhancedHeight = firstUnenhancedHeight,
+                lastScannedHeight = lastScannedHeight
             )
     }
+
+    /*
+     * Sets new values of lastScannedHeight in Processorinfo to the provided data for this 
+     * [CompactBlockProcessor]. This function should only be called within functions guaranteed
+     * to have a non-null SyncRange, i.e. ScanBatchOfBlocks, etc.
+     *
+     * @param lastScannedHeight the height at which we have processed all blocks up to. Particularly
+     * useful with linear scanning, where we have a certain linear progression lower bound.
+     */
+
+    private fun setProcessorScannedHeight(
+        lastScannedHeight: BlockHeight? = _processorInfo.value.lastScannedHeight
+    ) {
+        _processorInfo.value =
+            ProcessorInfo(
+                networkBlockHeight = _processorInfo.value.networkBlockHeight,
+                overallSyncRange = _processorInfo.value.overallSyncRange,
+                firstUnenhancedHeight = _processorInfo.value.firstUnenhancedHeight,
+                lastScannedHeight = lastScannedHeight
+            )
+    }
+
+    /**
+     * Sets the last scanned block for this [CompactBlockProcessor].
+     *
+     * @param lastScannedHeight the last height that blockProcessor has scanned fully
+     */
+    /*private fun setLastScannedHeight(lastScannedHeight: BlockHeight? = _lastScannedHeight.value) {
+        _lastScannedHeight.value = lastScannedHeight
+    }*/
 
     /**
      * Sets the progress for this [CompactBlockProcessor].
@@ -2314,7 +2375,11 @@ class CompactBlockProcessor internal constructor(
          * [State] for when we are done with syncing the blocks, for now, i.e. all necessary stages done (download,
          * scan).
          */
-        class Synced(val syncedRange: ClosedRange<BlockHeight>?) : IConnected, ISyncing, State()
+        class Synced(
+            val syncedRange: ClosedRange<BlockHeight>?
+        ) : State(),
+            IConnected,
+            ISyncing
 
         /**
          * [State] for when we have no connection to lightwalletd.
@@ -2330,7 +2395,7 @@ class CompactBlockProcessor internal constructor(
         /**
          * [State] the initial state of the processor, once it is constructed.
          */
-        object Initialized : State()
+        object Initializing : State()
     }
 
     /**
@@ -2347,7 +2412,8 @@ class CompactBlockProcessor internal constructor(
     data class ProcessorInfo(
         val networkBlockHeight: BlockHeight?,
         val overallSyncRange: ClosedRange<BlockHeight>?,
-        val firstUnenhancedHeight: BlockHeight?
+        val firstUnenhancedHeight: BlockHeight?,
+        val lastScannedHeight: BlockHeight?
     )
 
     data class ValidationErrorInfo(
