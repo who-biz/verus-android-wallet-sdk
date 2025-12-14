@@ -61,11 +61,11 @@ private fun ComposablePreview() {
     }
 }
 
-private const val NH_HOST_NA = "lightwalletd.whobiz.dev" // NON-NLS
+private const val NH_HOST_NA = "lightwallet.verus.services" // NON-NLS
 //private const val NH_HOST_SA = "sa.lightwalletd.com" // NON-NLS
 //private const val NH_HOST_EU = "eu.lightwalletd.com" // NON-NLS
 //private const val NH_HOST_AI = "ai.lightwalletd.com" // NON-NLS
-private const val NH_PORT = 443
+private const val NH_PORT = 8120
 
 //private const val YW_HOST_1 = "lightwallet.verus.services" // NON-NLS
 //private const val YW_HOST_2 = "lwd2.zcash-infra.com" // NON-NLS
