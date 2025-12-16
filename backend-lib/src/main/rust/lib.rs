@@ -183,6 +183,7 @@ fn account_id_from_jni<'local, P: Parameters>(
                         )
                     ).map(|account| match account.source() {
                         AccountSource::Derived { account_index, .. } if account_index == requested_account_index => Some(account),
+                        AccountSource::Imported { .. }  => Some(account),
                         _ => None
                     })
                 )
@@ -311,15 +312,22 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_initDataD
 
 fn encode_usk<'a>(
     env: &mut JNIEnv<'a>,
-    account: zip32::AccountId,
+    account: Option<zip32::AccountId>,
     usk: UnifiedSpendingKey,
 ) -> jni::errors::Result<JObject<'a>> {
     let encoded = SecretVec::new(usk.to_bytes(Era::Orchard));
     let bytes = env.byte_array_from_slice(encoded.expose_secret())?;
+
+    // Use a sentinel for “no account index” (Imported accounts, etc.)
+    let account_i32: i32 = match account {
+        Some(a) => u32::from(a) as i32,
+        None => 0,
+    };
+
     env.new_object(
         "cash/z/ecc/android/sdk/internal/model/JniUnifiedSpendingKey",
         "(I[B)V",
-        &[JValue::Int(u32::from(account) as i32), (&bytes).into()],
+        &[JValue::Int(account_i32), (&bytes).into()],
     )
 }
 
@@ -344,6 +352,7 @@ fn encode_extsk<'a>(
 ) -> jni::errors::Result<JObject<'a>> {
     let encoded = SecretVec::new(extsk.to_bytes().to_vec());
     let bytes = env.byte_array_from_slice(encoded.expose_secret())?;
+    //TODO: (Biz) see if we can find a way to not reference this by explicit path
     env.new_object(
         "cash/z/ecc/android/sdk/internal/model/JniShieldedSpendingKey",
         "(I[B)V",
@@ -365,6 +374,17 @@ fn decode_usk(env: &JNIEnv, usk: JByteArray) -> anyhow::Result<UnifiedSpendingKe
             "An error occurred decoding the provided unified spending key: {:?}",
             e
         ),
+    })
+}
+
+fn decode_extsk(env: &JNIEnv, extsk: JByteArray) -> anyhow::Result<ExtendedSpendingKey> {
+    let extsk_bytes = SecretVec::new(env.convert_byte_array(extsk).unwrap());
+
+    // The remainder of the function is safe.
+    ExtendedSpendingKey::from_bytes(extsk_bytes.expose_secret()).map_err(|e| match e {
+        _decoding_error => anyhow!(
+            "Spending key failed to derive when decoding ExtendedSpendingKey for Sapling"
+        )
     })
 }
 
@@ -426,8 +446,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
 
         let account = db_data.get_account(account_id)?.expect("just created");
         let account_index = match account.source() {
-            AccountSource::Derived { account_index, .. } => account_index,
-            AccountSource::Imported => unreachable!("just created"),
+            AccountSource::Derived { account_index, .. } => Some(account_index),
+            AccountSource::Imported { .. } => None,
         };
 
         Ok(encode_usk(env, account_index, usk)?.into_raw())
@@ -484,12 +504,20 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
         let transparent_key = SecretVec::new(env.convert_byte_array(transparent_key).unwrap_or(Vec::new()));
         let extsk = SecretVec::new(env.convert_byte_array(extsk).unwrap_or(Vec::new()));
         let seed = SecretVec::new(env.convert_byte_array(seed).unwrap_or(Vec::new()));
-        let account = account_id_from_jint(account)?;
+        let seed_present = !seed.expose_secret().is_empty();
 
-        let usk = UnifiedSpendingKey::from_seed(&network, transparent_key.expose_secret(), extsk.expose_secret(), seed.expose_secret(), account)
+        let account_id = if seed_present {
+            Some(account_id_from_jint(account)?)
+        } else {
+            None
+        };
+
+        let account_for_derivation = account_id.unwrap_or(zip32::AccountId::ZERO);
+
+        let usk = UnifiedSpendingKey::from_seed(&network, transparent_key.expose_secret(), extsk.expose_secret(), seed.expose_secret(), account_for_derivation)
             .map_err(|e| anyhow!("error generating unified spending key from seed: {:?}", e))?;
 
-        Ok(encode_usk(env, account, usk)?.into_raw())
+        Ok(encode_usk(env, account_id, usk)?.into_raw())
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
@@ -1164,7 +1192,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_getSaplin
 }
 
 #[no_mangle]
-pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSpendingKey<
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidUnifiedSpendingKey<
     'local,
 >(
     mut env: JNIEnv<'local>,
@@ -1172,8 +1200,24 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSp
     usk: JByteArray<'local>,
 ) -> jboolean {
     let res = panic::catch_unwind(|| {
-        let _span = tracing::info_span!("RustBackend.isValidSpendingKey").entered();
+        let _span = tracing::info_span!("RustBackend.isValidUnifiedSpendingKey").entered();
         let _usk = decode_usk(&env, usk)?;
+        Ok(JNI_TRUE)
+    });
+    unwrap_exc_or(&mut env, res, JNI_FALSE)
+}
+
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_isValidSaplingSpendingKey<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    extsk: JByteArray<'local>,
+) -> jboolean {
+    let res = panic::catch_unwind(|| {
+        let _span = tracing::info_span!("RustBackend.isValidSaplingSpendingKey").entered();
+        let _extsk = decode_extsk(&env, extsk)?;
         Ok(JNI_TRUE)
     });
     unwrap_exc_or(&mut env, res, JNI_FALSE)
@@ -1731,7 +1775,7 @@ const JNI_ACCOUNT_BALANCE: &str = "cash/z/ecc/android/sdk/internal/model/JniAcco
 
 fn encode_account_balance<'a>(
     env: &mut JNIEnv<'a>,
-    account: &zip32::AccountId,
+    account: Option<&zip32::AccountId>,
     balance: &AccountBalance,
 ) -> jni::errors::Result<JObject<'a>> {
     let sapling_verified_balance = Amount::from(balance.sapling_balance().spendable_value());
@@ -1740,47 +1784,32 @@ fn encode_account_balance<'a>(
     let sapling_value_pending =
         Amount::from(balance.sapling_balance().value_pending_spendability());
 
-    //#[cfg(feature = "orchard")]
-    //{
-        let orchard_verified_balance = Amount::from(balance.orchard_balance().spendable_value());
-        let orchard_change_pending =
-            Amount::from(balance.orchard_balance().change_pending_confirmation());
-        let orchard_value_pending =
-            Amount::from(balance.orchard_balance().value_pending_spendability());
-    //}
+    let orchard_verified_balance = Amount::from(balance.orchard_balance().spendable_value());
+    let orchard_change_pending =
+        Amount::from(balance.orchard_balance().change_pending_confirmation());
+    let orchard_value_pending =
+        Amount::from(balance.orchard_balance().value_pending_spendability());
     let unshielded = Amount::from(balance.unshielded());
 
-    //#[cfg(feature = "orchard")]
-    //{
-        env.new_object(
-            JNI_ACCOUNT_BALANCE,
-            "(IJJJJJJJ)V",
-            &[
-                JValue::Int(u32::from(*account) as i32),
-                JValue::Long(sapling_verified_balance.into()),
-                JValue::Long(sapling_change_pending.into()),
-                JValue::Long(sapling_value_pending.into()),
-                JValue::Long(orchard_verified_balance.into()),
-                JValue::Long(orchard_change_pending.into()),
-                JValue::Long(orchard_value_pending.into()),
-                JValue::Long(unshielded.into()),
-            ],
-        )
-    //}
-    /*#[cfg(not(feature = "orchard"))]
-    {
-            env.new_object(
-                JNI_ACCOUNT_BALANCE,
-                "(IJJJJJJJ)V",
-                &[
-                    JValue::Int(u32::from(*account) as i32),
-                    JValue::Long(sapling_verified_balance.into()),
-                    JValue::Long(sapling_change_pending.into()),
-                    JValue::Long(sapling_value_pending.into()),
-                    JValue::Long(unshielded.into()),
-                ],
-            )
-    }*/
+    let account_i32: i32 = match account {
+        Some(a) => u32::from(*a) as i32,
+        None => 0,
+    };
+
+    env.new_object(
+        JNI_ACCOUNT_BALANCE,
+        "(IJJJJJJJ)V",
+        &[
+            JValue::Int(account_i32),
+            JValue::Long(sapling_verified_balance.into()),
+            JValue::Long(sapling_change_pending.into()),
+            JValue::Long(sapling_value_pending.into()),
+            JValue::Long(orchard_verified_balance.into()),
+            JValue::Long(orchard_change_pending.into()),
+            JValue::Long(orchard_value_pending.into()),
+            JValue::Long(unshielded.into()),
+        ],
+    )
 }
 
 /// Returns a `JniWalletSummary` object, provided that `progress_numerator` is
@@ -1805,15 +1834,15 @@ fn encode_wallet_summary<'a, P: Parameters>(
                     .expect("the account exists in the wallet")
                     .source()
                 {
-                    AccountSource::Derived { account_index, .. } => account_index,
-                    AccountSource::Imported => unreachable!("Imported accounts are unimplemented"),
+                    AccountSource::Derived { account_index, .. } => Some(account_index),
+                    AccountSource::Imported { .. } => None, 
                 };
                 Ok::<_, anyhow::Error>((account_index, balance))
             })
             .collect::<Result<_, _>>()?,
         JNI_ACCOUNT_BALANCE,
-        |env, (account_index, balance)| encode_account_balance(env, &account_index, balance),
-        |env| encode_account_balance(env, &zip32::AccountId::ZERO, &AccountBalance::ZERO),
+        |env, (account_index, balance)| encode_account_balance(env, account_index.as_ref(), balance),
+        |env| encode_account_balance(env, None, &AccountBalance::ZERO),
     )?;
 
     let (progress_numerator, progress_denominator) = summary
@@ -2149,7 +2178,6 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_proposeTr
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
-
 
 #[no_mangle]
 #[cfg(feature = "transparent-inputs")]

@@ -264,7 +264,11 @@ private suspend fun newMnemonic() =
 
 private suspend fun newSeedPhrase() = SeedPhrase(newMnemonic().map { it.concatToString() })
 
-private suspend fun newRawHDSeed() = "dc064f1e2a1aa6a9f349b92b459f6ca9e6b598faf8de373059958c1f99b477"
+// Must enter a 32 or 64 character hex seed below for demo app to work, it uses PeristableWallet
+// SDK does not use this class at all outside of demo app presently
+
+private suspend fun newRawHDSeed() = ""
+
 /*
  * The following functions and variables are package private only and preserved to support backward compatibility for
  * [PersistableWallet] and testing purposes.

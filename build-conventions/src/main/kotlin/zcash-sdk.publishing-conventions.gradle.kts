@@ -4,7 +4,7 @@ val publicationVariant = "release"
 val isSnapshot = project.property("IS_SNAPSHOT").toString().toBoolean()
 val myVersion = project.property("LIBRARY_VERSION").toString()
 
-val myGroup = "com.github.who-biz"
+val myGroup = "com.github.VerusCoin"
 project.group = myGroup
 
 pluginManager.withPlugin("com.android.library") {

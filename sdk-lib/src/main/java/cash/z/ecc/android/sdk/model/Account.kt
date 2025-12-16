@@ -7,7 +7,7 @@ package cash.z.ecc.android.sdk.model
  */
 data class Account(val value: Int) {
     init {
-        require(value >= 0) { "Account index must be >= 0 but actually is $value" }
+        require(value >= 0) { "Account index must be >= 0 but actually is $value"  }
     }
 
     companion object {
