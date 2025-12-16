@@ -430,7 +430,7 @@ checksum = "a47c1c47d2f5964e29c61246e81db715514cd532db6b5116a25ea3c03d6780a2"
 [[package]]
 name = "equihash"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -455,7 +455,7 @@ dependencies = [
 [[package]]
 name = "f4jumble"
 version = "0.1.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "blake2b_simd",
 ]
@@ -2073,7 +2073,7 @@ dependencies = [
 [[package]]
 name = "zcash_address"
 version = "0.3.2"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "bech32",
  "bs58",
@@ -2085,7 +2085,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_backend"
 version = "0.12.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "base64",
  "bech32",
@@ -2124,7 +2124,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_sqlite"
 version = "0.10.3"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "bs58",
  "byteorder",
@@ -2157,7 +2157,7 @@ dependencies = [
 [[package]]
 name = "zcash_encoding"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "byteorder",
  "nonempty",
@@ -2166,7 +2166,7 @@ dependencies = [
 [[package]]
 name = "zcash_keys"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "bech32",
  "blake2b_simd",
@@ -2205,7 +2205,7 @@ dependencies = [
 [[package]]
 name = "zcash_primitives"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "aes",
  "bip0039",
@@ -2240,7 +2240,7 @@ dependencies = [
 [[package]]
 name = "zcash_proofs"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "bellman",
  "blake2b_simd",
@@ -2262,7 +2262,7 @@ dependencies = [
 [[package]]
 name = "zcash_protocol"
 version = "0.1.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=dev-backend-upgrade#30e9c770313594b704b60a51bce88dd5ad368778"
+source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#8d0fda2b53d9b4d1a0b83a8445840bbb50341944"
 dependencies = [
  "document-features",
  "memuse",
