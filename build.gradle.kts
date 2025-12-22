@@ -93,7 +93,7 @@ fun isNonStable(version: String): Boolean {
 //        publications {
 //            release(MavenPublication) {
 //                from components.release
-//                groupId = "com.github.who-biz"
+//                groupId = "com.github.VerusCoin"
 //                artifactId = "verus-android-wallet-sdk"
 //                version = '0.0.1'
 //            }

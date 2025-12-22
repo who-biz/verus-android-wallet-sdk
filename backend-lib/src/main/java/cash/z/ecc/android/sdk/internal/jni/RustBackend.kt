@@ -77,13 +77,6 @@ class RustBackend private constructor(
             )
         }
 
-/*    override suspend fun deleteDb(
-       clearCache: Boolean,
-       clearDataDb: Boolean
-    ): Boolean {
-             return this.clear(clearCache, clearDataDb)
-    }
-*/
     override suspend fun createAccount(
         transparentKey: ByteArray?,
         extsk: ByteArray?,
@@ -104,12 +97,10 @@ class RustBackend private constructor(
         }
     }
 
-    override suspend fun isSeedRelevantToAnyDerivedAccounts(transparentKey: ByteArray, extsk: ByteArray, seed: ByteArray): Boolean =
+    override suspend fun isSeedRelevantToAnyDerivedAccounts(seed: ByteArray): Boolean =
         withContext(SdkDispatchers.DATABASE_IO) {
             isSeedRelevantToAnyDerivedAccounts(
                 dataDbFile.absolutePath,
-                transparentKey,
-                extsk,
                 seed,
                 networkId = networkId
             )
@@ -457,12 +448,6 @@ class RustBackend private constructor(
             networkId: Int
         ): Int
 
-/*        @JvmStatic
-        private external fun deleteDb(
-             clearCache: Boolean,
-             clearDataDb: Boolean
-        ): Boolean
-*/
         @JvmStatic
         private external fun createAccount(
             dbDataPath: String,
@@ -477,8 +462,6 @@ class RustBackend private constructor(
         @JvmStatic
         private external fun isSeedRelevantToAnyDerivedAccounts(
             dbDataPath: String,
-            transparentKey: ByteArray,
-            extsk: ByteArray,
             seed: ByteArray,
             networkId: Int
         ): Boolean
@@ -503,10 +486,15 @@ class RustBackend private constructor(
             networkId: Int
         ): Array<String>
 
-        fun validateUnifiedSpendingKey(bytes: ByteArray) = isValidSpendingKey(bytes)
+        fun validateUnifiedSpendingKey(bytes: ByteArray) = isValidUnifiedSpendingKey(bytes)
+
+        fun validateShieldedSpendingKey(bytes: ByteArray) = isValidSaplingSpendingKey(bytes)
 
         @JvmStatic
-        private external fun isValidSpendingKey(bytes: ByteArray): Boolean
+        private external fun isValidUnifiedSpendingKey(bytes: ByteArray): Boolean
+
+        @JvmStatic
+        private external fun isValidSaplingSpendingKey(bytes: ByteArray): Boolean
 
         @JvmStatic
         private external fun isValidSaplingAddress(

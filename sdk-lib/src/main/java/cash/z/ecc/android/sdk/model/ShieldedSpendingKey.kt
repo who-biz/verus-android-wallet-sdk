@@ -73,8 +73,7 @@ class ShieldedSpendingKey private constructor(
             val bytesCopy = bytes.copyOf()
             RustBackend.loadLibrary()
             return runCatching {
-                // TODO: add validateShieldedSpendingKey func to backend
-                //require(RustBackend.validateUnifiedSpendingKey(bytesCopy))
+                require(RustBackend.validateShieldedSpendingKey(bytesCopy))
                 ShieldedSpendingKey(account, FirstClassByteArray(bytesCopy))
             }
         }

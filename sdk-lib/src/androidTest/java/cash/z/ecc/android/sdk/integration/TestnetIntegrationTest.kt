@@ -11,7 +11,6 @@ import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.Zatoshi
 import cash.z.ecc.android.sdk.model.ZcashNetwork
-import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.test.ScopedTest
 import cash.z.ecc.android.sdk.tool.CheckpointTool
 import cash.z.ecc.android.sdk.tool.DerivationTool
@@ -107,7 +106,6 @@ class TestnetIntegrationTest : ScopedTest() {
     private suspend fun sendFunds(): Boolean {
         val spendingKey =
             DerivationTool.getInstance().deriveUnifiedSpendingKey(
-                transparentKey,
                 seed,
                 synchronizer.network,
                 Account.DEFAULT
@@ -140,9 +138,6 @@ class TestnetIntegrationTest : ScopedTest() {
         val seed = "cash.z.ecc.android.sdk.integration.IntegrationTest.seed.value.64bytes".toByteArray()
         val address = "zs1m30y59wxut4zk9w24d6ujrdnfnl42hpy0ugvhgyhr8s0guszutqhdj05c7j472dndjstulph74m"
         val toAddress = "zs1vp7kvlqr4n9gpehztr76lcn6skkss9p8keqs3nv8avkdtjrcctrvmk9a7u494kluv756jeee5k0"
-        val wif = ""
-        val decodedWif = wif.decodeBase58WithChecksum()
-        val transparentKey = decodedWif.copyOfRange(1, decodedWif.size)
 
         private val context = InstrumentationRegistry.getInstrumentation().context
         private lateinit var synchronizer: Synchronizer
@@ -159,8 +154,7 @@ class TestnetIntegrationTest : ScopedTest() {
                     seed = seed,
                     birthday = BlockHeight.new(ZcashNetwork.Testnet, BIRTHDAY_HEIGHT),
                     // Using existing wallet init mode as simplification for the test
-                    walletInitMode = WalletInitMode.ExistingWallet,
-                    transparentKey = transparentKey
+                    walletInitMode = WalletInitMode.ExistingWallet
                 )
         }
     }

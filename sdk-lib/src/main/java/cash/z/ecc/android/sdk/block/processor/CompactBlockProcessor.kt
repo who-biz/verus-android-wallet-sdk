@@ -154,7 +154,7 @@ class CompactBlockProcessor internal constructor(
     private val _progress = MutableStateFlow(PercentDecimal.ZERO_PERCENT)
     private val _processorInfo = MutableStateFlow(ProcessorInfo(null, null, null, null))
     private val _networkHeight = MutableStateFlow<BlockHeight?>(null)
-    //private val _lastScannedHeight = MutableStateFlow<BlockHeight?>(null)
+    private val _lastScannedHeight = MutableStateFlow<BlockHeight?>(null)
 
     // pools
     internal val saplingBalances = MutableStateFlow<WalletBalance?>(null)
@@ -468,8 +468,6 @@ class CompactBlockProcessor internal constructor(
         var suggestedRangesResult = preparationResult.suggestedRangesResult
         val lastPreparationTime = System.currentTimeMillis()
 
-        //setLastScannedHeight(lastValidHeight);
-
         // Running synchronization for the [ScanRange.SuggestScanRangePriority.Verify] range
         while (verifyRangeResult is VerifySuggestedScanRange.ShouldVerify) {
             Twig.info { "Starting verification of range: $verifyRangeResult" }
@@ -485,6 +483,11 @@ class CompactBlockProcessor internal constructor(
             ).collect { batchSyncProgress ->
                 // Update sync progress and wallet balance
                 refreshWalletSummary()
+
+                // set only processorScannedHeight here
+                batchSyncProgress.range?.endInclusive?.let { endHeight ->
+                    setProcessorScannedHeight(endHeight)
+                }
 
                 when (batchSyncProgress.resultState) {
                     SyncingResult.UpdateBirthday -> {
@@ -581,6 +584,11 @@ class CompactBlockProcessor internal constructor(
             ).map { batchSyncProgress ->
                 // Update sync progress and wallet balance
                 refreshWalletSummary()
+
+                // set only processorScannedHeight here
+                batchSyncProgress.range?.endInclusive?.let { endHeight ->
+                    setProcessorScannedHeight(endHeight)
+                }
 
                 when (batchSyncProgress.resultState) {
                     SyncingResult.UpdateBirthday -> {
@@ -818,8 +826,6 @@ class CompactBlockProcessor internal constructor(
         // Get the first un-enhanced transaction from the repository
         val firstUnenhancedHeight = getFirstUnenhancedHeight(repository)
 
-        val lastScannedHeight = if (ranges.isEmpty()) networkBlockHeight else ranges[0].range.start
-
         // The overall sync range computation
         val syncRange =
             if (ranges.isNotEmpty()) {
@@ -838,6 +844,8 @@ class CompactBlockProcessor internal constructor(
                 // suggested ranges
                 null
             }
+
+        val lastScannedHeight = if (ranges.isEmpty()) networkBlockHeight else ranges[0].range.start
 
         setProcessorInfo(
             networkBlockHeight = networkBlockHeight,

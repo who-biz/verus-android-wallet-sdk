@@ -25,8 +25,6 @@ secrecy = "0.8"
 sha2 = "0.10.9"
 zcash_address = "0.3"
 #zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs", "unstable"] }
-#zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs", "unstable"] }
-#zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs", "unstable"] }
 #zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs", "unstable", "linearscanning"] }
 zcash_client_backend = { version = "0.12.1", features = ["unstable"] }
 zcash_client_sqlite = { version = "0.10.3", features = ["unstable", "linearscanning"] }
@@ -62,11 +60,11 @@ transparent-inputs = []
 
 ## Uncomment this to test librustzcash changes locally
 #[patch.crates-io]
-#zcash_address = { path = '<pathtolibrustzcashroot>/zcash_address' }
-#zcash_client_backend = { path = '<pathtolibrustzcashroot>/zcash_client_backend' }
-#zcash_client_sqlite = { path = '<pathtolibrustzcashroot>/zcash_client_sqlite' }
-#zcash_primitives = { path = '<pathtolibrustzcashroot>/zcash_primitives' }
-#zcash_proofs = { path = '<pathtolibrustzcashroot>/zcash_proofs' }
+#zcash_address = { path = '../../clones/librustzcash/components/zcash_address' }
+#zcash_client_backend = { path = '../../clones/librustzcash/zcash_client_backend' }
+#zcash_client_sqlite = { path = '../../clones/librustzcash/zcash_client_sqlite' }
+#zcash_primitives = { path = '../../clones/librustzcash/zcash_primitives' }
+#zcash_proofs = { path = '../../clones/librustzcash/zcash_proofs' }
 
 ## Uncomment this to test someone else's librustzcash changes in a branch
 [patch.crates-io]
