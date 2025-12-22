@@ -28,10 +28,10 @@ use verus_zfunc::{
         encrypt_message,
         decrypt_message,
         RpcParams,
-        EncryptedPayload,
+        //EncryptedPayload,
         DecryptParams
  };
-use chacha20poly1305::{ChaCha20Poly1305, KeyInit, AeadInPlace, Key};
+//use chacha20poly1305::{ChaCha20Poly1305, KeyInit, AeadInPlace, Key};
 
 #[cfg(feature = "transparent-inputs")]
 use zcash_client_backend::{
@@ -107,7 +107,7 @@ use jubjub::Fr;
 use sapling::{ Note, Rseed };
 use sapling::value::NoteValue;
 
-use sha2::{Sha256, Digest};
+//use sha2::{Sha256, Digest};
 
 use crate::zip32::Scope;
 
