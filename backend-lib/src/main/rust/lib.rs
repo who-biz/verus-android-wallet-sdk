@@ -5,6 +5,10 @@ use std::panic;
 use std::path::Path;
 use std::ptr;
 
+//use tracing::warn;
+
+use rand::rngs::OsRng;
+
 use anyhow::anyhow;
 use jni::objects::{JByteArray, JObject, JObjectArray, JValue};
 use jni::{
@@ -19,6 +23,15 @@ use tracing::{debug, error};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::reload;
 use zcash_address::{ToAddress, ZcashAddress};
+use verus_zfunc::{
+        z_getencryptionaddress,
+        encrypt_message,
+        decrypt_message,
+        RpcParams,
+        //EncryptedPayload,
+        DecryptParams
+ };
+//use chacha20poly1305::{ChaCha20Poly1305, KeyInit, AeadInPlace, Key};
 
 #[cfg(feature = "transparent-inputs")]
 use zcash_client_backend::{
@@ -87,6 +100,16 @@ use zcash_primitives::{
     zip32::{self, DiversifierIndex},
 };
 use zcash_proofs::prover::LocalTxProver;
+
+use zcash_note_encryption::{ Domain, EphemeralKeyBytes };
+use sapling::note_encryption::{ PreparedIncomingViewingKey, SaplingDomain};
+use jubjub::Fr;
+use sapling::{ Note, Rseed };
+use sapling::value::NoteValue;
+
+//use sha2::{Sha256, Digest};
+
+use crate::zip32::Scope;
 
 use crate::utils::{catch_unwind, exception::unwrap_exc_or};
 
@@ -419,6 +442,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_createAcc
     });
     unwrap_exc_or(&mut env, res, ptr::null_mut())
 }
+
 
 /// Checks whether the given seed is relevant to any of the derived accounts in the wallet.
 #[no_mangle]
@@ -779,6 +803,260 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_de
 }
 
 #[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_getSymmetricKeyReceiver<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    ufvk_string: JString<'local>,
+    ephemeral_pk_jbytes: JByteArray<'local>,
+    network_id: jint,
+) -> jstring {
+    let res = catch_unwind(&mut env, |env| {
+        let _span = tracing::info_span!("RustDerivationTool.GetSymmetricKeyReceiver").entered();
+        let network = parse_network(network_id as u32)?;
+        let ufvk_string = utils::java_string_to_rust(env, &ufvk_string);
+        let ufvk = match UnifiedFullViewingKey::decode(&network, &ufvk_string) {
+            Ok(ufvk) => ufvk,
+            Err(e) => {
+                return Err(anyhow!(
+                    "Error while deriving viewing key from string input: {}",
+                    e,
+                ));
+            }
+        };
+
+        let sapling_dfvk = ufvk.sapling().expect("Sapling key is present").clone();
+        let sapling_ivk = PreparedIncomingViewingKey::new(&sapling_dfvk.to_ivk(Scope::External));
+        //warn!("sapling_ivk: {:?}", sapling_ivk);
+
+        let epk_array: [u8; 32] = env.convert_byte_array(ephemeral_pk_jbytes)?.try_into().unwrap();
+        //warn!("epk_array: {:?}", epk_array);
+        let epk_bytes = EphemeralKeyBytes::from(epk_array);
+        //warn!("epk_bytes: {:?}", epk_bytes);
+
+        let epk = match <SaplingDomain as Domain>::epk(&epk_bytes) {
+            Some(epk) => epk,
+            None => { 
+                return Err(anyhow!(
+                    "Unable to convert EphemeralKeyBytes to EphemeralPublicKey!"
+                ));
+            }
+        };
+
+        let prepared_epk = <SaplingDomain as Domain>::prepare_epk(epk);
+        let shared_secret = <SaplingDomain as Domain>::ka_agree_dec(&sapling_ivk, &prepared_epk);
+        //warn!("shared_secret: {:?}", shared_secret);
+
+        let symmetric_key = <SaplingDomain as Domain>::kdf(shared_secret, &epk_bytes).to_hex();
+        //warn!("symmetric_key: {:?}", symmetric_key);
+        let output = env
+            .new_string(symmetric_key)
+            .expect("Couldn't create Java string!");
+            
+        Ok(output.into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+
+#[no_mangle]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_generateSymmetricKeySender<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _: JClass<'local>,
+    sapling_address: JString<'local>,
+    network_id: jint,
+) -> jstring {
+    let res = catch_unwind(&mut env, |env| {
+        let _span = tracing::info_span!("RustDerivationTool.generateSymmetricKeySender").entered();
+        let network = parse_network(network_id as u32)?;
+        let addr = utils::java_string_to_rust(env, &sapling_address);
+        let recipient = match Address::decode(&network, &addr) {
+            Some(addr) => match addr {
+                Address::Sapling(addr) => addr,
+                // reject everything except saplingAddresses
+                _ => return Err(anyhow!("Incompatible Address used in generateSymmetricKeySender!"))
+            },
+            None => return Err(anyhow!("Address is for the wrong network")),
+        };
+
+       let mut rng = OsRng;
+        
+        let buf = [0; 64];
+        let rseed_bytes = Fr::from_bytes_wide(&buf);
+        let rseed = Rseed::BeforeZip212(rseed_bytes);
+
+       //TODO: see if there's a clearer way to expose this function, that doesn't require empty note construction
+       let note = Note::from_parts(recipient, NoteValue::ZERO, rseed);
+       let esk = note.generate_or_derive_esk(&mut rng);
+
+       //warn!("esk {:?}, rseed{:?}", esk, rseed);
+
+        let epk = <SaplingDomain as Domain>::ka_derive_public_from_recipient(&recipient, &esk);
+        let epk_bytes = <SaplingDomain as Domain>::epk_bytes(&epk);
+        //warn!("epk: {:?}, epk_bytes {:?}", epk, epk_bytes);
+
+        let pk_d = recipient.pk_d();
+        let shared_secret = <SaplingDomain as Domain>::ka_agree_enc(&esk, &pk_d);
+        //warn!("shared_secret: {:?}", shared_secret);
+        let symmetric_key = <SaplingDomain as Domain>::kdf(shared_secret, &epk_bytes).to_hex();
+        //warn!("symmetric_key: {:?}", symmetric_key);
+        let output = env
+            .new_string(symmetric_key)
+            .expect("Couldn't create Java string!");
+            
+        Ok(output.into_raw())
+    });
+    unwrap_exc_or(&mut env, res, ptr::null_mut())
+}
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zGetEncryptionAddress<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JObject<'local>,
+    seed: JString<'local>,
+    spending_key: JString<'local>,
+    hd_index: jint,
+    encryption_index: jint,
+    from_id: JString<'local>,
+    to_id: JString<'local>,
+    return_secret: jboolean,
+) -> jobject {
+    // we wrap our logic in a catch_unwind block so that if the rust code panics
+    // it doesn't crash the entire android app. we can catch it and return null instead
+    let res = catch_unwind(&mut env, |env| {
+        // we need to translate all the incoming java types into types that rust
+        // understands. this means handling potential nulls and converting java strings
+        let params = RpcParams {
+            seed: if seed.is_null() { None } else { Some(env.get_string(&seed)?.into()) },
+            spending_key: if spending_key.is_null() { None } else { Some(env.get_string(&spending_key)?.into()) },
+            hd_index: hd_index as u32,
+            encryption_index: encryption_index as u32,
+            from_id: if from_id.is_null() { None } else { Some(env.get_string(&from_id)?.into()) },
+            to_id: if to_id.is_null() { None } else { Some(env.get_string(&to_id)?.into()) },
+            return_secret: return_secret == JNI_TRUE,
+        };
+
+        // now we can call our pure rust function to do all the heavy lifting.
+        let channel_keys = z_getencryptionaddress(params)
+            .map_err(|e| anyhow!("z_getencryptionaddress failed: {}", e))?;
+
+        // with the result back from our rust logic, we have to translate it back
+        // into a java object that the android sdk can understand.
+        let address_java = env.new_string(&channel_keys.address)?;
+        let fvk_java = env.new_string(&channel_keys.fvk)?;
+        let fvk_hex_java = env.new_string(&channel_keys.fvk_hex)?;
+        let dfvk_hex_java = env.new_string(&channel_keys.dfvk_hex)?;
+
+        let ivk_java = match channel_keys.ivk {
+            Some(ivk) => env.new_string(ivk)?.into(),
+            None => JObject::null(),
+        };
+
+        let sk_java = match channel_keys.spending_key {
+            Some(sk) => env.new_string(sk)?.into(),
+            None => JObject::null(),
+        };
+
+        // here we're building the new java object. the path and the constructor signature
+        // string must exactly match the definition in the kotlin/java code
+        let result_obj = env.new_object(
+            "cash/z/ecc/android/sdk/model/ChannelKeys", // path to the kotlin/java data class
+            // the constructor signature: (String, String, String, String, String, String) -> void
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+            &[
+                JValue::Object(&address_java),
+                JValue::Object(&fvk_java),
+                JValue::Object(&fvk_hex_java),
+                JValue::Object(&dfvk_hex_java),
+                JValue::Object(&ivk_java),
+                JValue::Object(&sk_java),
+            ],
+        )?;
+
+        // return the raw pointer to the newly created java object.
+        Ok(result_obj.into_raw())
+    });
+
+    unwrap_exc_or(&mut env, res, std::ptr::null_mut())
+}
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_encryptMessage<'local>(
+        mut env: JNIEnv<'local>,
+        _class: JObject<'local>,
+        address_string: JString<'local>,
+        message: JString<'local>,
+        return_ssk: jboolean,
+    ) -> jobject {
+    let res = catch_unwind(&mut env, |env| {
+        // convert Java types to Rust types
+        let rust_addr: String = env.get_string(&address_string)?.into();
+        let rust_msg: String = env.get_string(&message)?.into();
+        let rust_return_ssk = return_ssk == JNI_TRUE;
+
+        // call the centralized library function
+        let encrypted_payload = encrypt_message(rust_addr, rust_msg, rust_return_ssk)
+            .map_err(|e| anyhow!("encrypt_message failed: {}", e))?;
+
+        // convert the Rust result into a new Java `EncryptedPayload` object
+        let epk_java = env.new_string(&encrypted_payload.ephemeral_public_key)?;
+        let ciphertext_java = env.new_string(&encrypted_payload.ciphertext)?;
+
+        let ssk_java = match encrypted_payload.symmetric_key {
+            Some(ssk) => env.new_string(ssk)?.into(),
+            None => JObject::null(),
+        };
+
+        let result_obj = env.new_object(
+            "cash/z/ecc/android/sdk/model/EncryptedPayload",
+            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+            &[
+                JValue::Object(&epk_java),
+                JValue::Object(&ciphertext_java),
+                JValue::Object(&ssk_java),
+            ],
+        )?;
+
+        Ok(result_obj.into_raw())
+    });
+
+    unwrap_exc_or(&mut env, res, std::ptr::null_mut())
+}
+
+#[no_mangle]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_decryptMessage<'local>(
+        mut env: JNIEnv<'local>,
+        _class: JObject<'local>,
+        fvk_hex: JString<'local>,
+        ephemeral_public_key_hex: JString<'local>,
+        ciphertext_hex: JString<'local>,
+        symmetric_key_hex: JString<'local>,
+    ) -> jstring {
+    let res = catch_unwind(&mut env, |env| {
+        // convert all Java types to Rust types.
+        let params = DecryptParams {
+            fvk_hex: if fvk_hex.is_null() { None } else { Some(env.get_string(&fvk_hex)?.into()) },
+            ephemeral_public_key_hex: if ephemeral_public_key_hex.is_null() { None } else { Some(env.get_string(&ephemeral_public_key_hex)?.into()) },
+            ciphertext_hex: env.get_string(&ciphertext_hex)?.into(),
+            symmetric_key_hex: if symmetric_key_hex.is_null() { None } else { Some(env.get_string(&symmetric_key_hex)?.into()) },
+        };
+
+        // call the centralized library function
+        let decrypted_message = decrypt_message(params)
+            .map_err(|e| anyhow!("decrypt_message failed: {}", e))?;
+
+        // convert the Rust String result back to a Java String
+        let output = env.new_string(decrypted_message)?;
+        Ok(output.into_raw())
+    });
+
+    unwrap_exc_or(&mut env, res, std::ptr::null_mut())
+}
+
+#[no_mangle]
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustBackend_getCurrentAddress<'local>(
     mut env: JNIEnv<'local>,
     _: JClass<'local>,
@@ -947,9 +1225,14 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_is
         let network = parse_network(network_id as u32)?;
         let addr = utils::java_string_to_rust(env, &addr);
 
+        //warn!("isValidAddress: address({:?}", addr);
+
         match Address::decode(&network, &addr) {
             Some(addr) => match addr {
-                Address::Sapling(_) => Ok(JNI_TRUE),
+                Address::Sapling(_) => {
+                    //warn!("address::sapling condition hit!");
+                    Ok(JNI_TRUE)
+                },
                 Address::Transparent(_) | Address::Unified(_) => Ok(JNI_FALSE),
             },
             None => Err(anyhow!("Address is for the wrong network")),
