@@ -931,7 +931,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         let params = RpcParams {
             seed: if seed.is_null() { None } else { Some(env.get_string(&seed)?.into()) },
             spending_key: if spending_key.is_null() { None } else { Some(env.get_string(&spending_key)?.into()) },
-            hd_index: hd_index as u32,
+            hd_index: if hd_index == -1 { None } else { Some(hd_index as u32) },
             encryption_index: encryption_index as u32,
             from_id: if from_id.is_null() { None } else { Some(env.get_string(&from_id)?.into()) },
             to_id: if to_id.is_null() { None } else { Some(env.get_string(&to_id)?.into()) },
