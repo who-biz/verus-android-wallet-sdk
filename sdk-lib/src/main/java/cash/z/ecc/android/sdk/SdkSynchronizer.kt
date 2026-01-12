@@ -2,12 +2,13 @@ package cash.z.ecc.android.sdk
 
 import android.content.Context
 import cash.z.ecc.android.sdk.Synchronizer.Status.DISCONNECTED
+import cash.z.ecc.android.sdk.Synchronizer.Status.INITIALIZING
 import cash.z.ecc.android.sdk.Synchronizer.Status.STOPPED
 import cash.z.ecc.android.sdk.Synchronizer.Status.SYNCED
 import cash.z.ecc.android.sdk.Synchronizer.Status.SYNCING
 import cash.z.ecc.android.sdk.block.processor.CompactBlockProcessor
 import cash.z.ecc.android.sdk.block.processor.CompactBlockProcessor.State.Disconnected
-import cash.z.ecc.android.sdk.block.processor.CompactBlockProcessor.State.Initialized
+import cash.z.ecc.android.sdk.block.processor.CompactBlockProcessor.State.Initializing
 import cash.z.ecc.android.sdk.block.processor.CompactBlockProcessor.State.Stopped
 import cash.z.ecc.android.sdk.block.processor.CompactBlockProcessor.State.Synced
 import cash.z.ecc.android.sdk.block.processor.CompactBlockProcessor.State.Syncing
@@ -232,6 +233,12 @@ class SdkSynchronizer private constructor(
      */
     override val networkHeight: StateFlow<BlockHeight?> = processor.networkHeight
 
+    /**
+     * The lastScannedHeight seen on the network while processing blocks. This may differ from the
+     * latest height scanned and is useful for determining block confirmations and expiration.
+     */
+    //override val lastScannedHeight: StateFlow<BlockHeight?> = processor.lastScannedHeight
+
     //
     // Error Handling
     //
@@ -411,7 +418,7 @@ class SdkSynchronizer private constructor(
     }
 
     suspend fun isValidAddress(address: String): Boolean {
-        return !validateAddress(address).isNotValid
+        return validateShieldedAddress(address)
     }
 
     //
@@ -429,28 +436,25 @@ class SdkSynchronizer private constructor(
         }
 
         launch(CoroutineExceptionHandler(::onCriticalError)) {
-            var lastScanTime = 0L
             processor.onProcessorErrorListener = ::onProcessorError
             processor.onSetupErrorListener = ::onSetupError
             processor.onChainErrorListener = ::onChainError
 
-            processor.state.onEach {
-                when (it) {
-                    is Synced -> {
-                        val now = System.currentTimeMillis()
-                        // do a bit of housekeeping and then report synced status
-                        onScanComplete(it.syncedRange, now - lastScanTime)
-                        lastScanTime = now
-                        SYNCED
+            processor.state
+                .onEach {
+                    when (it) {
+                        is Initializing -> INITIALIZING
+                        is Synced -> {
+                            onScanComplete()
+                            SYNCED
+                        }
+                        is Stopped -> STOPPED
+                        is Disconnected -> DISCONNECTED
+                        is Syncing -> SYNCING
+                    }.let { synchronizerStatus ->
+                        _status.value = synchronizerStatus
                     }
-
-                    is Stopped -> STOPPED
-                    is Disconnected -> DISCONNECTED
-                    is Syncing, Initialized -> SYNCING
-                }.let { synchronizerStatus ->
-                    _status.value = synchronizerStatus
-                }
-            }.launchIn(this)
+                }.launchIn(this)
             processor.start()
             Twig.debug { "Completed starting synchronizer" }
         }
@@ -519,31 +523,15 @@ class SdkSynchronizer private constructor(
         onChainErrorHandler?.invoke(errorHeight, rewindHeight)
     }
 
-    /**
-     * @param elapsedMillis the amount of time that passed since the last scan
-     */
-    private suspend fun onScanComplete(
-        scannedRange: ClosedRange<BlockHeight>?,
-        elapsedMillis: Long
-    ) {
-        // We don't need to update anything if there have been no blocks
-        // refresh anyway if:
-        // - if it's the first time we finished scanning
-        // - if we check for blocks 5 times and find nothing was mined
-        @Suppress("MagicNumber")
-        val shouldRefresh = !scannedRange.isNullOrEmpty() || elapsedMillis > (ZcashSdk.POLL_INTERVAL * 5)
-        val reason = if (scannedRange.isNullOrEmpty()) "it's been a while" else "new blocks were scanned"
+    private suspend fun onScanComplete() {
+        Twig.debug { "Triggering utxo refresh" }
+        refreshUtxos(Account.DEFAULT)
 
-        if (shouldRefresh) {
-            Twig.debug { "Triggering utxo refresh since $reason!" }
-            refreshUtxos(Account.DEFAULT)
+        Twig.debug { "Triggering balance refresh" }
+        refreshAllBalances()
 
-            Twig.debug { "Triggering balance refresh since $reason!" }
-            refreshAllBalances()
-
-            Twig.debug { "Triggering transaction refresh since $reason!" }
-            refreshTransactions()
-        }
+        Twig.debug { "Triggering transaction refresh" }
+        refreshTransactions()
     }
 
     //
@@ -552,12 +540,16 @@ class SdkSynchronizer private constructor(
 
     // Not ready to be a public API; internal for testing only
     internal suspend fun createAccount(
+        transparentKey: ByteArray,
+        extsk: ByteArray,
         seed: ByteArray,
         treeState: TreeState,
         recoverUntil: BlockHeight?
     ): UnifiedSpendingKey? {
         return runCatching {
             backend.createAccountAndGetSpendingKey(
+                transparentKey = transparentKey,
+                extsk = extsk,
                 seed = seed,
                 treeState = treeState,
                 recoverUntil = recoverUntil
@@ -723,6 +715,8 @@ class SdkSynchronizer private constructor(
     override suspend fun isValidTransparentAddr(address: String) = txManager.isValidTransparentAddress(address)
 
     override suspend fun isValidUnifiedAddr(address: String) = txManager.isValidUnifiedAddress(address)
+
+    override suspend fun validateShieldedAddress(address: String): Boolean = txManager.isValidShieldedAddress(address)
 
     override suspend fun validateAddress(address: String): AddressType =
         runCatching {
@@ -908,7 +902,9 @@ internal object DefaultSynchronizerFactory {
         checkpoint: Checkpoint,
         seed: ByteArray?,
         numberOfAccounts: Int,
-        recoverUntil: BlockHeight?
+        recoverUntil: BlockHeight?,
+        transparentKey: ByteArray?,
+        extsk: ByteArray?
     ): DerivedDataRepository =
         DbDerivedDataRepository(
             DerivedDataDb.new(
@@ -917,6 +913,8 @@ internal object DefaultSynchronizerFactory {
                 databaseFile,
                 zcashNetwork,
                 checkpoint,
+                transparentKey,
+                extsk,
                 seed,
                 numberOfAccounts,
                 recoverUntil

@@ -83,4 +83,10 @@
     <string name="server_save">Save</string>
 
     <string name="transactions_refresh">Refresh transactions</string>
+
+    <string name="spending_key">Private Spending Key</string>
+    <string name="shielded_address">Shielded Address</string>
+    <string name="base58_wif">WIF Used (Base58)</string>
+    <string name="decoded_wif">Decoded WIF (Hex)</string>
+    <string name="seed">Seed Phrase (Not Used if WIF Present)</string>
 </resources>

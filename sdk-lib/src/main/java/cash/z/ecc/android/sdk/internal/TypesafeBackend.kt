@@ -21,7 +21,9 @@ internal interface TypesafeBackend {
     val network: ZcashNetwork
 
     suspend fun createAccountAndGetSpendingKey(
-        seed: ByteArray,
+        transparentKey: ByteArray?,
+        extsk: ByteArray?,
+        seed: ByteArray?,
         treeState: TreeState,
         recoverUntil: BlockHeight?
     ): UnifiedSpendingKey
@@ -81,7 +83,7 @@ internal interface TypesafeBackend {
     ): String?
 
     @Throws(InitializeException::class)
-    suspend fun initDataDb(seed: ByteArray?)
+    suspend fun initDataDb(transparentKey: ByteArray?, extsk: ByteArray?, seed: ByteArray?)
 
     /**
      * @throws RuntimeException as a common indicator of the operation failure

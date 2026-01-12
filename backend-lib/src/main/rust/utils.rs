@@ -38,6 +38,7 @@ pub(crate) fn java_string_to_rust(env: &mut JNIEnv, jstring: &JString) -> String
         .into()
 }
 
+#[cfg(feature = "transparent-inputs")]
 pub(crate) fn java_nullable_string_to_rust(env: &mut JNIEnv, jstring: &JString) -> Option<String> {
     (!jstring.is_null()).then(|| java_string_to_rust(env, jstring))
 }

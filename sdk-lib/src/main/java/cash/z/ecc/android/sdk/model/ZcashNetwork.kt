@@ -27,16 +27,16 @@ data class ZcashNetwork(
             ZcashNetwork(
                 ID_TESTNET,
                 "testnet",
-                saplingActivationHeight = BlockHeight(280_000),
-                orchardActivationHeight = BlockHeight(1_842_420)
+                saplingActivationHeight = BlockHeight(1),
+                orchardActivationHeight = BlockHeight(4_000_000_000) // Max value java will acccept here is 4,294,967,294 
             )
 
         val Mainnet =
             ZcashNetwork(
                 ID_MAINNET,
-                "mainnet",
-                saplingActivationHeight = BlockHeight(419_200),
-                orchardActivationHeight = BlockHeight(1_687_104)
+                "vrsc",
+                saplingActivationHeight = BlockHeight(227_520), // taken from VerusCoin/src/chainparams.cpp
+                orchardActivationHeight = BlockHeight(4_000_000_000) // Max value java will acccept here is 4,294,967,294 
             )
 
         fun from(id: Int) =

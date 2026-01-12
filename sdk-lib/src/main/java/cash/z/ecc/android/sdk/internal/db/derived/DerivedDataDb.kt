@@ -47,11 +47,13 @@ internal class DerivedDataDb private constructor(
             databaseFile: File,
             zcashNetwork: ZcashNetwork,
             checkpoint: Checkpoint,
+            transparentKey: ByteArray?,
+            extsk: ByteArray?,
             seed: ByteArray?,
             numberOfAccounts: Int,
             recoverUntil: BlockHeight?
         ): DerivedDataDb {
-            backend.initDataDb(seed)
+            backend.initDataDb(transparentKey, extsk, seed)
 
             val database =
                 ReadOnlySupportSqliteOpenHelper.openExistingDatabaseAsReadOnly(
@@ -66,6 +68,7 @@ internal class DerivedDataDb private constructor(
             val dataDb = DerivedDataDb(zcashNetwork, database)
 
             // If a seed is provided, fill in the accounts.
+ 
             seed?.let { checkedSeed ->
                 // toInt() should be safe because we expect very few accounts
                 val missingAccounts = numberOfAccounts - dataDb.accountTable.count().toInt()
@@ -75,6 +78,8 @@ internal class DerivedDataDb private constructor(
                 repeat(missingAccounts) {
                     runCatching {
                         backend.createAccountAndGetSpendingKey(
+                            transparentKey = transparentKey,
+                            extsk = extsk,
                             seed = checkedSeed,
                             treeState = checkpoint.treeState(),
                             recoverUntil = recoverUntil

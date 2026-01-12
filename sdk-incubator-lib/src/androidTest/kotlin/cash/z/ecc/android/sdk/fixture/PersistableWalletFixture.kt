@@ -6,6 +6,7 @@ import cash.z.ecc.android.sdk.model.Mainnet
 import cash.z.ecc.android.sdk.model.PersistableWallet
 import cash.z.ecc.android.sdk.model.SeedPhrase
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import co.electriccoin.lightwallet.client.model.LightWalletEndpoint
 
 object PersistableWalletFixture {

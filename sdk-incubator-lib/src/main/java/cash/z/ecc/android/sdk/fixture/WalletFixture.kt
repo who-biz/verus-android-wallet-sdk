@@ -3,35 +3,52 @@ package cash.z.ecc.android.sdk.fixture
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.BlockHeight
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
 import cash.z.ecc.android.sdk.model.ZcashNetwork
+import cash.z.ecc.android.sdk.model.decodeHex
 import cash.z.ecc.android.sdk.tool.DerivationTool
 
 /**
  * Provides two default wallets, making it easy to test sending funds back and forth between them.
  */
 sealed class WalletFixture {
-    abstract val seedPhrase: String
+    //abstract val seedPhrase: String
+
+    abstract val hexSeed: String
+
+    abstract val wifString: String
+
+    abstract val extskString: String
 
     abstract fun getBirthday(zcashNetwork: ZcashNetwork): BlockHeight
 
     abstract fun getAddresses(zcashNetwork: ZcashNetwork): Addresses
 
     suspend fun getUnifiedSpendingKey(
-        seed: String = seedPhrase,
+        wif: ByteArray = wifString.decodeBase58WithChecksum().copyOfRange(1,34), //TODO: don't use hardcoded ints
+        extsk: String = extskString,
+        seed: String = hexSeed,
         network: ZcashNetwork,
         account: Account = Account.DEFAULT
     ) = DerivationTool.getInstance().deriveUnifiedSpendingKey(
-        Mnemonics.MnemonicCode(seed).toEntropy(),
+        wif,
+        extsk.decodeHex(),
+        seed.decodeHex(),
         network,
         account
     )
 
     @Suppress("MaxLineLength")
     object Ben : WalletFixture() {
-        override val seedPhrase: String
-            get() =
-                "kitchen renew wide common vague fold vacuum tilt amazing pear square gossip jewel month tree" +
-                    " shock scan alpha just spot fluid toilet view dinner"
+
+        // Base58-encoded WIF goes here
+        override val wifString = ""
+
+        override val extskString = "" 
+
+        override val hexSeed: String
+        // 32 or 64 character hex seed should go here
+            get() = ""
 
         // These birthdays were the latest checkpoint at the time this was implemented
         // Moving these forward will improve testing time, while leaving old transactions behind
@@ -42,7 +59,7 @@ sealed class WalletFixture {
                     BlockHeight.new(zcashNetwork, 2170000L)
                 }
                 ZcashNetwork.ID_MAINNET -> {
-                    BlockHeight.new(zcashNetwork, 1935000L)
+                    BlockHeight.new(zcashNetwork, 227520L)
                 }
                 else -> error("Unknown network $zcashNetwork")
             }
@@ -74,10 +91,24 @@ sealed class WalletFixture {
 
     @Suppress("MaxLineLength")
     object Alice : WalletFixture() {
-        override val seedPhrase: String
+
+	override val wifString: String
+	    get() = ""
+        // MUST ENTER A WIF HERE, or things may not work in demo app
+
+	override val extskString: String
+	    get() = ""
+
+        override val hexSeed: String
+            get() = ""
+        //MUST ENTER A HEX SEED HERE, or demo app may not work
+        // we use HEX SEED and a WIF for this demo scenario
+
+        /*override val seedPhrase: String
             get() =
                 "wish puppy smile loan doll curve hole maze file ginger hair nose key relax knife witness cannon" +
                     " grab despair throw review deal slush frame"
+         */
 
         // These birthdays were the latest checkpoint at the time this was implemented
         // Moving these forward will improve testing time, while leaving old transactions behind
@@ -88,7 +119,7 @@ sealed class WalletFixture {
                     BlockHeight.new(zcashNetwork, 2170000L)
                 }
                 ZcashNetwork.ID_MAINNET -> {
-                    BlockHeight.new(zcashNetwork, 1935000L)
+                    BlockHeight.new(zcashNetwork, 227520L)
                 }
                 else -> error("Unknown network $zcashNetwork")
             }

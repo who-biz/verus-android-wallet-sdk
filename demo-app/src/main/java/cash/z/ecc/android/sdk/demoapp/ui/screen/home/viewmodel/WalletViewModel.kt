@@ -1,6 +1,7 @@
 package cash.z.ecc.android.sdk.demoapp.ui.screen.home.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.bip39.Mnemonics
@@ -29,6 +30,8 @@ import cash.z.ecc.android.sdk.model.WalletBalance
 import cash.z.ecc.android.sdk.model.Zatoshi
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.model.ZecSend
+import cash.z.ecc.android.sdk.model.decodeBase58WithChecksum
+import cash.z.ecc.android.sdk.model.decodeHex
 import cash.z.ecc.android.sdk.model.proposeSend
 import cash.z.ecc.android.sdk.model.send
 import cash.z.ecc.android.sdk.tool.DerivationTool
@@ -94,25 +97,69 @@ class WalletViewModel(application: Application) : AndroidViewModel(application) 
                 SecretState.Loading
             )
 
+    @OptIn(ExperimentalStdlibApi::class)
     val spendingKey =
         secretState
             .filterIsInstance<SecretState.Ready>()
             .map { it.persistableWallet }
             .map {
-                val bip39Seed =
-                    withContext(Dispatchers.IO) {
-                        Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
-                    }
-                DerivationTool.getInstance().deriveUnifiedSpendingKey(
-                    seed = bip39Seed,
-                    network = it.network,
-                    account = Account.DEFAULT
-                )
+                if (null == it.wif) {
+                    val empty = byteArrayOf()
+                    val hexSeed = it.hexSeed.decodeHex()
+                    /*val bip39Seed =
+                        withContext(Dispatchers.IO) {
+                            Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
+                        }*/
+                    DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                        transparentKey = empty,
+                        seed = hexSeed,
+                        network = it.network,
+                        account = Account.DEFAULT
+                    )
+                } else {
+                    Log.w("WifCheck", "WIF included for this Wallet! Using that instead of bip39!")
+                    Log.w("WifCheck", "WIF value: " + it.wif)
+                    val decodedWif = it.wif!!.decodeBase58WithChecksum()
+                    val decodedTrimmedWif = decodedWif.copyOfRange(1, decodedWif.size)
+                    Log.w("WifCheck", "Decoded WIF: " + decodedTrimmedWif.toHexString())
+                    /*val bip39Seed =
+                        withContext(Dispatchers.IO) {
+                            Mnemonics.MnemonicCode(it.seedPhrase.joinToString()).toSeed()
+                        }
+                    */
+                    val hexSeed = it.hexSeed.decodeHex()
+                    Log.w("WifCheck", "bip39 calculated seed: " + hexSeed.toHexString())
+                    DerivationTool.getInstance().deriveUnifiedSpendingKey(
+                        transparentKey = decodedTrimmedWif,
+                        seed = hexSeed,
+                        network = it.network,
+                        account = Account.DEFAULT,
+                    )
+                }
             }.stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
                 null
             )
+
+    @OptIn(ExperimentalStdlibApi::class)
+    val shieldedAddress =
+        secretState
+            .filterIsInstance<SecretState.Ready>()
+            .map { it.persistableWallet }
+            .map {
+                    val hexSeed = it.hexSeed.decodeHex()
+                    DerivationTool.getInstance().deriveShieldedAddress(
+                        seed = hexSeed,
+                        network = it.network,
+                        account = Account.DEFAULT
+                    )
+            }.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
+                null
+            )
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val walletSnapshot: StateFlow<WalletSnapshot?> =

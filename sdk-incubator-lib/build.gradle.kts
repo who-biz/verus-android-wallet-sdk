@@ -16,7 +16,7 @@ plugins {
 publishing {
     publications {
         publications.withType<MavenPublication>().all {
-            artifactId = "zcash-android-sdk-incubator"
+            artifactId = "verus-android-sdk-incubator"
         }
     }
 }
@@ -62,6 +62,7 @@ tasks.dokkaHtml.configure {
 }
 
 dependencies {
+
     implementation(projects.sdkLib)
     implementation(libs.bip39)
 

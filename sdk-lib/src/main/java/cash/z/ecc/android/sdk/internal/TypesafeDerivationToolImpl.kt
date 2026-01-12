@@ -3,6 +3,7 @@ package cash.z.ecc.android.sdk.internal
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
+import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.tool.DerivationTool
 
@@ -18,11 +19,27 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         network: ZcashNetwork
     ): UnifiedFullViewingKey = derivation.deriveUnifiedFullViewingKey(usk, network)
 
+
+/*    override suspend fun deriveViewingKey(
+        seed: ByteArray,
+        network: ZcashNetwork
+    ): ByteArray = derivation.deriveViewingKey(seed, network)
+*/
     override suspend fun deriveUnifiedSpendingKey(
+        transparentKey: ByteArray,
+        extendedSecretKey: ByteArray,
         seed: ByteArray,
         network: ZcashNetwork,
         account: Account
-    ): UnifiedSpendingKey = derivation.deriveUnifiedSpendingKey(seed, network, account)
+    ): UnifiedSpendingKey = derivation.deriveUnifiedSpendingKey(transparentKey, extendedSecretKey, seed, network, account)
+
+
+    override suspend fun deriveSaplingSpendingKey(
+        seed: ByteArray,
+        network: ZcashNetwork,
+        account: Account
+    ): ShieldedSpendingKey = derivation.deriveSaplingSpendingKey(seed, network, account)
+
 
     override suspend fun deriveUnifiedAddress(
         seed: ByteArray,
@@ -34,4 +51,20 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         viewingKey: String,
         network: ZcashNetwork,
     ): String = derivation.deriveUnifiedAddress(viewingKey, network)
+
+    override suspend fun deriveShieldedAddress(
+        viewingKey: String,
+        network: ZcashNetwork,
+    ): String = derivation.deriveShieldedAddress(viewingKey, network)
+
+    override suspend fun deriveShieldedAddress(
+        seed: ByteArray,
+        network: ZcashNetwork,
+        account: Account
+    ): String = derivation.deriveShieldedAddress(seed, network, account)
+
+    override suspend fun isValidShieldedAddress(
+        address: String,
+        network: ZcashNetwork
+    ): Boolean = derivation.isValidShieldedAddress(address, network)
 }

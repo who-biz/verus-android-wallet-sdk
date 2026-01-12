@@ -4,7 +4,7 @@ val publicationVariant = "release"
 val isSnapshot = project.property("IS_SNAPSHOT").toString().toBoolean()
 val myVersion = project.property("LIBRARY_VERSION").toString()
 
-val myGroup = "cash.z.ecc.android"
+val myGroup = "com.github.VerusCoin"
 project.group = myGroup
 
 pluginManager.withPlugin("com.android.library") {
@@ -86,7 +86,7 @@ plugins.withId("org.gradle.maven-publish") {
         }
     }
 
-    plugins.withId("org.gradle.signing") {
+    /*plugins.withId("org.gradle.signing") {
         project.the<SigningExtension>().apply {
             // Maven Central requires signing for non-snapshots
             isRequired = !isSnapshot
@@ -107,5 +107,5 @@ plugins.withId("org.gradle.maven-publish") {
 
             sign(publishingExtension.publications)
         }
-    }
+    }*/
 }

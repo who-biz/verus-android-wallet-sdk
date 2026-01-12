@@ -1,4 +1,5 @@
 buildscript {
+
     repositories {
         google()
         gradlePluginPortal()
@@ -16,6 +17,7 @@ plugins {
     id("zcash-sdk.detekt-conventions")
     id("zcash-sdk.ktlint-conventions")
     id("zcash-sdk.rosetta-conventions")
+    `maven-publish`
 }
 
 tasks {
@@ -86,49 +88,15 @@ fun isNonStable(version: String): Boolean {
     return unstableKeywords.any { versionLowerCase.contains(it) }
 }
 
-fladle {
-    // Firebase Test Lab has min and max values that might differ from our project's
-    // These are determined by `gcloud firebase test android models list`
-    @Suppress("MagicNumber", "VariableNaming")
-    val FIREBASE_TEST_LAB_MIN_API = 27 // Minimum for Pixel2.arm device
-
-    @Suppress("MagicNumber", "VariableNaming")
-    val FIREBASE_TEST_LAB_MAX_API = 33
-
-    val minSdkVersion = run {
-        val buildMinSdk = project.properties["ANDROID_MIN_SDK_VERSION"].toString().toInt()
-        buildMinSdk.coerceAtLeast(FIREBASE_TEST_LAB_MIN_API).toString()
-    }
-    val targetSdkVersion = run {
-        val buildTargetSdk = project.properties["ANDROID_TARGET_SDK_VERSION"].toString().toInt()
-        buildTargetSdk.coerceAtMost(FIREBASE_TEST_LAB_MAX_API).toString()
-    }
-
-    val firebaseTestLabKeyPath = project.properties["ZCASH_FIREBASE_TEST_LAB_API_KEY_PATH"].toString()
-    val firebaseProject = project.properties["ZCASH_FIREBASE_TEST_LAB_PROJECT"].toString()
-
-    if (firebaseTestLabKeyPath.isNotEmpty()) {
-        serviceAccountCredentials.set(File(firebaseTestLabKeyPath))
-    } else if (firebaseProject.isNotEmpty()) {
-        projectId.set(firebaseProject)
-    }
-
-    devices.addAll(
-        mapOf("model" to "Pixel2.arm", "version" to minSdkVersion),
-        mapOf("model" to "Pixel2.arm", "version" to targetSdkVersion)
-    )
-
-    @Suppress("MagicNumber")
-    flakyTestAttempts.set(2)
-
-    flankVersion.set(libs.versions.flank.get())
-
-    filesToDownload.set(listOf(
-        "*/matrix_*/*test_results_merged\\.xml",
-        "*/matrix_*/*/artifacts/sdcard/googletest/test_outputfiles/*\\.png"
-    ))
-
-    directoriesToPull.set(listOf(
-        "/sdcard/googletest/test_outputfiles"
-    ))
-}
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            release(MavenPublication) {
+//                from components.release
+//                groupId = "com.github.VerusCoin"
+//                artifactId = "verus-android-wallet-sdk"
+//                version = '0.0.1'
+//            }
+//        }
+//    }
+//}

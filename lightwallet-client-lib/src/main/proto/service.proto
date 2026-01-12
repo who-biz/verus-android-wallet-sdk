@@ -115,8 +115,8 @@ message TreeState {
     uint64 height = 2;      // block height
     string hash = 3;        // block id
     uint32 time = 4;        // Unix epoch time when the block was mined
-    string saplingTree = 5; // sapling commitment tree state
-    string orchardTree = 6; // orchard commitment tree state
+    string tree = 5; // sapling commitment tree state
+//    string orchardTree = 6; // orchard commitment tree state
 }
 
 enum ShieldedProtocol {

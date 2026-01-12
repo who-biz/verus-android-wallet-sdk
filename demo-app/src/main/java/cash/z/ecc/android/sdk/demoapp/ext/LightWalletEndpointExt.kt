@@ -17,12 +17,13 @@ internal fun LightWalletEndpoint.Companion.defaultForNetwork(zcashNetwork: Zcash
     }
 }
 
-private const val DEFAULT_PORT = 9067
+private const val DEFAULT_PORT = 8120
 
 internal val LightWalletEndpoint.Companion.Mainnet
     get() =
         LightWalletEndpoint(
-            "mainnet.lightwalletd.com",
+            // below URL is strictly for demo app usage
+            "lightwallet.verus.services",
             DEFAULT_PORT,
             isSecure = true
         )
