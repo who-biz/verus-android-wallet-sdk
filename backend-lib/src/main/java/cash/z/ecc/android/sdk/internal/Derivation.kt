@@ -91,8 +91,8 @@ interface Derivation {
         spendingKey: ByteArray?,
         hdIndex: Int,
         encryptionIndex: Int,
-        fromId: String?,
-        toId: String?,
+        fromId: ByteArray?,
+        toId: ByteArray?,
         returnSecret: Boolean
     ): ChannelKeys
 

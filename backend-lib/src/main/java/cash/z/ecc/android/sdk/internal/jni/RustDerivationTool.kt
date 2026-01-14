@@ -103,8 +103,8 @@ class RustDerivationTool private constructor() : Derivation {
         spendingKey: ByteArray?,
         hdIndex: Int,
         encryptionIndex: Int,
-        fromId: String?,
-        toId: String?,
+        fromId: ByteArray?,
+        toId: ByteArray?,
         returnSecret: Boolean
     ): ChannelKeys = zGetEncryptionAddress(seed, spendingKey, hdIndex, encryptionIndex, fromId, toId, returnSecret)
 
@@ -208,8 +208,8 @@ class RustDerivationTool private constructor() : Derivation {
             spendingKey: ByteArray?,
             hdIndex: Int,
             encryptionIndex: Int,
-            fromId: String?,
-            toId: String?,
+            fromId: ByteArray?,
+            toId: ByteArray?,
             returnSecret: Boolean
         ): ChannelKeys
 

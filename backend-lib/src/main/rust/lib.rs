@@ -919,8 +919,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
     spending_key: JByteArray<'local>,
     hd_index: jint,
     encryption_index: jint,
-    from_id: JString<'local>,
-    to_id: JString<'local>,
+    from_id: JByteArray<'local>,
+    to_id: JByteArray<'local>,
     return_secret: jboolean,
 ) -> jobject {
     // we wrap our logic in a catch_unwind block so that if the rust code panics
@@ -933,10 +933,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
             spending_key: if spending_key.is_null() { None } else { Some(SecretVec::new(env.convert_byte_array(&spending_key)?.into())) },
             hd_index: if hd_index == -1 { None } else { Some(hd_index as u32) },
             encryption_index: encryption_index as u32,
-//            from_id: if from_id.is_null() { None } else { Some(SecretVec::new(env.convert_byte_array(&from_id)?.into()).unwrap()) },
-//            to_id: if to_id.is_null() { None } else { Some(SecretVec::new(env.convert_byte_array(&to_id)?.into()).unwrap()) },
-            from_id: if from_id.is_null() { None } else { Some(env.get_string(&from_id)?.into()) },
-            to_id: if to_id.is_null() { None } else { Some(env.get_string(&to_id)?.into()) },
+            from_id: if from_id.is_null() { None } else { Some(env.convert_byte_array(&from_id)?.into()) },
+            to_id: if to_id.is_null() { None } else { Some(env.convert_byte_array(&to_id)?.into()) },
             return_secret: return_secret == JNI_TRUE,
         };
 

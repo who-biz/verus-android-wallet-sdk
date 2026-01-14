@@ -84,6 +84,8 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         network: ZcashNetwork
     ): String = derivation.generateSymmetricKey(saplingAddress, network)
 
+    //TODO: remove this entirely, not used and only partially implemented.
+    // Biz strictly built this (partially) to get Artist started
     override suspend fun getEncryptionAddress(
         seed: ByteArray,
         fromId: ByteArray,
@@ -95,8 +97,8 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
     override suspend fun getVerusEncryptionAddress(
         seed: ByteArray?,
         spendingKey: ByteArray?,
-        fromId: String?,
-        toId: String?,
+        fromId: ByteArray?,
+        toId: ByteArray?,
         hdIndex: Int,
         encryptionIndex: Int,
         returnSecret: Boolean

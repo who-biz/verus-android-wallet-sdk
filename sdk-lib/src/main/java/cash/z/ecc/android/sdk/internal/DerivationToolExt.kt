@@ -110,8 +110,8 @@ fun Derivation.getEncryptionAddress(
 fun Derivation.getVerusEncryptionAddress(
     seed: ByteArray?,
     spendingKey: ByteArray?,
-    fromId: String?,
-    toId: String?,
+    fromId: ByteArray?,
+    toId: ByteArray?,
     hdIndex: Int,
     encryptionIndex: Int,
     returnSecret: Boolean
