@@ -87,8 +87,8 @@ interface Derivation {
     ): String
 
     fun getVerusEncryptionAddress(
-        seed: String?,
-        spendingKey: String?,
+        seed: ByteArray?,
+        spendingKey: ByteArray?,
         hdIndex: Int,
         encryptionIndex: Int,
         fromId: String?,

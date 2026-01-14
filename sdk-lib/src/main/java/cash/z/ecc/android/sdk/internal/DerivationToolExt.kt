@@ -109,17 +109,15 @@ fun Derivation.getEncryptionAddress(
 
 fun Derivation.getVerusEncryptionAddress(
     seed: ByteArray?,
-    spendingKey: String?,
+    spendingKey: ByteArray?,
     fromId: String?,
     toId: String?,
     hdIndex: Int,
     encryptionIndex: Int,
     returnSecret: Boolean
 ): ChannelKeys {
-    val seedHex = seed?.let { cash.z.ecc.android.sdk.internal.ext.Hex.toHexString(it) }
-
     return getVerusEncryptionAddress(
-        seed = seedHex,
+        seed = seed,
         spendingKey = spendingKey,
         hdIndex = hdIndex,
         encryptionIndex = encryptionIndex,

@@ -94,18 +94,17 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
 
     override suspend fun getVerusEncryptionAddress(
         seed: ByteArray?,
-        spendingKey: String?,
+        spendingKey: ByteArray?,
         fromId: String?,
         toId: String?,
         hdIndex: Int,
         encryptionIndex: Int,
         returnSecret: Boolean
     ): ChannelKeys {
-        val seedHex = seed?.let { Hex.toHexString(it) }
         // We must call the NEW function "getVerusEncryptionAddress" on the derivation object,
         // not the old function "getEncryptionAddress".
         return derivation.getVerusEncryptionAddress(
-            seed = seedHex,
+            seed = seed,
             spendingKey = spendingKey,
             hdIndex = hdIndex,
             encryptionIndex = encryptionIndex,

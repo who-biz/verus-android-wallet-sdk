@@ -99,8 +99,8 @@ class RustDerivationTool private constructor() : Derivation {
     }
 
     override fun getVerusEncryptionAddress(
-        seed: String?,
-        spendingKey: String?,
+        seed: ByteArray?,
+        spendingKey: ByteArray?,
         hdIndex: Int,
         encryptionIndex: Int,
         fromId: String?,
@@ -204,8 +204,8 @@ class RustDerivationTool private constructor() : Derivation {
 
         @JvmStatic
         private external fun zGetEncryptionAddress(
-            seed: String?,
-            spendingKey: String?,
+            seed: ByteArray?,
+            spendingKey: ByteArray?,
             hdIndex: Int,
             encryptionIndex: Int,
             fromId: String?,

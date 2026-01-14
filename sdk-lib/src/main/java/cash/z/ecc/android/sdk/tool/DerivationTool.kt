@@ -168,7 +168,7 @@ interface DerivationTool {
      */
     suspend fun getVerusEncryptionAddress(
         seed: ByteArray?,
-        spendingKey: String?,
+        spendingKey: ByteArray?,
         fromId: String?,
         toId: String?,
         hdIndex: Int = 0,
