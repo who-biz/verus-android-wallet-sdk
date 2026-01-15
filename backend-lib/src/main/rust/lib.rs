@@ -953,6 +953,8 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         // We should move java object construction into a separate 'encode_channel_keys' function here too
 
         let address_java = env.new_string(&channel_keys.address)?;
+        let fvk_java = env.byte_array_from_slice(&channel_keys.fvk_bytes.expose_secret())?;
+
         let dfvk_java = env.byte_array_from_slice(&channel_keys.dfvk_bytes.expose_secret())?;
 
         //TODO: I'm not sure IVK needs to be optional, or benefits from being declared as such, for now.
@@ -970,9 +972,10 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         //TODO: (Biz) this should be moved into a separate 'encode_channel_keys' function
         let result_obj = env.new_object(
             "cash/z/ecc/android/sdk/model/ChannelKeys",
-            "(Ljava/lang/String;[B[B[B)V",
+            "(Ljava/lang/String;[B[B[B[B)V",
             &[
                 JValue::Object(&address_java.into()),
+                JValue::Object(&fvk_java),
                 JValue::Object(&dfvk_java),
                 JValue::Object(&ivk_java),
                 JValue::Object(&sk_java),
