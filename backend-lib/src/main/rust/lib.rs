@@ -923,11 +923,16 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
     to_id: JByteArray<'local>,
     return_secret: jboolean,
 ) -> jobject {
-    // we wrap our logic in a catch_unwind block so that if the rust code panics
-    // it doesn't crash the entire android app. we can catch it and return null instead
     let res = catch_unwind(&mut env, |env| {
-        // we need to translate all the incoming java types into types that rust
-        // understands. this means handling potential nulls and converting java strings
+        if hd_index < -1 {
+            // -1 is valid here, because we pass this through as sentinel for None conversion, when we do not have 
+            // a meaningful index scenario (i.e. extsk-based derivation carries hdIndex with it inherently)
+            return Err(anyhow!("Invalid hd_index value! expected >= -1, actual {:?}", hd_index));
+        }
+        if encryption_index < 0 {
+            // conversely, -1 is not a valid argument here. encryption index is always meaningful in all contexts
+            return Err(anyhow!("Invalid hd_index value! expected >= -1, actual {:?}", hd_index));
+        }
         let params = RpcParams {
             seed: if seed.is_null() { None } else { Some(SecretVec::new(env.convert_byte_array(seed)?.into())) },
             spending_key: if spending_key.is_null() { None } else { Some(SecretVec::new(env.convert_byte_array(&spending_key)?.into())) },
@@ -938,38 +943,37 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
             return_secret: return_secret == JNI_TRUE,
         };
 
-        // now we can call our pure rust function to do all the heavy lifting.
+        // this is the pure rust function in 'verus_zfunc' crate
         let channel_keys = z_getencryptionaddress(params)
             .map_err(|e| anyhow!("z_getencryptionaddress failed: {}", e))?;
 
-        // with the result back from our rust logic, we have to translate it back
-        // into a java object that the android sdk can understand.
+        //TODO: (Biz) we need to rework all of the below, and create JniChannelKeys class in Android SDK
+        // JniChannelKeys class will properly shield these values from logging, etc, and should check validity
+        // of members as well. Will also provide a single accessing function, to lock down as tightly as possible.
+        // We should move java object construction into a separate 'encode_channel_keys' function here too
+
         let address_java = env.new_string(&channel_keys.address)?;
-        let fvk_java = env.new_string(&channel_keys.fvk)?;
-        let fvk_hex_java = env.new_string(&channel_keys.fvk_hex)?;
-        let dfvk_hex_java = env.new_string(&channel_keys.dfvk_hex)?;
+        let dfvk_java = env.byte_array_from_slice(&channel_keys.dfvk_bytes.expose_secret())?;
 
-        let ivk_java = match channel_keys.ivk {
-            Some(ivk) => env.new_string(ivk)?.into(),
+        //TODO: I'm not sure IVK needs to be optional, or benefits from being declared as such, for now.
+        // dfvk needs to be optional too, if ivk is optional. good feature for later, if we want
+        let ivk_java = match channel_keys.ivk_bytes {
+            Some(ivk) => env.byte_array_from_slice(ivk.expose_secret())?.into(),
             None => JObject::null(),
         };
 
-        let sk_java = match channel_keys.spending_key {
-            Some(sk) => env.new_string(sk)?.into(),
+        let sk_java = match channel_keys.spending_key_bytes {
+            Some(sk) => env.byte_array_from_slice(sk.expose_secret())?.into(),
             None => JObject::null(),
         };
 
-        // here we're building the new java object. the path and the constructor signature
-        // string must exactly match the definition in the kotlin/java code
+        //TODO: (Biz) this should be moved into a separate 'encode_channel_keys' function
         let result_obj = env.new_object(
-            "cash/z/ecc/android/sdk/model/ChannelKeys", // path to the kotlin/java data class
-            // the constructor signature: (String, String, String, String, String, String) -> void
-            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+            "cash/z/ecc/android/sdk/model/ChannelKeys",
+            "(Ljava/lang/String;[B[B[B)V",
             &[
-                JValue::Object(&address_java),
-                JValue::Object(&fvk_java),
-                JValue::Object(&fvk_hex_java),
-                JValue::Object(&dfvk_hex_java),
+                JValue::Object(&address_java.into()),
+                JValue::Object(&dfvk_java),
                 JValue::Object(&ivk_java),
                 JValue::Object(&sk_java),
             ],

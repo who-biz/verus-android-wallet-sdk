@@ -447,7 +447,7 @@ checksum = "a47c1c47d2f5964e29c61246e81db715514cd532db6b5116a25ea3c03d6780a2"
 [[package]]
 name = "equihash"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -472,7 +472,7 @@ dependencies = [
 [[package]]
 name = "f4jumble"
 version = "0.1.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "blake2b_simd",
 ]
@@ -1850,7 +1850,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 [[package]]
 name = "verus_zfunc"
 version = "0.1.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "anyhow",
  "bech32",
@@ -2197,7 +2197,7 @@ dependencies = [
 [[package]]
 name = "zcash_address"
 version = "0.3.2"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "bech32",
  "bs58",
@@ -2209,7 +2209,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_backend"
 version = "0.12.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "base64",
  "bech32",
@@ -2248,7 +2248,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_sqlite"
 version = "0.10.3"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "bs58",
  "byteorder",
@@ -2281,7 +2281,7 @@ dependencies = [
 [[package]]
 name = "zcash_encoding"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "byteorder",
  "nonempty",
@@ -2290,7 +2290,7 @@ dependencies = [
 [[package]]
 name = "zcash_keys"
 version = "0.2.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "bech32",
  "blake2b_simd",
@@ -2328,7 +2328,7 @@ dependencies = [
 [[package]]
 name = "zcash_primitives"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "aes",
  "bip0039",
@@ -2363,7 +2363,7 @@ dependencies = [
 [[package]]
 name = "zcash_proofs"
 version = "0.15.0"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "bellman",
  "blake2b_simd",
@@ -2385,7 +2385,7 @@ dependencies = [
 [[package]]
 name = "zcash_protocol"
 version = "0.1.1"
-source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#3abde12c22d1e1f8bd236eebf4a6a80418fe2118"
+source = "git+https://github.com/who-biz/librustzcash?branch=ka_agree-security-fixes#b42acf6b4059bbde827c1f0aca3a0a0090f6c9ba"
 dependencies = [
  "document-features",
  "memuse",
