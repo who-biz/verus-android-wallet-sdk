@@ -4,6 +4,6 @@ data class ChannelKeys(
     val address: String,
     val fvkBytes: ByteArray,
     val dfvkBytes: ByteArray,
-    val ivkBytes: ByteArray?,
+    val ivkBytes: ByteArray,
     val spendingKeyBytes: ByteArray?
 )

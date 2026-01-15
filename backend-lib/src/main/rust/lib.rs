@@ -947,9 +947,9 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         let channel_keys = z_getencryptionaddress(params)
             .map_err(|e| anyhow!("z_getencryptionaddress failed: {}", e))?;
 
-        //TODO: (Biz) we need to rework all of the below, and create JniChannelKeys class in Android SDK
+        //TODO: (Biz) we need to rework all of the below object creation, and create a 'JniChannelKeys' class in Android SDK
         // JniChannelKeys class will properly shield these values from logging, etc, and should check validity
-        // of members as well. Will also provide a single accessing function, to lock down as tightly as possible.
+        // of members as well. Will also provide a single byte-accessing function, to lock down as tightly as possible.
         // We should move java object construction into a separate 'encode_channel_keys' function here too
 
         let address_java = env.new_string(&channel_keys.address)?;
@@ -957,12 +957,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
 
         let dfvk_java = env.byte_array_from_slice(&channel_keys.dfvk_bytes.expose_secret())?;
 
-        //TODO: I'm not sure IVK needs to be optional, or benefits from being declared as such, for now.
-        // dfvk needs to be optional too, if ivk is optional. good feature for later, if we want
-        let ivk_java = match channel_keys.ivk_bytes {
-            Some(ivk) => env.byte_array_from_slice(ivk.expose_secret())?.into(),
-            None => JObject::null(),
-        };
+        let ivk_java = env.byte_array_from_slice(&channel_keys.ivk_bytes.expose_secret())?;
 
         let sk_java = match channel_keys.spending_key_bytes {
             Some(sk) => env.byte_array_from_slice(sk.expose_secret())?.into(),
