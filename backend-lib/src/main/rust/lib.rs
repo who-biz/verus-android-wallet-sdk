@@ -1003,7 +1003,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         //TODO: (Biz) this should be moved into a separate 'encode_channel_keys' function
         let result_obj = env.new_object(
             "cash/z/ecc/android/sdk/model/ChannelKeys",
-            "(Ljava/lang/String;[B[B[B[B)V",
+            "(Ljava/lang/String;[B[B[B)V",
             &[
                 JValue::Object(&address_java.into()),
                 JValue::Object(&fvk_java),
