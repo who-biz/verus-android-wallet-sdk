@@ -3,8 +3,8 @@ package cash.z.ecc.android.sdk.internal.jni
 import cash.z.ecc.android.sdk.internal.Derivation
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
+import cash.z.ecc.android.sdk.internal.model.JniChannelKeys
 
-import cash.z.ecc.android.sdk.model.ChannelKeys
 import cash.z.ecc.android.sdk.model.EncryptedPayload
 
 class RustDerivationTool private constructor() : Derivation {
@@ -106,7 +106,7 @@ class RustDerivationTool private constructor() : Derivation {
         fromId: ByteArray?,
         toId: ByteArray?,
         returnSecret: Boolean
-    ): ChannelKeys = zGetEncryptionAddress(seed, spendingKey, hdIndex, encryptionIndex, fromId, toId, returnSecret)
+    ): JniChannelKeys = zGetEncryptionAddress(seed, spendingKey, hdIndex, encryptionIndex, fromId, toId, returnSecret)
 
     override fun encryptVerusMessage(
         addressString: String,
@@ -211,7 +211,7 @@ class RustDerivationTool private constructor() : Derivation {
             fromId: ByteArray?,
             toId: ByteArray?,
             returnSecret: Boolean
-        ): ChannelKeys
+        ): JniChannelKeys
 
         @JvmStatic
         private external fun encryptMessage(
