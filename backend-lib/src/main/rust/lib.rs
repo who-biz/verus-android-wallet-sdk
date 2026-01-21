@@ -161,7 +161,7 @@ fn account_id_from_jint(account: jint) -> anyhow::Result<zip32::AccountId> {
 // JNI won't let us handle the JByteArray directly into a fixed-size array, using helper functions only. The single-copy functions they
 // provide all require heap allocated memory.  This keeps memory allocs out of heap, and results in a single copy. Using the helper functions,
 // i.e. env.convert_byte_array, we are forced to either create 2 copies, or forced into heap allocation
-fn single_copy_read_extsk(env: &mut JNIEnv<'_>, arr: &JByteArray<'_>) -> anyhow::Result<Secret<[u8; 169]>> {
+fn single_copy_read_ext_key(env: &mut JNIEnv<'_>, arr: &JByteArray<'_>) -> anyhow::Result<Secret<[u8; 169]>> {
     let len = env.get_array_length(arr)?;
     if len != 169 {
         anyhow::bail!("spending_key must be 169 bytes, got {}", len);
@@ -366,6 +366,35 @@ fn encode_extsk<'a>(
         "(I[B)V",
         &[JValue::Int(u32::from(account) as i32), (&bytes).into()],
     )
+}
+
+pub fn encode_channel_keys<'a>(
+    env: &mut JNIEnv<'a>,
+    address: &String,
+    extfvk_bytes: &Secret<[u8; 169]>,
+    spending_key_bytes: Option<&Secret<[u8; 169]>>,
+    ivk_bytes: &Secret<[u8; 32]>,
+) -> jni::errors::Result<JObject<'a>> {
+    let address_java = env.new_string(address)?;
+    let fvk_java = env.byte_array_from_slice(extfvk_bytes.expose_secret().as_slice())?;
+
+    let ivk_java = env.byte_array_from_slice(ivk_bytes.expose_secret().as_slice())?;
+
+    let sk_java = match spending_key_bytes {
+        Some(sk) => env.byte_array_from_slice(&sk.expose_secret().as_slice())?.into(),
+        None => JObject::null(),
+    };
+
+    Ok(env.new_object(
+        "cash/z/ecc/android/sdk/internal/model/JniChannelKeys",
+        "(Ljava/lang/String;[B[B[B)V",
+        &[
+            JValue::Object(&address_java.into()),
+            JValue::Object(&fvk_java),
+            JValue::Object(&ivk_java),
+            JValue::Object(&sk_java),
+        ],
+    )?)
 }
 
 fn decode_usk(env: &JNIEnv, usk: JByteArray) -> anyhow::Result<UnifiedSpendingKey> {
@@ -955,7 +984,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         }
 
         let seed = if seed.is_null() { None } else { Some(SecretVec::new(env.convert_byte_array(seed)?.into())) };
-        let spending_key = if spending_key.is_null() { None } else { Some(single_copy_read_extsk(env, &spending_key)?) };
+        let spending_key = if spending_key.is_null() { None } else { Some(single_copy_read_ext_key(env, &spending_key)?) };
         let hd_index = if hd_index == -1 { None } else { Some(hd_index as u32) };   
         let encryption_index = encryption_index as u32;
         let return_secret = { return_secret == JNI_TRUE };
@@ -985,35 +1014,7 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zG
         let channel_keys = z_getencryptionaddress(seed.as_ref(), spending_key.as_ref(), hd_index, encryption_index, from_id_bytes.as_ref(), to_id_bytes.as_ref(), return_secret)
             .map_err(|e| anyhow!("z_getencryptionaddress failed: {}", e))?;
 
-        //TODO: (Biz) we need to rework all of the below object creation, and create a 'JniChannelKeys' class in Android SDK
-        // JniChannelKeys class will properly shield these values from logging, etc, and should check validity
-        // of members as well. Will also provide a single byte-accessing function, to lock down as tightly as possible.
-        // We should move java object construction into a separate 'encode_channel_keys' function here too
-
-        let address_java = env.new_string(&channel_keys.address)?;
-        let fvk_java = env.byte_array_from_slice(&channel_keys.extfvk_bytes.expose_secret().as_slice())?;
-
-        let ivk_java = env.byte_array_from_slice(&channel_keys.ivk_bytes.expose_secret().as_slice())?;
-
-        let sk_java = match channel_keys.spending_key_bytes {
-            Some(sk) => env.byte_array_from_slice(&sk.expose_secret().as_slice())?.into(),
-            None => JObject::null(),
-        };
-
-        //TODO: (Biz) this should be moved into a separate 'encode_channel_keys' function
-        let result_obj = env.new_object(
-            "cash/z/ecc/android/sdk/model/ChannelKeys",
-            "(Ljava/lang/String;[B[B[B)V",
-            &[
-                JValue::Object(&address_java.into()),
-                JValue::Object(&fvk_java),
-                JValue::Object(&ivk_java),
-                JValue::Object(&sk_java),
-            ],
-        )?;
-
-        // return the raw pointer to the newly created java object.
-        Ok(result_obj.into_raw())
+        Ok(encode_channel_keys(env, &channel_keys.address, &channel_keys.extfvk_bytes, channel_keys.spending_key_bytes.as_ref(), &channel_keys.ivk_bytes)?.into_raw())
     });
 
     unwrap_exc_or(&mut env, res, std::ptr::null_mut())
