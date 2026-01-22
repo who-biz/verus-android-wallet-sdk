@@ -6,10 +6,10 @@ import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
 import cash.z.ecc.android.sdk.model.UnifiedSpendingKey
 import cash.z.ecc.android.sdk.model.ShieldedSpendingKey
 import cash.z.ecc.android.sdk.model.SharedSecret
+import cash.z.ecc.android.sdk.model.ChannelKeys
 import cash.z.ecc.android.sdk.model.ZcashNetwork
 import cash.z.ecc.android.sdk.tool.DerivationTool
 import cash.z.ecc.android.sdk.internal.ext.Hex
-import cash.z.ecc.android.sdk.model.ChannelKeys
 import cash.z.ecc.android.sdk.model.EncryptedPayload
 
 internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : DerivationTool {
@@ -102,10 +102,7 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
         hdIndex: Int,
         encryptionIndex: Int,
         returnSecret: Boolean
-    ): ChannelKeys {
-        // We must call the NEW function "getVerusEncryptionAddress" on the derivation object,
-        // not the old function "getEncryptionAddress".
-        return derivation.getVerusEncryptionAddress(
+    ): ChannelKeys = ChannelKeys(derivation.getVerusEncryptionAddress(
             seed = seed,
             spendingKey = spendingKey,
             hdIndex = hdIndex,
@@ -114,7 +111,7 @@ internal class TypesafeDerivationToolImpl(private val derivation: Derivation) : 
             toId = toId,
             returnSecret = returnSecret
         )
-    }
+    )
 
     override suspend fun encryptVerusMessage(
         address: String,

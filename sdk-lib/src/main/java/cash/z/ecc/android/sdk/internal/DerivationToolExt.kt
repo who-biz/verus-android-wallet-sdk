@@ -1,7 +1,7 @@
 package cash.z.ecc.android.sdk.internal
 
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
-//import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
+import cash.z.ecc.android.sdk.internal.model.JniChannelKeys
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.EphemeralPublicKey
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
@@ -115,8 +115,7 @@ fun Derivation.getVerusEncryptionAddress(
     hdIndex: Int,
     encryptionIndex: Int,
     returnSecret: Boolean
-): ChannelKeys {
-    return getVerusEncryptionAddress(
+): ChannelKeys = ChannelKeys(getVerusEncryptionAddress(
         seed = seed,
         spendingKey = spendingKey,
         hdIndex = hdIndex,
@@ -125,7 +124,7 @@ fun Derivation.getVerusEncryptionAddress(
         toId = toId,
         returnSecret = returnSecret
     )
-}
+)
 
 
 fun Derivation.encryptMessage(
