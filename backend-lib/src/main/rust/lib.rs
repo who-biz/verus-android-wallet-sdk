@@ -13,12 +13,12 @@ use anyhow::anyhow;
 use jni::objects::{JByteArray, JObject, JObjectArray, JValue};
 use jni::{
     objects::{JClass, JString},
-    sys::{jboolean, jbyteArray, jint, jlong, jobject, jobjectArray, jstring, JNI_FALSE, JNI_TRUE},
+    sys::{jboolean, jbyte, jbyteArray, jint, jlong, jobject, jobjectArray, jstring, JNI_FALSE, JNI_TRUE},
     JNIEnv,
 };
 use prost::Message;
 use sapling::zip32::ExtendedSpendingKey;
-use secrecy::{ExposeSecret, SecretVec};
+use secrecy::{ExposeSecret, SecretVec, Secret};
 use tracing::{debug, error};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::reload;
@@ -27,8 +27,6 @@ use verus_zfunc::{
         z_getencryptionaddress,
         encrypt_message,
         decrypt_message,
-        RpcParams,
-        //EncryptedPayload,
         DecryptParams
  };
 //use chacha20poly1305::{ChaCha20Poly1305, KeyInit, AeadInPlace, Key};
@@ -115,6 +113,9 @@ use crate::utils::{catch_unwind, exception::unwrap_exc_or};
 
 mod utils;
 
+//TODO: move this constant into librustzcash
+const HASH160_BYTE_LEN: usize = 20;
+
 const ANCHOR_OFFSET_U32: u32 = 10;
 const ANCHOR_OFFSET: NonZeroU32 = unsafe { NonZeroU32::new_unchecked(ANCHOR_OFFSET_U32) };
 
@@ -155,6 +156,25 @@ fn account_id_from_jint(account: jint) -> anyhow::Result<zip32::AccountId> {
         .map_err(|_| ())
         .and_then(|id| zip32::AccountId::try_from(id).map_err(|_| ()))
         .map_err(|_| anyhow!("Invalid account ID"))
+}
+
+// JNI won't let us handle the JByteArray directly into a fixed-size array, using helper functions only. The single-copy functions they
+// provide all require heap allocated memory.  This keeps memory allocs out of heap, and results in a single copy. Using the helper functions,
+// i.e. env.convert_byte_array, we are forced to either create 2 copies, or forced into heap allocation
+fn single_copy_read_ext_key(env: &mut JNIEnv<'_>, arr: &JByteArray<'_>) -> anyhow::Result<Secret<[u8; 169]>> {
+    let len = env.get_array_length(arr)?;
+    if len != 169 {
+        anyhow::bail!("spending_key must be 169 bytes, got {}", len);
+    }
+
+    let mut out = [0u8; 169];
+    env.get_byte_array_region(
+        arr,
+        0,
+        unsafe { std::slice::from_raw_parts_mut(out.as_mut_ptr() as *mut jbyte, 169) },
+    )?;
+
+    Ok(Secret::new(out))
 }
 
 fn account_id_from_jni<'local, P: Parameters>(
@@ -346,6 +366,35 @@ fn encode_extsk<'a>(
         "(I[B)V",
         &[JValue::Int(u32::from(account) as i32), (&bytes).into()],
     )
+}
+
+pub fn encode_channel_keys<'a>(
+    env: &mut JNIEnv<'a>,
+    address: &String,
+    extfvk_bytes: &Secret<[u8; 169]>,
+    spending_key_bytes: Option<&Secret<[u8; 169]>>,
+    ivk_bytes: &Secret<[u8; 32]>,
+) -> jni::errors::Result<JObject<'a>> {
+    let address_java = env.new_string(address)?;
+    let fvk_java = env.byte_array_from_slice(extfvk_bytes.expose_secret().as_slice())?;
+
+    let ivk_java = env.byte_array_from_slice(ivk_bytes.expose_secret().as_slice())?;
+
+    let sk_java = match spending_key_bytes {
+        Some(sk) => env.byte_array_from_slice(&sk.expose_secret().as_slice())?.into(),
+        None => JObject::null(),
+    };
+
+    Ok(env.new_object(
+        "cash/z/ecc/android/sdk/internal/model/JniChannelKeys",
+        "(Ljava/lang/String;[B[B[B)V",
+        &[
+            JValue::Object(&address_java.into()),
+            JValue::Object(&fvk_java),
+            JValue::Object(&ivk_java),
+            JValue::Object(&sk_java),
+        ],
+    )?)
 }
 
 fn decode_usk(env: &JNIEnv, usk: JByteArray) -> anyhow::Result<UnifiedSpendingKey> {
@@ -915,68 +964,57 @@ pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_ge
 pub extern "C" fn Java_cash_z_ecc_android_sdk_internal_jni_RustDerivationTool_zGetEncryptionAddress<'local>(
     mut env: JNIEnv<'local>,
     _class: JObject<'local>,
-    seed: JString<'local>,
-    spending_key: JString<'local>,
+    seed: JByteArray<'local>,
+    spending_key: JByteArray<'local>,
     hd_index: jint,
     encryption_index: jint,
-    from_id: JString<'local>,
-    to_id: JString<'local>,
+    from_id: JByteArray<'local>,
+    to_id: JByteArray<'local>,
     return_secret: jboolean,
 ) -> jobject {
-    // we wrap our logic in a catch_unwind block so that if the rust code panics
-    // it doesn't crash the entire android app. we can catch it and return null instead
     let res = catch_unwind(&mut env, |env| {
-        // we need to translate all the incoming java types into types that rust
-        // understands. this means handling potential nulls and converting java strings
-        let params = RpcParams {
-            seed: if seed.is_null() { None } else { Some(env.get_string(&seed)?.into()) },
-            spending_key: if spending_key.is_null() { None } else { Some(env.get_string(&spending_key)?.into()) },
-            hd_index: if hd_index == -1 { None } else { Some(hd_index as u32) },
-            encryption_index: encryption_index as u32,
-            from_id: if from_id.is_null() { None } else { Some(env.get_string(&from_id)?.into()) },
-            to_id: if to_id.is_null() { None } else { Some(env.get_string(&to_id)?.into()) },
-            return_secret: return_secret == JNI_TRUE,
+        if hd_index < -1 {
+            // -1 is valid here, because we pass this through as sentinel for None conversion, when we do not have 
+            // a meaningful index scenario (i.e. extsk-based derivation carries hdIndex with it inherently)
+            return Err(anyhow!("Invalid hd_index value! expected >= -1, actual {:?}", hd_index));
+        }
+        if encryption_index < 0 {
+            // conversely, -1 is not a valid argument here. encryption index is always meaningful in all contexts
+            return Err(anyhow!("Invalid hd_index value! expected >= -1, actual {:?}", hd_index));
+        }
+
+        let seed = if seed.is_null() { None } else { Some(SecretVec::new(env.convert_byte_array(seed)?.into())) };
+        let spending_key = if spending_key.is_null() { None } else { Some(single_copy_read_ext_key(env, &spending_key)?) };
+        let hd_index = if hd_index == -1 { None } else { Some(hd_index as u32) };   
+        let encryption_index = encryption_index as u32;
+        let return_secret = { return_secret == JNI_TRUE };
+
+        let from_id_bytes: Option<[u8; HASH160_BYTE_LEN]> = if from_id.is_null() { None } else {
+            let v = env.convert_byte_array(from_id)?;
+            if v.len() != HASH160_BYTE_LEN {
+                return Err(anyhow!("Invalid length of from_id provided, must be 20 bytes exactly. actual: {}", v.len()));
+            }
+            let mut arr = [0u8; HASH160_BYTE_LEN];
+            arr.copy_from_slice(&v);
+            Some(arr)
         };
 
-        // now we can call our pure rust function to do all the heavy lifting.
-        let channel_keys = z_getencryptionaddress(params)
+        let to_id_bytes: Option<[u8; HASH160_BYTE_LEN]> = if to_id.is_null() { None } else {
+            let v = env.convert_byte_array(to_id)?;
+            if v.len() != HASH160_BYTE_LEN {
+                return Err(anyhow!(
+                    "Invalid length of to_id provided, must be 20 bytes exactly. actual: {}", v.len()));
+            }
+            let mut arr = [0u8; HASH160_BYTE_LEN];
+            arr.copy_from_slice(&v);
+            Some(arr)
+        };
+
+        // this is the pure rust function in 'verus_zfunc' crate
+        let channel_keys = z_getencryptionaddress(seed.as_ref(), spending_key.as_ref(), hd_index, encryption_index, from_id_bytes.as_ref(), to_id_bytes.as_ref(), return_secret)
             .map_err(|e| anyhow!("z_getencryptionaddress failed: {}", e))?;
 
-        // with the result back from our rust logic, we have to translate it back
-        // into a java object that the android sdk can understand.
-        let address_java = env.new_string(&channel_keys.address)?;
-        let fvk_java = env.new_string(&channel_keys.fvk)?;
-        let fvk_hex_java = env.new_string(&channel_keys.fvk_hex)?;
-        let dfvk_hex_java = env.new_string(&channel_keys.dfvk_hex)?;
-
-        let ivk_java = match channel_keys.ivk {
-            Some(ivk) => env.new_string(ivk)?.into(),
-            None => JObject::null(),
-        };
-
-        let sk_java = match channel_keys.spending_key {
-            Some(sk) => env.new_string(sk)?.into(),
-            None => JObject::null(),
-        };
-
-        // here we're building the new java object. the path and the constructor signature
-        // string must exactly match the definition in the kotlin/java code
-        let result_obj = env.new_object(
-            "cash/z/ecc/android/sdk/model/ChannelKeys", // path to the kotlin/java data class
-            // the constructor signature: (String, String, String, String, String, String) -> void
-            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
-            &[
-                JValue::Object(&address_java),
-                JValue::Object(&fvk_java),
-                JValue::Object(&fvk_hex_java),
-                JValue::Object(&dfvk_hex_java),
-                JValue::Object(&ivk_java),
-                JValue::Object(&sk_java),
-            ],
-        )?;
-
-        // return the raw pointer to the newly created java object.
-        Ok(result_obj.into_raw())
+        Ok(encode_channel_keys(env, &channel_keys.address, &channel_keys.extfvk_bytes, channel_keys.spending_key_bytes.as_ref(), &channel_keys.ivk_bytes)?.into_raw())
     });
 
     unwrap_exc_or(&mut env, res, std::ptr::null_mut())

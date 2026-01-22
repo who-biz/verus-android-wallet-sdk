@@ -3,7 +3,7 @@ package cash.z.ecc.android.sdk.internal
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
 import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
 import cash.z.ecc.android.sdk.internal.model.JniSharedSecret
-import cash.z.ecc.android.sdk.model.ChannelKeys
+import cash.z.ecc.android.sdk.internal.model.JniChannelKeys
 import cash.z.ecc.android.sdk.model.EncryptedPayload
 
 interface Derivation {
@@ -87,14 +87,14 @@ interface Derivation {
     ): String
 
     fun getVerusEncryptionAddress(
-        seed: String?,
-        spendingKey: String?,
+        seed: ByteArray?,
+        spendingKey: ByteArray?,
         hdIndex: Int,
         encryptionIndex: Int,
-        fromId: String?,
-        toId: String?,
+        fromId: ByteArray?,
+        toId: ByteArray?,
         returnSecret: Boolean
-    ): ChannelKeys
+    ): JniChannelKeys
 
     fun encryptVerusMessage(
         addressString: String,

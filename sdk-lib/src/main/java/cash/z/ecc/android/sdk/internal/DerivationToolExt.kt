@@ -1,7 +1,7 @@
 package cash.z.ecc.android.sdk.internal
 
 import cash.z.ecc.android.sdk.internal.model.JniUnifiedSpendingKey
-//import cash.z.ecc.android.sdk.internal.model.JniShieldedSpendingKey
+import cash.z.ecc.android.sdk.internal.model.JniChannelKeys
 import cash.z.ecc.android.sdk.model.Account
 import cash.z.ecc.android.sdk.model.EphemeralPublicKey
 import cash.z.ecc.android.sdk.model.UnifiedFullViewingKey
@@ -109,17 +109,14 @@ fun Derivation.getEncryptionAddress(
 
 fun Derivation.getVerusEncryptionAddress(
     seed: ByteArray?,
-    spendingKey: String?,
-    fromId: String?,
-    toId: String?,
+    spendingKey: ByteArray?,
+    fromId: ByteArray?,
+    toId: ByteArray?,
     hdIndex: Int,
     encryptionIndex: Int,
     returnSecret: Boolean
-): ChannelKeys {
-    val seedHex = seed?.let { cash.z.ecc.android.sdk.internal.ext.Hex.toHexString(it) }
-
-    return getVerusEncryptionAddress(
-        seed = seedHex,
+): ChannelKeys = ChannelKeys(getVerusEncryptionAddress(
+        seed = seed,
         spendingKey = spendingKey,
         hdIndex = hdIndex,
         encryptionIndex = encryptionIndex,
@@ -127,7 +124,7 @@ fun Derivation.getVerusEncryptionAddress(
         toId = toId,
         returnSecret = returnSecret
     )
-}
+)
 
 
 fun Derivation.encryptMessage(
