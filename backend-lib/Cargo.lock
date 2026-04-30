@@ -477,7 +477,7 @@ checksum = "a47c1c47d2f5964e29c61246e81db715514cd532db6b5116a25ea3c03d6780a2"
 [[package]]
 name = "equihash"
 version = "0.2.0"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "blake2b_simd",
  "byteorder",
@@ -502,7 +502,7 @@ dependencies = [
 [[package]]
 name = "f4jumble"
 version = "0.1.0"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "blake2b_simd",
 ]
@@ -1923,7 +1923,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 [[package]]
 name = "verus_zfunc"
 version = "0.1.0"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "anyhow",
  "bech32 0.9.1",
@@ -2271,7 +2271,7 @@ dependencies = [
 [[package]]
 name = "zcash_address"
 version = "0.3.2"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "bech32 0.9.1",
  "bs58",
@@ -2297,7 +2297,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_backend"
 version = "0.12.1"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "base64",
  "bech32 0.9.1",
@@ -2336,7 +2336,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_sqlite"
 version = "0.10.3"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "bs58",
  "byteorder",
@@ -2369,7 +2369,7 @@ dependencies = [
 [[package]]
 name = "zcash_encoding"
 version = "0.2.0"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "byteorder",
  "nonempty",
@@ -2387,7 +2387,7 @@ dependencies = [
 [[package]]
 name = "zcash_keys"
 version = "0.2.0"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "bech32 0.9.1",
  "blake2b_simd",
@@ -2451,7 +2451,7 @@ dependencies = [
 [[package]]
 name = "zcash_primitives"
 version = "0.15.0"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "aes",
  "bip0039",
@@ -2486,7 +2486,7 @@ dependencies = [
 [[package]]
 name = "zcash_proofs"
 version = "0.15.0"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "bellman",
  "blake2b_simd",
@@ -2508,7 +2508,7 @@ dependencies = [
 [[package]]
 name = "zcash_protocol"
 version = "0.1.1"
-source = "git+https://github.com/VerusCoin/librustzcash?branch=dev#df9dc2d4e5f99fd6434ce6ddacbdb43c54bfc293"
+source = "git+https://github.com/who-biz/librustzcash?branch=scan-from#9bbb8c1c63b7dcf052cd6bc2da32aff45b5fff90"
 dependencies = [
  "document-features",
  "memuse",
