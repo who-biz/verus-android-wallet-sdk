@@ -26,7 +26,7 @@ sha2 = "0.10.9"
 zcash_address = "0.3"
 #zcash_client_backend = { version = "0.12.1", features = ["transparent-inputs", "unstable"] }
 #zcash_client_sqlite = { version = "0.10.3", features = ["transparent-inputs", "unstable", "linearscanning"] }
-zcash_client_backend = { version = "0.12.1", features = ["unstable"] }
+zcash_client_backend = { version = "0.12.1", features = ["unstable", "external-change-scope"] }
 zcash_client_sqlite = { version = "0.10.3", features = ["unstable", "linearscanning"] }
 # Check that we do indeed need this
 zcash_keys = "0.6.1"
